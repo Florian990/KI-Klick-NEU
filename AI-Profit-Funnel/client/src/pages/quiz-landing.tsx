@@ -40,11 +40,6 @@ function LiveCounter() {
   );
 }
 
-const miniTestimonials = [
-  { name: "Thomas M.", result: "12.400€ im 1. Monat", avatar: avatar1 },
-  { name: "Sandra W.", result: "8.900€ Durchschnitt", avatar: avatar2 },
-  { name: "Markus S.", result: "15.200€ Rekord", avatar: avatar3 },
-];
 
 const benefits = [
   { icon: Coins, title: "Hohe Provisionen", description: "5-stellige Provisionen pro Deal" },
@@ -235,26 +230,11 @@ export default function QuizLandingPage() {
       {/* Mini Social Proof - Direkt nach dem Quiz */}
       <section className="py-6 sm:py-8 px-3 sm:px-4 bg-muted/20">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-1 mb-4">
+          <div className="flex items-center justify-center gap-1">
             {[...Array(5)].map((_, i) => (
               <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-primary text-primary" />
             ))}
-            <span className="ml-2 text-xs sm:text-sm text-muted-foreground">750+ zufriedene Partner</span>
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-            {miniTestimonials.map((t, i) => (
-              <div key={i} className="flex items-center gap-2 bg-background/50 rounded-full px-3 py-1.5 sm:px-4 sm:py-2">
-                <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                  <AvatarImage src={t.avatar} alt={t.name} />
-                  <AvatarFallback>{t.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="text-left">
-                  <p className="text-[10px] sm:text-xs font-medium">{t.name}</p>
-                  <p className="text-[10px] sm:text-xs text-primary font-semibold">{t.result}</p>
-                </div>
-              </div>
-            ))}
+            <span className="ml-2 text-xs sm:text-sm text-muted-foreground">350+ zufriedene Partner</span>
           </div>
         </div>
       </section>
