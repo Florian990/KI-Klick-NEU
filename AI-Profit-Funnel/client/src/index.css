@@ -171,8 +171,36 @@
     @apply border-border;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  input, textarea, button, select {
+    font-size: 16px;
+  }
+
+  button, [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 15px;
+    }
   }
 }
 

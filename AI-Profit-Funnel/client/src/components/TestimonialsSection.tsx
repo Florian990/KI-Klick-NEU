@@ -40,46 +40,46 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-16 sm:py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 sm:mb-16">
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+    <section className="py-10 sm:py-16 md:py-24 bg-background">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">
             Das sagen unsere Vertriebspartner
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-2">
             Echte Erfolgsgeschichten von Menschen, die mit uns gestartet sind.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
           {testimonials.map((testimonial, index) => (
             <Card 
               key={index}
               className="relative"
               data-testid={`card-testimonial-${index}`}
             >
-              <CardContent className="p-6 sm:p-8">
-                <Quote className="h-8 w-8 text-primary/20 mb-4" />
+              <CardContent className="p-4 sm:p-5 md:p-6 lg:p-8">
+                <Quote className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary/20 mb-3 sm:mb-4" />
                 
-                <blockquote className="text-lg leading-relaxed mb-6 italic">
+                <blockquote className="text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-5 md:mb-6 italic">
                   "{testimonial.quote}"
                 </blockquote>
 
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Avatar className="h-10 w-10 sm:h-11 sm:w-11 md:h-12 md:w-12">
                     <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
                     <AvatarFallback>
                       {testimonial.name.split(" ").map(n => n[0]).join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    <p className="font-semibold text-sm sm:text-base">{testimonial.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-sm font-medium text-primary">
+                <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border">
+                  <p className="text-xs sm:text-sm font-medium text-primary">
                     {testimonial.result}
                   </p>
                 </div>

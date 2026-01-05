@@ -121,17 +121,17 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      <div className="mb-4 sm:mb-6">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs sm:text-sm text-muted-foreground">Frage {displayStep} von {totalSteps}</span>
-          <span className="text-xs sm:text-sm text-primary font-semibold">{Math.round(progress)}%</span>
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
+      <div className="mb-3 sm:mb-4 md:mb-6">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Frage {displayStep} von {totalSteps}</span>
+          <span className="text-[10px] sm:text-xs md:text-sm text-primary font-semibold">{Math.round(progress)}%</span>
         </div>
-        <Progress value={progress} className="h-1.5 sm:h-2" />
+        <Progress value={progress} className="h-1 sm:h-1.5 md:h-2" />
       </div>
 
-      <div className="text-center mb-5 sm:mb-8">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
+      <div className="text-center mb-4 sm:mb-5 md:mb-8">
+        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight px-1">
           {currentQuestion.id === 5 ? (
             <>
               Ist dir bewusst, dass die KI Agent Methode <span className="underline">kein Jobangebot</span> ist, sondern es sich um ein System handelt, welches du nebenbei umsetzen kannst um Geld zu verdienen?
@@ -142,18 +142,18 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
         </h2>
       </div>
 
-      <div className={`grid gap-3 sm:gap-4 ${currentQuestion.answers.length === 4 ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4' : currentQuestion.answers.length === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
+      <div className={`grid gap-2 sm:gap-3 md:gap-4 ${currentQuestion.answers.length === 4 ? 'grid-cols-2 lg:grid-cols-4' : currentQuestion.answers.length === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
         {currentQuestion.answers.map((answer, index) => (
           <button
             key={index}
             onClick={() => handleAnswer(answer)}
             data-testid={`quiz-answer-${currentQuestion.id}-${index}`}
-            className="group p-4 sm:p-5 rounded-lg border-2 border-primary/30 bg-card transition-all duration-200 hover:border-primary hover:bg-primary/10 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-[100px] sm:min-h-[120px]"
+            className="group p-3 sm:p-4 md:p-5 rounded-lg border-2 border-primary/30 bg-card transition-all duration-200 hover:border-primary hover:bg-primary/10 active:border-primary active:bg-primary/20 active:scale-[0.98] flex flex-col items-center justify-center gap-1.5 sm:gap-2 md:gap-3 min-h-[80px] sm:min-h-[100px] md:min-h-[120px] touch-manipulation"
           >
-            <div className="text-primary group-hover:scale-110 transition-transform">
+            <div className="text-primary group-hover:scale-110 group-active:scale-105 transition-transform">
               {answer.icon}
             </div>
-            <span className="text-sm sm:text-base font-medium text-foreground text-center">
+            <span className="text-xs sm:text-sm md:text-base font-medium text-foreground text-center leading-tight">
               {answer.text}
             </span>
           </button>
@@ -161,15 +161,15 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       </div>
 
       {(currentStep > 0 || showFollowUp) && (
-        <div className="mt-4 sm:mt-6 flex justify-center">
+        <div className="mt-3 sm:mt-4 md:mt-6 flex justify-center">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="text-muted-foreground"
+            className="text-muted-foreground h-10 sm:h-11 touch-manipulation"
             data-testid="quiz-back-button"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Zurück
+            <ChevronLeft className="h-4 w-4 mr-1.5 sm:mr-2" />
+            <span className="text-sm sm:text-base">Zurück</span>
           </Button>
         </div>
       )}

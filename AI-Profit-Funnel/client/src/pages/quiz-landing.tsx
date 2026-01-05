@@ -125,40 +125,40 @@ export default function QuizLandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center px-4 pt-6 pb-4 sm:pt-8 sm:pb-6 md:pt-10 md:pb-8 text-center overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Hero Section - Kompakt für Mobile */}
+      <section className="relative flex flex-col items-center justify-center px-3 pt-4 pb-2 sm:px-4 sm:pt-6 sm:pb-4 md:pt-8 md:pb-6 text-center overflow-hidden flex-shrink-0">
         {/* Subtle glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[200px] sm:h-[300px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="mb-3 sm:mb-4">
+        <div className="max-w-4xl mx-auto relative z-10 w-full">
+          <div className="mb-2 sm:mb-3">
             <LiveCounter />
           </div>
           
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-3 sm:mb-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground leading-tight mb-2 sm:mb-3 px-2">
             Finde in <span className="text-primary">30 Sekunden</span> heraus, ob du dafür geeignet bist.
           </h1>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-muted-foreground text-xs sm:text-sm">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-muted-foreground text-[10px] sm:text-xs md:text-sm">
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
               <span>750+ erfolgreiche Teilnehmer</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
               <span>90% automatisiert</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
               <span>Keine Vorkenntnisse nötig</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Quiz / Form / Disqualified Section */}
-      <section id="quiz-section" className="flex items-center justify-center py-4 sm:py-6 md:py-8">
+      {/* Quiz / Form / Disqualified Section - Hauptfokus */}
+      <section id="quiz-section" className="flex-1 flex items-start sm:items-center justify-center py-2 sm:py-4 md:py-6 px-2 sm:px-4">
         {funnelState === "quiz" && (
           <Quiz onComplete={handleQuizComplete} onDisqualify={handleDisqualify} />
         )}
@@ -173,20 +173,35 @@ export default function QuizLandingPage() {
       </section>
 
       {/* System Section */}
-      <section className="py-20 px-4 border-t border-border">
+      <section className="py-10 sm:py-16 md:py-20 px-3 sm:px-4 border-t border-border">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Auf Mobile: Bild zuerst */}
+            <div className="flex flex-col items-center text-center order-first lg:order-last">
+              <img 
+                src="/assets/WhatsApp_Image_2025-12-12_at_11.54.15_(1)_1765900281327.jpeg" 
+                alt="Florian Mehler"
+                className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-48 lg:h-48 rounded-full object-cover border-4 border-primary/30 mb-3 sm:mb-4"
+              />
+              <p className="text-base sm:text-lg text-foreground font-medium">
+                Florian Mehler
+              </p>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                der Gründer des KI Agenten Modells
+              </p>
+            </div>
+
+            <div className="order-last lg:order-first">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-4 sm:mb-6 text-center lg:text-left">
                 Das System das für normale Angestellte wirklich funktioniert
               </h2>
-              <p className="text-foreground mb-4">
+              <p className="text-sm sm:text-base text-foreground mb-3 sm:mb-4">
                 Das System ist für alle die sich neben ihrem Haupt- oder Teilzeitjob ein zweites Einkommen aufbauen wollen. Ohne verkaufen zu müssen oder ihr eigenes Business von 0 auf aufzubauen.
               </p>
-              <p className="text-foreground mb-6">
+              <p className="text-sm sm:text-base text-foreground mb-4 sm:mb-6">
                 Ob du gerade erst startest oder schon Erfahrung hast, spielt keine Rolle. Mit unserer <span className="font-medium">Schritt-für-Schritt-Anleitung</span> kannst du sofort loslegen – flexibel, anonym und effektiv.
               </p>
-              <ul className="space-y-3">
+              <ul className="space-y-2 sm:space-y-3">
                 {[
                   "Keine Vorerfahrung nötig",
                   "Mit 1-2h Zeitaufwand pro Tag",
@@ -194,8 +209,8 @@ export default function QuizLandingPage() {
                   "Neben dem Vollzeit- oder Teilzeitjob",
                   "Ohne dein Gesicht zu zeigen",
                 ].map((item, index) => (
-                  <li key={index} className="flex items-center gap-3 text-foreground">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
+                  <li key={index} className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-foreground">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -204,77 +219,63 @@ export default function QuizLandingPage() {
               <Button
                 size="lg"
                 onClick={scrollToQuiz}
-                className="mt-8 h-14 px-10 text-lg font-semibold"
+                className="mt-6 sm:mt-8 h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold w-full sm:w-auto"
                 data-testid="button-cta-test"
               >
-                <ChevronRight className="mr-2 h-5 w-5" />
+                <ChevronRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Teste jetzt, ob du geeignet bist
               </Button>
-            </div>
-
-            <div className="flex flex-col items-center text-center">
-              <img 
-                src="/assets/WhatsApp_Image_2025-12-12_at_11.54.15_(1)_1765900281327.jpeg" 
-                alt="Florian Mehler"
-                className="w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-primary/30 mb-4"
-              />
-              <p className="text-lg text-foreground font-medium">
-                Florian Mehler
-              </p>
-              <p className="text-muted-foreground">
-                der Gründer des KI Agenten Modells
-              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 border-t border-border">
+      <section className="py-10 sm:py-16 md:py-20 px-3 sm:px-4 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6">
             Bereit für den ersten Schritt?
           </h2>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8">
             Finde jetzt heraus, ob das System zu dir passt.
           </p>
           <Button
             size="lg"
             onClick={scrollToQuiz}
-            className="h-14 px-10 text-lg font-semibold"
+            className="h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold w-full sm:w-auto"
             data-testid="button-cta-final"
           >
-            <ChevronRight className="mr-2 h-5 w-5" />
+            <ChevronRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Teste jetzt, ob du geeignet bist
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 border-t border-border">
+      <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           {/* Disclaimer */}
-          <div className="mb-6">
-            <p className="text-xs text-primary font-medium mb-2">Haftungsausschluss & Disclaimer:</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+          <div className="mb-4 sm:mb-6">
+            <p className="text-[10px] sm:text-xs text-primary font-medium mb-1 sm:mb-2">Haftungsausschluss & Disclaimer:</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
               Diese Website ist nicht Teil der Facebook-Website oder der Facebook Inc. Außerdem wird diese Website in keiner Weise von Facebook unterstützt.<br />
               FACEBOOK ist eine Marke von FACEBOOK, Inc.
             </p>
           </div>
 
           {/* Copyright */}
-          <div className="mb-6">
-            <p className="text-xs text-primary font-medium">© 2025 KI Lizenzpartner</p>
-            <p className="text-xs text-primary">Alle Rechte vorbehalten.</p>
+          <div className="mb-4 sm:mb-6">
+            <p className="text-[10px] sm:text-xs text-primary font-medium">© 2025 KI Lizenzpartner</p>
+            <p className="text-[10px] sm:text-xs text-primary">Alle Rechte vorbehalten.</p>
           </div>
 
           {/* Links */}
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors active:text-foreground">Impressum</a>
             <span>|</span>
-            <a href="#" className="hover:text-foreground transition-colors">Datenschutzerklärung</a>
+            <a href="#" className="hover:text-foreground transition-colors active:text-foreground">Datenschutzerklärung</a>
             <span>|</span>
-            <a href="#" className="hover:text-foreground transition-colors">Allgemeine Geschäftsbedingungen</a>
+            <a href="#" className="hover:text-foreground transition-colors active:text-foreground">AGB</a>
           </div>
         </div>
       </footer>
