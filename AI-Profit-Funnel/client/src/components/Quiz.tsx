@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GraduationCap, Users, Briefcase, XCircle, Check, ChevronRight, ChevronLeft } from "lucide-react";
+import { GraduationCap, Users, Briefcase, XCircle, Check, ChevronRight, ChevronLeft, Euro, Home, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
@@ -65,10 +65,20 @@ const questions: QuizQuestion[] = [
       { text: "Nein", icon: <XCircle className="h-6 w-6 sm:h-8 sm:w-8" />, followUp: true },
     ],
   },
+  {
+    id: 6,
+    question: "Wähle aus, was dir am Wichtigsten ist!",
+    answers: [
+      { text: "Einkommen über 2.500€", icon: <Euro className="h-6 w-6 sm:h-8 sm:w-8" /> },
+      { text: "Mehr Zeit für Freunde und Familie", icon: <Users className="h-6 w-6 sm:h-8 sm:w-8" /> },
+      { text: "Arbeiten von Zuhause", icon: <Home className="h-6 w-6 sm:h-8 sm:w-8" /> },
+      { text: "Ortsunabhängig", icon: <MapPin className="h-6 w-6 sm:h-8 sm:w-8" /> },
+    ],
+  },
 ];
 
 const followUpQuestion: QuizQuestion = {
-  id: 6,
+  id: 7,
   question: "Wenn du einen Mehrwert erkennen würdest + eine schriftliche Garantie von uns bekommst, könntest du es dir dann vorstellen das System zu nutzen?",
   answers: [
     { text: "Ja", icon: <Check className="h-6 w-6 sm:h-8 sm:w-8" /> },
@@ -83,8 +93,8 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
 
   const currentQuestions = showFollowUp ? [followUpQuestion] : questions;
   const currentQuestion = showFollowUp ? followUpQuestion : questions[currentStep];
-  const totalSteps = showFollowUp ? 6 : 5;
-  const displayStep = showFollowUp ? 6 : currentStep + 1;
+  const totalSteps = showFollowUp ? 7 : 6;
+  const displayStep = showFollowUp ? 7 : currentStep + 1;
   const progress = (displayStep / totalSteps) * 100;
 
   const handleAnswer = (answer: typeof currentQuestion.answers[0]) => {
