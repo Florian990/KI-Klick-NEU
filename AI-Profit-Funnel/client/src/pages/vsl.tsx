@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 const applicationSchema = z.object({
   vorname: z.string().min(1, "Vorname ist erforderlich"),
   nachname: z.string().min(1, "Nachname ist erforderlich"),
-  email: z.string().email("Gültige Email-Adresse erforderlich"),
   countryCode: z.string().default("+49"),
   phone: z.string().min(6, "Telefonnummer ist erforderlich"),
 });
@@ -31,7 +30,6 @@ export default function VSLPage() {
     defaultValues: {
       vorname: "",
       nachname: "",
-      email: "",
       countryCode: "+49",
       phone: "",
     },
@@ -43,7 +41,6 @@ export default function VSLPage() {
       const fullPhone = `${data.countryCode} ${data.phone}`;
       await apiRequest("POST", "/api/leads", {
         name: `${data.vorname} ${data.nachname}`,
-        email: data.email,
         phone: fullPhone,
       });
 
@@ -320,22 +317,6 @@ export default function VSLPage() {
                 />
                 {form.formState.errors.nachname && (
                   <p className="text-red-400 text-xs mt-1">{form.formState.errors.nachname.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="email" className="text-white text-sm font-medium">
-                  Deine E-Mail Adresse*
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...form.register("email")}
-                  className="mt-1.5 bg-white border-0 text-zinc-900 h-11"
-                  data-testid="input-email-vsl"
-                />
-                {form.formState.errors.email && (
-                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.email.message}</p>
                 )}
               </div>
 
