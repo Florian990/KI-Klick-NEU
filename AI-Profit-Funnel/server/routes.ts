@@ -14,15 +14,17 @@ export async function registerRoutes(
     try {
       const validatedData = insertLeadSchema.parse(req.body);
       
-      // Check if email already exists
-      const existingLead = await storage.getLeadByEmail(validatedData.email);
-      if (existingLead) {
-        // Return success even if lead exists (don't reveal this to frontend)
-        return res.status(200).json({ 
-          success: true, 
-          message: "Lead registered",
-          leadId: existingLead.id 
-        });
+      // Check if email already exists (only if email provided)
+      if (validatedData.email) {
+        const existingLead = await storage.getLeadByEmail(validatedData.email);
+        if (existingLead) {
+          // Return success even if lead exists (don't reveal this to frontend)
+          return res.status(200).json({ 
+            success: true, 
+            message: "Lead registered",
+            leadId: existingLead.id 
+          });
+        }
       }
       
       const lead = await storage.createLead(validatedData);
