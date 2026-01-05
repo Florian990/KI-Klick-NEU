@@ -155,7 +155,7 @@ export default function QuizLandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-muted-foreground text-[10px] sm:text-xs md:text-sm">
             <div className="flex items-center gap-1">
               <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
-              <span>750+ erfolgreiche Teilnehmer</span>
+              <span>350+ erfolgreiche Partner</span>
             </div>
             <div className="flex items-center gap-1">
               <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
