@@ -37,7 +37,7 @@ function LiveCounter() {
 
 
 const benefits = [
-  { icon: Coins, title: "Hohe Provisionen", description: "5-stellige Provisionen pro Deal" },
+  { icon: Coins, title: "Umsatzgarantie", description: "Du erhältst eine klare Garantie" },
   { icon: GraduationCap, title: "Komplette Schulung", description: "Umfassende Ausbildung inklusive" },
   { icon: Target, title: "Warme Leads", description: "Vorqualifizierte Kontakte" },
   { icon: Clock, title: "Flexible Zeiten", description: "Arbeite wann du willst" },
