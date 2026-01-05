@@ -192,7 +192,7 @@ export default function QuizLandingPage() {
             Finde in <span className="text-primary">30 Sekunden</span> heraus, ob du dafür geeignet bist.
           </h1>
 
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-muted-foreground text-[10px] sm:text-xs md:text-sm mb-4 sm:mb-5">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-muted-foreground text-[10px] sm:text-xs md:text-sm">
             <div className="flex items-center gap-1">
               <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
               <span>750+ erfolgreiche Teilnehmer</span>
@@ -206,15 +206,6 @@ export default function QuizLandingPage() {
               <span>Keine Vorkenntnisse nötig</span>
             </div>
           </div>
-
-          <Button
-            size="lg"
-            onClick={scrollToQuiz}
-            className="h-12 sm:h-14 px-8 sm:px-12 text-base sm:text-lg font-semibold touch-manipulation active:scale-[0.98] transition-transform"
-          >
-            <ChevronRight className="mr-2 h-5 w-5" />
-            Quiz starten
-          </Button>
         </div>
       </section>
 
@@ -318,6 +309,15 @@ export default function QuizLandingPage() {
                   </li>
                 ))}
               </ul>
+
+              <Button
+                size="lg"
+                onClick={scrollToQuiz}
+                className="mt-6 sm:mt-8 h-12 sm:h-14 px-8 sm:px-12 text-base sm:text-lg font-semibold w-full sm:w-auto touch-manipulation active:scale-[0.98] transition-transform"
+              >
+                <ChevronRight className="mr-2 h-5 w-5" />
+                Quiz starten
+              </Button>
             </div>
           </div>
         </div>
