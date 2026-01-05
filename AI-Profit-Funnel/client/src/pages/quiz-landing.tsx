@@ -39,7 +39,7 @@ function LiveCounter() {
 const benefits = [
   { icon: Coins, title: "Umsatzgarantie", description: "Du erhältst eine klare Garantie" },
   { icon: GraduationCap, title: "Komplette Schulung", description: "Umfassende Ausbildung inklusive" },
-  { icon: Target, title: "Warme Leads", description: "Vorqualifizierte Kontakte" },
+  { icon: Target, title: "KI gestützt", description: "Lerne wie du KI richtig nutzt" },
   { icon: Clock, title: "Flexible Zeiten", description: "Arbeite wann du willst" },
   { icon: TrendingUp, title: "Wachsender Markt", description: "Explodierender KI-Markt" },
   { icon: HeadphonesIcon, title: "1:1 Support", description: "Persönlicher Ansprechpartner" },
