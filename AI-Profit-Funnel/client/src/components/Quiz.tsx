@@ -59,7 +59,7 @@ const questions: QuizQuestion[] = [
   },
   {
     id: 5,
-    question: "Ist dir bewusst, dass die KI Agent Methode kein Jobangebot ist, sondern es sich um ein System handelt, welches du nebenbei umsetzen kannst um Geld zu verdienen?",
+    question: "Ist dir bewusst, dass es sich hier um einen High Income Skill handelt den du lernen kannst und NICHT um ein Job Angebot?",
     answers: [
       { text: "Ja", icon: <Check className="h-6 w-6 sm:h-8 sm:w-8" /> },
       { text: "Nein", icon: <XCircle className="h-6 w-6 sm:h-8 sm:w-8" />, followUp: true },
@@ -134,7 +134,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
         <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight px-1">
           {currentQuestion.id === 5 ? (
             <>
-              Ist dir bewusst, dass die KI Agent Methode <span className="underline">kein Jobangebot</span> ist, sondern es sich um ein System handelt, welches du nebenbei umsetzen kannst um Geld zu verdienen?
+              Ist dir bewusst, dass es sich hier um einen <span className="underline">High Income Skill</span> handelt den du lernen kannst und <span className="underline">NICHT</span> um ein Job Angebot?
             </>
           ) : (
             currentQuestion.question
