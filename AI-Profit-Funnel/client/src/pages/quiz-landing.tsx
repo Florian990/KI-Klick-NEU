@@ -238,7 +238,7 @@ export default function QuizLandingPage() {
                 className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-primary/30 mb-3 sm:mb-4"
               />
               <p className="text-base sm:text-lg text-foreground font-medium">Florian Mehler</p>
-              <p className="text-sm sm:text-base text-muted-foreground">Gründer des KI Success Modell</p>
+              <p className="text-sm sm:text-base text-muted-foreground">Gründer der KI-Klick Methode</p>
             </div>
 
             <div className="order-last lg:order-first">
