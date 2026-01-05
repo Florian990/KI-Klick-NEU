@@ -262,15 +262,6 @@ export default function QuizLandingPage() {
                   </li>
                 ))}
               </ul>
-
-              <Button
-                size="lg"
-                onClick={scrollToQuiz}
-                className="mt-6 sm:mt-8 h-12 sm:h-14 px-8 sm:px-12 text-base sm:text-lg font-semibold w-full sm:w-auto touch-manipulation active:scale-[0.98] transition-transform"
-              >
-                <ChevronRight className="mr-2 h-5 w-5" />
-                Quiz starten
-              </Button>
             </div>
           </div>
         </div>
