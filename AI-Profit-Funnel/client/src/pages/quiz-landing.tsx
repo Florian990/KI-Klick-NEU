@@ -140,7 +140,7 @@ export default function QuizLandingPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Hero Section - Kompakt mit direktem CTA */}
-      <section className="relative flex flex-col items-center justify-center px-3 pt-4 pb-3 sm:px-4 sm:pt-6 sm:pb-4 md:pt-8 md:pb-6 text-center overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center px-3 pt-8 pb-3 sm:px-4 sm:pt-12 sm:pb-4 md:pt-16 md:pb-6 text-center overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[200px] sm:h-[300px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-4xl mx-auto relative z-10 w-full">
