@@ -84,10 +84,10 @@ export default function VSLPage() {
           <div className="text-center mb-10">
             <p className="text-primary font-medium mb-3">Exklusives Video-Training</p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Das KI-Lizenzpartner System
+              Die KI-Klick Methode
             </h1>
             <p className="text-lg text-muted-foreground">
-              Schaue dir jetzt das Video an und erfahre, wie du mit unserem System dein zweites Standbein aufbauen kannst.
+              Schaue dir jetzt das Video an und erfahre, wie DU dir ein zweites Standbein aufbauen kannst.
             </p>
           </div>
 
