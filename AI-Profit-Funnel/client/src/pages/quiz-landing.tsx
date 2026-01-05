@@ -209,19 +209,27 @@ export default function QuizLandingPage() {
         </div>
       </section>
 
-      {/* Quiz Section - Der Hauptfokus */}
-      <section ref={quizRef} className="py-4 sm:py-6 md:py-8 px-2 sm:px-4">
-        {funnelState === "quiz" && (
-          <Quiz onComplete={handleQuizComplete} onDisqualify={handleDisqualify} />
-        )}
-        {funnelState === "form" && (
-          <LeadForm onSubmit={handleFormSubmit} isLoading={isLoading} />
-        )}
-        {funnelState === "disqualified" && (
-          <div className="w-full">
-            <DisqualifiedMessage />
+      {/* Quiz Section - Der Hauptfokus mit Highlight */}
+      <section ref={quizRef} className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/10 to-primary/5 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <div className="bg-card/80 backdrop-blur-sm border border-primary/20 rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg shadow-primary/5">
+            {funnelState === "quiz" && (
+              <Quiz onComplete={handleQuizComplete} onDisqualify={handleDisqualify} />
+            )}
+            {funnelState === "form" && (
+              <LeadForm onSubmit={handleFormSubmit} isLoading={isLoading} />
+            )}
+            {funnelState === "disqualified" && (
+              <div className="w-full">
+                <DisqualifiedMessage />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </section>
 
       {/* Mini Social Proof - Direkt nach dem Quiz */}
