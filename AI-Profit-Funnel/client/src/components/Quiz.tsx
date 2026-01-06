@@ -3,8 +3,12 @@ import { GraduationCap, Users, Briefcase, XCircle, Check, ChevronRight, ChevronL
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
+export interface QuizAnswers {
+  [questionId: number]: string;
+}
+
 interface QuizProps {
-  onComplete: () => void;
+  onComplete: (answers: QuizAnswers) => void;
   onDisqualify: () => void;
 }
 
@@ -111,7 +115,8 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     }
 
     if (showFollowUp || currentStep === questions.length - 1) {
-      onComplete();
+      const finalAnswers = { ...selectedAnswers, [currentQuestion.id]: answer.text };
+      onComplete(finalAnswers);
       return;
     }
 

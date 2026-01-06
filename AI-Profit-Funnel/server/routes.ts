@@ -25,7 +25,8 @@ export async function registerRoutes(
             name: existingLead.name,
             email: existingLead.email,
             phone: existingLead.phone,
-            source: source + ' (Wiederholung)'
+            source: source + ' (Wiederholung)',
+            quizAnswers: req.body.quizAnswers
           });
           
           return res.status(200).json({ 
@@ -53,7 +54,8 @@ export async function registerRoutes(
         name: lead.name,
         email: lead.email,
         phone: lead.phone,
-        source: source
+        source: source,
+        quizAnswers: req.body.quizAnswers
       });
       
       res.status(201).json({ 

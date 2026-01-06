@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import Quiz from "@/components/Quiz";
+import Quiz, { QuizAnswers } from "@/components/Quiz";
 import LeadForm from "@/components/LeadForm";
 import DisqualifiedMessage from "@/components/DisqualifiedMessage";
 import { useToast } from "@/hooks/use-toast";
@@ -59,6 +59,7 @@ interface UTMParams {
 export default function QuizLandingPage() {
   const [funnelState, setFunnelState] = useState<FunnelState>("quiz");
   const [isLoading, setIsLoading] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const quizRef = useRef<HTMLDivElement>(null);
@@ -89,7 +90,8 @@ export default function QuizLandingPage() {
     quizRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleQuizComplete = () => {
+  const handleQuizComplete = (answers: QuizAnswers) => {
+    setQuizAnswers(answers);
     setFunnelState("form");
   };
 
@@ -109,6 +111,7 @@ export default function QuizLandingPage() {
         utmContent: utmParams.utmContent,
         utmTerm: utmParams.utmTerm,
         source: "Quiz Funnel",
+        quizAnswers: quizAnswers,
       });
 
       if (typeof window !== "undefined" && (window as any).fbq) {
