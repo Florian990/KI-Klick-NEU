@@ -61,13 +61,14 @@ Quelle: ${lead.source || 'Unbekannt'}
 Automatisch gesendet von deinem KI-Klick Methode Funnel
     `.trim();
 
-    await client.emails.send({
+    const result = await client.emails.send({
       from: fromEmail || 'onboarding@resend.dev',
       to: 'ki-klick-leads@web.de',
       subject: `Neuer Lead: ${lead.name}`,
       text: emailContent,
     });
 
+    console.log(`Lead notification email result:`, JSON.stringify(result, null, 2));
     console.log(`Lead notification email sent for: ${lead.name}`);
     return true;
   } catch (error) {
