@@ -48,6 +48,8 @@ export async function registerRoutes(
         utmContent: lead.utmContent,
       });
       
+      console.log("Quiz answers received:", JSON.stringify(req.body.quizAnswers));
+      
       // Send email notification
       const source = req.body.source || (lead.utmSource ? `UTM: ${lead.utmSource}` : 'Quiz Funnel');
       sendLeadNotification({
