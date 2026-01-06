@@ -19,7 +19,15 @@ export async function registerRoutes(
       if (validatedData.email) {
         const existingLead = await storage.getLeadByEmail(validatedData.email);
         if (existingLead) {
-          // Return success even if lead exists (don't reveal this to frontend)
+          // Still send email notification for existing leads
+          const source = req.body.source || 'Quiz Funnel';
+          sendLeadNotification({
+            name: existingLead.name,
+            email: existingLead.email,
+            phone: existingLead.phone,
+            source: source + ' (Wiederholung)'
+          });
+          
           return res.status(200).json({ 
             success: true, 
             message: "Lead registered",
