@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertLeadSchema } from "@shared/schema";
 import { z } from "zod";
+import { sendLeadNotification } from "./email";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -36,6 +37,15 @@ export async function registerRoutes(
         utmMedium: lead.utmMedium,
         utmCampaign: lead.utmCampaign,
         utmContent: lead.utmContent,
+      });
+      
+      // Send email notification
+      const source = req.body.source || (lead.utmSource ? `UTM: ${lead.utmSource}` : 'Quiz Funnel');
+      sendLeadNotification({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        source: source
       });
       
       res.status(201).json({ 

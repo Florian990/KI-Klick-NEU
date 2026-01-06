@@ -108,6 +108,7 @@ export default function QuizLandingPage() {
         utmCampaign: utmParams.utmCampaign,
         utmContent: utmParams.utmContent,
         utmTerm: utmParams.utmTerm,
+        source: "Quiz Funnel",
       });
 
       if (typeof window !== "undefined" && (window as any).fbq) {

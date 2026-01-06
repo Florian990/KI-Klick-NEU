@@ -42,6 +42,7 @@ export default function VSLPage() {
       await apiRequest("POST", "/api/leads", {
         name: `${data.vorname} ${data.nachname}`,
         phone: fullPhone,
+        source: "VSL Bewerbung",
       });
 
       if (typeof window !== "undefined" && (window as any).fbq) {
