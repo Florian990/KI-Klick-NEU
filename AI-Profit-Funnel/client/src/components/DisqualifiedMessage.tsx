@@ -8,7 +8,7 @@ export default function DisqualifiedMessage() {
       </div>
       
       <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
-        Entschuldige, die KI Lizenzpartner Methode ist für dich leider ungeeignet.
+        Entschuldige, die KI-Klick Methode ist für dich leider ungeeignet.
       </h2>
       
       <p className="text-lg text-muted-foreground">
