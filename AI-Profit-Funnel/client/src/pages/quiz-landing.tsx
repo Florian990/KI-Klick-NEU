@@ -295,14 +295,7 @@ export default function QuizLandingPage() {
       <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           <div className="mb-4 sm:mb-6">
-            <p className="text-[10px] sm:text-xs text-primary font-medium mb-1 sm:mb-2">Haftungsausschluss:</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
-              Diese Website ist nicht Teil der Facebook-Website oder der Facebook Inc. Außerdem wird diese Website in keiner Weise von Facebook unterstützt. FACEBOOK ist eine Marke von FACEBOOK, Inc.
-            </p>
-          </div>
-
-          <div className="mb-4 sm:mb-6">
-            <p className="text-[10px] sm:text-xs text-primary font-medium">© 2025 KI Lizenzpartner</p>
+            <p className="text-[10px] sm:text-xs text-primary font-medium">© 2026 KI-Klick Methode</p>
             <p className="text-[10px] sm:text-xs text-primary">Alle Rechte vorbehalten.</p>
           </div>
 
