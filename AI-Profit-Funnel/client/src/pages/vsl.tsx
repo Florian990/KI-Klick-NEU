@@ -2,13 +2,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle, Play, X, Loader2, Calendar } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle, Play, Pause, X, Loader2, Volume2, VolumeX } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 
 const applicationSchema = z.object({
   vorname: z.string().min(1, "Vorname ist erforderlich"),
@@ -20,9 +27,16 @@ const applicationSchema = z.object({
 type ApplicationForm = z.infer<typeof applicationSchema>;
 
 export default function VSLPage() {
+  const [showVideo, setShowVideo] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(100);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [playerReady, setPlayerReady] = useState(false);
+  const playerRef = useRef<any>(null);
+  const expectedTimeRef = useRef<number>(0);
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const form = useForm<ApplicationForm>({
@@ -34,6 +48,118 @@ export default function VSLPage() {
       phone: "",
     },
   });
+
+  useEffect(() => {
+    if (!showVideo) return;
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = () => {
+      playerRef.current = new window.YT.Player('youtube-player', {
+        videoId: 'ZYc4uDJxE2A',
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          modestbranding: 1,
+          rel: 0,
+          fs: 0,
+          iv_load_policy: 3,
+          playsinline: 1,
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+        },
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      window.onYouTubeIframeAPIReady();
+    }
+
+    return () => {
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+      }
+    };
+  }, [showVideo]);
+
+  const onPlayerReady = (event: any) => {
+    setPlayerReady(true);
+    event.target.playVideo();
+    setIsPlaying(true);
+  };
+
+  const onPlayerStateChange = (event: any) => {
+    if (event.data === window.YT.PlayerState.PLAYING) {
+      setIsPlaying(true);
+      startSeekProtection();
+    } else if (event.data === window.YT.PlayerState.PAUSED) {
+      setIsPlaying(false);
+    } else if (event.data === window.YT.PlayerState.ENDED) {
+      setIsPlaying(false);
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+      }
+    }
+  };
+
+  const startSeekProtection = useCallback(() => {
+    if (checkIntervalRef.current) {
+      clearInterval(checkIntervalRef.current);
+    }
+
+    checkIntervalRef.current = setInterval(() => {
+      if (playerRef.current && playerRef.current.getCurrentTime) {
+        const currentTime = playerRef.current.getCurrentTime();
+        
+        if (currentTime > expectedTimeRef.current + 2) {
+          playerRef.current.seekTo(expectedTimeRef.current, true);
+        } else {
+          expectedTimeRef.current = currentTime;
+        }
+      }
+    }, 500);
+  }, []);
+
+  const togglePlay = () => {
+    if (!playerRef.current) return;
+    
+    if (isPlaying) {
+      playerRef.current.pauseVideo();
+    } else {
+      playerRef.current.playVideo();
+    }
+  };
+
+  const toggleMute = () => {
+    if (!playerRef.current) return;
+    
+    if (isMuted) {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(volume);
+    } else {
+      playerRef.current.mute();
+    }
+    setIsMuted(!isMuted);
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseInt(e.target.value);
+    setVolume(newVolume);
+    if (playerRef.current) {
+      playerRef.current.setVolume(newVolume);
+      if (newVolume === 0) {
+        setIsMuted(true);
+      } else if (isMuted) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+      }
+    }
+  };
 
   const onSubmit = async (data: ApplicationForm) => {
     setIsSubmitting(true);
@@ -74,6 +200,10 @@ export default function VSLPage() {
     setShowForm(true);
   };
 
+  const startVideo = () => {
+    setShowVideo(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* VSL Section */}
@@ -89,12 +219,12 @@ export default function VSLPage() {
             </p>
           </div>
 
-          {/* Video Player Placeholder */}
+          {/* Video Player */}
           <div className="relative aspect-video bg-card rounded-xl border border-border overflow-hidden mb-8">
-            {!isPlaying ? (
+            {!showVideo ? (
               <div 
                 className="absolute inset-0 flex items-center justify-center cursor-pointer group"
-                onClick={() => setIsPlaying(true)}
+                onClick={startVideo}
                 data-testid="button-play-video"
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -106,13 +236,50 @@ export default function VSLPage() {
                 </div>
               </div>
             ) : (
-              <iframe
-                src="https://www.youtube.com/embed/ZYc4uDJxE2A?autoplay=1&rel=0"
-                title="KI-Klick Methode VSL"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
+              <>
+                <div id="youtube-player" className="absolute inset-0 w-full h-full" />
+                
+                {/* Custom Controls Overlay */}
+                {playerReady && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <div className="flex items-center gap-4">
+                      {/* Play/Pause Button */}
+                      <button
+                        onClick={togglePlay}
+                        className="h-10 w-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors"
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-5 w-5 text-primary-foreground" />
+                        ) : (
+                          <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
+                        )}
+                      </button>
+
+                      {/* Volume Controls */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={toggleMute}
+                          className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                        >
+                          {isMuted || volume === 0 ? (
+                            <VolumeX className="h-4 w-4 text-white" />
+                          ) : (
+                            <Volume2 className="h-4 w-4 text-white" />
+                          )}
+                        </button>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={isMuted ? 0 : volume}
+                          onChange={handleVolumeChange}
+                          className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
