@@ -106,11 +106,13 @@ export default function VSLPage() {
                 </div>
               </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-black">
-                <p className="text-white text-lg">
-                  [Video Player - Hier dein VSL einbetten]
-                </p>
-              </div>
+              <iframe
+                src="https://www.youtube.com/embed/ZYc4uDJxE2A?autoplay=1&rel=0"
+                title="KI-Klick Methode VSL"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
             )}
           </div>
 
@@ -233,28 +235,17 @@ export default function VSLPage() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
-          {/* Disclaimer */}
           <div className="mb-6">
-            <p className="text-xs text-primary font-medium mb-2">Haftungsausschluss & Disclaimer:</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Diese Website ist nicht Teil der Facebook-Website oder der Facebook Inc. Außerdem wird diese Website in keiner Weise von Facebook unterstützt.<br />
-              FACEBOOK ist eine Marke von FACEBOOK, Inc.
-            </p>
-          </div>
-
-          {/* Copyright */}
-          <div className="mb-6">
-            <p className="text-xs text-primary font-medium">© 2025 KI Lizenzpartner</p>
+            <p className="text-xs text-primary font-medium">© 2026 KI-Klick Methode</p>
             <p className="text-xs text-primary">Alle Rechte vorbehalten.</p>
           </div>
 
-          {/* Links */}
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
             <span>|</span>
             <a href="#" className="hover:text-foreground transition-colors">Datenschutzerklärung</a>
             <span>|</span>
-            <a href="#" className="hover:text-foreground transition-colors">Allgemeine Geschäftsbedingungen</a>
+            <a href="#" className="hover:text-foreground transition-colors">AGB</a>
           </div>
         </div>
       </footer>
