@@ -38,10 +38,14 @@ function formatQuizAnswers(answers?: QuizAnswers): string {
     return '';
   }
   
-  let result = '\n--- QUIZ-ANTWORTEN ---\n';
+  let result = '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  result += '📋 QUIZ-ANTWORTEN\n';
+  result += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  
   for (const [questionId, answer] of Object.entries(answers)) {
     const questionText = questionTexts[Number(questionId)] || `Frage ${questionId}`;
-    result += `${questionText}: ${answer}\n`;
+    result += `❓ ${questionText}\n`;
+    result += `➡️ ${answer}\n\n`;
   }
   return result;
 }
@@ -53,14 +57,18 @@ export async function sendLeadNotification(lead: LeadData) {
     const quizSection = formatQuizAnswers(lead.quizAnswers);
     
     const emailContent = `
-Neuer Lead eingegangen!
+🎯 NEUER LEAD EINGEGANGEN!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Name: ${lead.name}
-${lead.email ? `E-Mail: ${lead.email}` : ''}
-${lead.phone ? `Telefon: ${lead.phone}` : ''}
-Quelle: ${lead.source || 'Unbekannt'}
+👤 Name: ${lead.name}
+
+📧 E-Mail: ${lead.email || 'Nicht angegeben'}
+
+📱 Telefon: ${lead.phone || 'Nicht angegeben'}
+
+📍 Quelle: ${lead.source || 'Quiz Funnel'}
 ${quizSection}
----
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Automatisch gesendet von deinem KI-Klick Methode Funnel
     `.trim();
 
