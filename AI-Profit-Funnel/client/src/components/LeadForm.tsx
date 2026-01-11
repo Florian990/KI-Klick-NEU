@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -16,6 +17,8 @@ import { Loader2, ArrowRight } from "lucide-react";
 const formSchema = z.object({
   name: z.string().min(2, "Bitte gib deinen Namen ein"),
   email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
+  countryCode: z.string().default("+49"),
+  phone: z.string().min(6, "Bitte gib deine Telefonnummer ein"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -31,6 +34,8 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
     defaultValues: {
       name: "",
       email: "",
+      countryCode: "+49",
+      phone: "",
     },
   });
 
@@ -92,6 +97,43 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage className="text-xs sm:text-sm" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-foreground text-sm sm:text-base">Deine Telefonnummer</FormLabel>
+                  <div className="flex gap-2">
+                    <Select
+                      defaultValue="+49"
+                      onValueChange={(value) => form.setValue("countryCode", value)}
+                    >
+                      <SelectTrigger className="w-24 h-11 sm:h-12 bg-background border-input" data-testid="select-country-code">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="+49">DE +49</SelectItem>
+                        <SelectItem value="+43">AT +43</SelectItem>
+                        <SelectItem value="+41">CH +41</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        placeholder="1512 3456789"
+                        className="flex-1 h-11 sm:h-12 bg-background border-input text-base touch-manipulation"
+                        data-testid="input-phone"
+                        autoComplete="tel"
+                        inputMode="tel"
+                        {...field}
+                      />
+                    </FormControl>
+                  </div>
                   <FormMessage className="text-xs sm:text-sm" />
                 </FormItem>
               )}

@@ -99,12 +99,14 @@ export default function QuizLandingPage() {
     setFunnelState("disqualified");
   };
 
-  const handleFormSubmit = async (data: { name: string; email: string }) => {
+  const handleFormSubmit = async (data: { name: string; email: string; countryCode: string; phone: string }) => {
     setIsLoading(true);
     try {
+      const fullPhone = `${data.countryCode} ${data.phone}`;
       await apiRequest("POST", "/api/leads", {
         name: data.name,
         email: data.email,
+        phone: fullPhone,
         utmSource: utmParams.utmSource,
         utmMedium: utmParams.utmMedium,
         utmCampaign: utmParams.utmCampaign,
