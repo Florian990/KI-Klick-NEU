@@ -1,14 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle, Play, Pause, X, Loader2, Volume2, VolumeX } from "lucide-react";
+import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar, Lock } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
 declare global {
   interface Window {
@@ -17,37 +8,16 @@ declare global {
   }
 }
 
-const applicationSchema = z.object({
-  vorname: z.string().min(1, "Vorname ist erforderlich"),
-  nachname: z.string().min(1, "Nachname ist erforderlich"),
-  countryCode: z.string().default("+49"),
-  phone: z.string().min(6, "Telefonnummer ist erforderlich"),
-});
-
-type ApplicationForm = z.infer<typeof applicationSchema>;
-
 export default function VSLPage() {
   const [showVideo, setShowVideo] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
-  const [showForm, setShowForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { toast } = useToast();
-
-  const form = useForm<ApplicationForm>({
-    resolver: zodResolver(applicationSchema),
-    defaultValues: {
-      vorname: "",
-      nachname: "",
-      countryCode: "+49",
-      phone: "",
-    },
-  });
 
   useEffect(() => {
     if (!showVideo) return;
@@ -101,6 +71,7 @@ export default function VSLPage() {
       setIsPlaying(false);
     } else if (event.data === window.YT.PlayerState.ENDED) {
       setIsPlaying(false);
+      setVideoEnded(true);
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
       }
@@ -159,45 +130,6 @@ export default function VSLPage() {
         setIsMuted(false);
       }
     }
-  };
-
-  const onSubmit = async (data: ApplicationForm) => {
-    setIsSubmitting(true);
-    try {
-      const fullPhone = `${data.countryCode} ${data.phone}`;
-      await apiRequest("POST", "/api/leads", {
-        name: `${data.vorname} ${data.nachname}`,
-        phone: fullPhone,
-        source: "VSL Bewerbung",
-      });
-
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("track", "Lead", {
-          content_name: "VSL Application",
-        });
-      }
-
-      toast({
-        title: "Erfolgreich!",
-        description: "Wir melden uns in Kürze bei dir.",
-      });
-
-      setShowForm(false);
-      form.reset();
-    } catch (error) {
-      console.error("Error submitting application:", error);
-      toast({
-        title: "Fehler",
-        description: "Etwas ist schief gelaufen. Bitte versuche es erneut.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleBookCall = () => {
-    setShowForm(true);
   };
 
   const startVideo = () => {
@@ -297,16 +229,63 @@ export default function VSLPage() {
             ))}
           </div>
 
-          {/* CTA under video */}
-          <div className="text-center">
-            <Button
-              size="lg"
-              onClick={handleBookCall}
-              className="h-14 px-10 text-lg font-semibold uppercase tracking-wide"
-              data-testid="button-book-call-top"
-            >
-              Jetzt kostenfrei bewerben
-            </Button>
+          {/* Calendly Section */}
+          <div className="mt-12">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                Buche jetzt dein kostenloses Erstgespräch
+              </h2>
+              <p className="text-muted-foreground">
+                Wähle einen passenden Termin für dein persönliches Beratungsgespräch
+              </p>
+            </div>
+
+            {/* Calendly Container */}
+            <div className="relative rounded-xl overflow-hidden border border-border">
+              {/* Calendly iframe */}
+              <iframe
+                src="https://calendly.com/florianbenedict/kostenloses-potenzialgesprach"
+                className={`w-full h-[700px] transition-all duration-500 ${
+                  videoEnded ? 'opacity-100' : 'opacity-30 grayscale pointer-events-none'
+                }`}
+                title="Calendly Terminbuchung"
+              />
+
+              {/* Lock Overlay when video not finished */}
+              {!videoEnded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+                  <div className={`p-6 rounded-2xl bg-card/90 border border-border shadow-2xl text-center max-w-md mx-4 ${
+                    showVideo ? 'animate-pulse' : ''
+                  }`}>
+                    <div className="h-16 w-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                      <Lock className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground mb-2">
+                      Kalender wird freigeschaltet
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Schaue das Video bis zum Ende an, um deinen Termin buchen zu können.
+                    </p>
+                    {showVideo && (
+                      <div className="mt-4 flex items-center justify-center gap-2 text-primary">
+                        <Calendar className="h-5 w-5" />
+                        <span className="text-sm font-medium">Video läuft...</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Unlock Animation when video ends */}
+              {videoEnded && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+                  <div className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/30 flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
+                    <span>Kalender freigeschaltet!</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -363,42 +342,6 @@ export default function VSLPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 border-t border-border">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Bereit für den nächsten Schritt?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-            Vereinbare jetzt ein kostenloses Beratungsgespräch und erfahre, wie du mit dem KI-Lizenzpartner Modell durchstarten kannst.
-          </p>
-
-          <Button
-            size="lg"
-            onClick={handleBookCall}
-            className="h-14 px-10 text-lg font-semibold uppercase tracking-wide"
-            data-testid="button-book-call"
-          >
-            Jetzt kostenfrei bewerben
-          </Button>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-primary" />
-              <span>Kostenlos & unverbindlich</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-primary" />
-              <span>15-30 Minuten</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-primary" />
-              <span>Persönliche Beratung</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
@@ -416,121 +359,6 @@ export default function VSLPage() {
           </div>
         </div>
       </footer>
-
-      {/* Application Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setShowForm(false)}
-          />
-          
-          {/* Modal */}
-          <div className="relative bg-zinc-900 border border-zinc-700 rounded-lg w-full max-w-md p-6 sm:p-8 shadow-2xl">
-            {/* Close button */}
-            <button
-              onClick={() => setShowForm(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
-              data-testid="button-close-form"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            {/* Header */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Dein <span className="text-primary">kostenloses</span> Erstgespräch
-              </h2>
-              <p className="text-zinc-400 text-sm">
-                Damit wir Dich für dein gratis Gespräch kontaktieren können, hinterlass uns doch bitte <span className="font-semibold text-white">deine persönlichen Kontaktdaten</span> ...
-              </p>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <Label htmlFor="vorname" className="text-white text-sm font-medium">
-                  Dein Vorname*
-                </Label>
-                <Input
-                  id="vorname"
-                  {...form.register("vorname")}
-                  className="mt-1.5 bg-white border-0 text-zinc-900 h-11"
-                  data-testid="input-vorname"
-                />
-                {form.formState.errors.vorname && (
-                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.vorname.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="nachname" className="text-white text-sm font-medium">
-                  Dein Nachname*
-                </Label>
-                <Input
-                  id="nachname"
-                  {...form.register("nachname")}
-                  className="mt-1.5 bg-white border-0 text-zinc-900 h-11"
-                  data-testid="input-nachname"
-                />
-                {form.formState.errors.nachname && (
-                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.nachname.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="phone" className="text-white text-sm font-medium">
-                  Deine Telefonnummer*
-                </Label>
-                <div className="flex gap-2 mt-1.5">
-                  <Select
-                    defaultValue="+49"
-                    onValueChange={(value) => form.setValue("countryCode", value)}
-                  >
-                    <SelectTrigger className="w-24 bg-white border-0 text-zinc-900 h-11" data-testid="select-country-code">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="+49">DE +49</SelectItem>
-                      <SelectItem value="+43">AT +43</SelectItem>
-                      <SelectItem value="+41">CH +41</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="1512 3456789"
-                    {...form.register("phone")}
-                    className="flex-1 bg-white border-0 text-zinc-900 h-11"
-                    data-testid="input-phone"
-                  />
-                </div>
-                {form.formState.errors.phone && (
-                  <p className="text-red-400 text-xs mt-1">{form.formState.errors.phone.message}</p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-12 text-base font-bold uppercase tracking-wide mt-2"
-                data-testid="button-submit-application"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  "Kostenfrei Bewerben"
-                )}
-              </Button>
-
-              <p className="text-center text-zinc-500 text-xs">
-                Die Eintragung ist <span className="font-semibold text-zinc-300">100% kostenlos</span> und kann <span className="font-semibold text-zinc-300">jederzeit</span> widerrufen werden.
-              </p>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
