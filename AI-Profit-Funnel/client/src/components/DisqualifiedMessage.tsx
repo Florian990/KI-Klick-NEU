@@ -16,8 +16,8 @@ export default function DisqualifiedMessage() {
         Entschuldige, die KI-Klick Methode ist für dich leider ungeeignet, ABER
       </h2>
       
-      <p className="text-lg text-muted-foreground mb-8">
-        Wir haben auch eine Methode, die <span className="font-bold text-foreground">perfekt</span> auf deine Situation zugeschnitten ist und mit der du sogar noch <span className="font-bold text-foreground">einfacher</span> Geld verdienen kannst!
+      <p className="text-lg text-foreground mb-8">
+        Wir haben auch eine Methode, die <span className="underline">perfekt</span> auf deine Situation zugeschnitten ist und mit der du sogar noch <span className="underline">einfacher</span> Geld verdienen kannst!
       </p>
 
       <Button
