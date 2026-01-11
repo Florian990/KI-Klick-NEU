@@ -1,4 +1,4 @@
-import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar, Lock } from "lucide-react";
+import { CheckCircle, Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 declare global {
@@ -14,7 +14,6 @@ export default function VSLPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
   const [playerReady, setPlayerReady] = useState(false);
-  const [videoEnded, setVideoEnded] = useState(false);
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -71,7 +70,6 @@ export default function VSLPage() {
       setIsPlaying(false);
     } else if (event.data === window.YT.PlayerState.ENDED) {
       setIsPlaying(false);
-      setVideoEnded(true);
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
       }
@@ -242,49 +240,11 @@ export default function VSLPage() {
 
             {/* Calendly Container */}
             <div className="relative rounded-xl overflow-hidden border border-border">
-              {/* Calendly iframe */}
               <iframe
                 src="https://calendly.com/florianbenedict/kostenloses-potenzialgesprach"
-                className={`w-full h-[700px] transition-all duration-500 ${
-                  videoEnded ? 'opacity-100' : 'opacity-30 grayscale pointer-events-none'
-                }`}
+                className="w-full h-[700px]"
                 title="Calendly Terminbuchung"
               />
-
-              {/* Lock Overlay when video not finished */}
-              {!videoEnded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
-                  <div className={`p-6 rounded-2xl bg-card/90 border border-border shadow-2xl text-center max-w-md mx-4 ${
-                    showVideo ? 'animate-pulse' : ''
-                  }`}>
-                    <div className="h-16 w-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                      <Lock className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">
-                      Kalender wird freigeschaltet
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Schaue das Video bis zum Ende an, um deinen Termin buchen zu können.
-                    </p>
-                    {showVideo && (
-                      <div className="mt-4 flex items-center justify-center gap-2 text-primary">
-                        <Calendar className="h-5 w-5" />
-                        <span className="text-sm font-medium">Video läuft...</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Unlock Animation when video ends */}
-              {videoEnded && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-                  <div className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/30 flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    <span>Kalender freigeschaltet!</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
