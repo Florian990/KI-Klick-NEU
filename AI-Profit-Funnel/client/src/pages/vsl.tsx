@@ -6,12 +6,12 @@ declare global {
   interface Window {
     YT: any;
     onYouTubeIframeAPIReady: () => void;
+    Calendly: any;
   }
 }
 
 export default function VSLPage() {
   const [showVideo, setShowVideo] = useState(false);
-  const [showCalendly, setShowCalendly] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
@@ -19,7 +19,23 @@ export default function VSLPage() {
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const calendlyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://assets.calendly.com/assets/external/widget.css';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.head.removeChild(link);
+      document.body.removeChild(script);
+    };
+  }, []);
 
   useEffect(() => {
     if (!showVideo) return;
@@ -137,11 +153,12 @@ export default function VSLPage() {
     setShowVideo(true);
   };
 
-  const openCalendly = () => {
-    setShowCalendly(true);
-    setTimeout(() => {
-      calendlyRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+  const openCalendlyPopup = () => {
+    if (window.Calendly) {
+      window.Calendly.initPopupWidget({
+        url: 'https://calendly.com/florianbenedict/kostenloses-potenzialgesprach'
+      });
+    }
   };
 
   return (
@@ -241,7 +258,7 @@ export default function VSLPage() {
           <div className="text-center">
             <Button
               size="lg"
-              onClick={openCalendly}
+              onClick={openCalendlyPopup}
               className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold touch-manipulation active:scale-[0.98] transition-transform"
             >
               <Calendar className="mr-2 h-5 w-5" />
@@ -251,29 +268,6 @@ export default function VSLPage() {
               Unverbindlich und 100% kostenlos
             </p>
           </div>
-
-          {/* Calendly Section - Hidden until button clicked */}
-          {showCalendly && (
-            <div ref={calendlyRef} className="mt-8 sm:mt-10 md:mt-12">
-              <div className="text-center mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
-                  Buche jetzt dein kostenloses Erstgespräch
-                </h2>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Wähle einen passenden Termin für dein persönliches Beratungsgespräch
-                </p>
-              </div>
-
-              {/* Calendly Container */}
-              <div className="relative rounded-lg sm:rounded-xl overflow-hidden border border-border">
-                <iframe
-                  src="https://calendly.com/florianbenedict/kostenloses-potenzialgesprach"
-                  className="w-full h-[500px] sm:h-[600px] md:h-[700px]"
-                  title="Calendly Terminbuchung"
-                />
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -330,18 +324,16 @@ export default function VSLPage() {
       </section>
 
       {/* Floating CTA for Mobile */}
-      {!showCalendly && (
-        <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-sm border-t border-border sm:hidden z-50">
-          <Button
-            size="lg"
-            onClick={openCalendly}
-            className="w-full h-12 text-base font-semibold touch-manipulation active:scale-[0.98] transition-transform"
-          >
-            <Calendar className="mr-2 h-5 w-5" />
-            Kostenloses Potenzialgespräch
-          </Button>
-        </div>
-      )}
+      <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-sm border-t border-border sm:hidden z-50">
+        <Button
+          size="lg"
+          onClick={openCalendlyPopup}
+          className="w-full h-12 text-base font-semibold touch-manipulation active:scale-[0.98] transition-transform"
+        >
+          <Calendar className="mr-2 h-5 w-5" />
+          Kostenloses Potenzialgespräch
+        </Button>
+      </div>
 
       {/* Footer */}
       <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border pb-20 sm:pb-8">
