@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function DisqualifiedMessage() {
   const handleClick = () => {
-    window.open("https://moneten-wissen.de/mit-apps-geld-verdienen-ebook/?aff=Florianbenedict", "_blank");
+    window.open("https://www.digistore24.com/redir/453066/Florianbenedict/disq", "_blank");
   };
 
   return (
@@ -17,7 +17,7 @@ export default function DisqualifiedMessage() {
       </h2>
       
       <p className="text-lg text-foreground mb-8">
-        Wir haben auch eine Methode, die <span className="underline">perfekt</span> auf deine Situation zugeschnitten ist und mit der du sogar noch <span className="underline">einfacher</span> Geld verdienen kannst!
+        Wir haben ebenfalls eine <span className="underline">Methode die kostenlos ist</span>, um 300 - 1000 Euro im Monat nebenbei online dazu zu verdienen:
       </p>
 
       <Button
