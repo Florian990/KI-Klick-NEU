@@ -1,5 +1,6 @@
-import { CheckCircle, Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Button } from "@/components/ui/button";
 
 declare global {
   interface Window {
@@ -10,6 +11,7 @@ declare global {
 
 export default function VSLPage() {
   const [showVideo, setShowVideo] = useState(false);
+  const [showCalendly, setShowCalendly] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
@@ -17,6 +19,7 @@ export default function VSLPage() {
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const calendlyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!showVideo) return;
@@ -134,23 +137,30 @@ export default function VSLPage() {
     setShowVideo(true);
   };
 
+  const openCalendly = () => {
+    setShowCalendly(true);
+    setTimeout(() => {
+      calendlyRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* VSL Section */}
-      <section className="py-16 px-4">
+      <section className="py-6 sm:py-10 md:py-16 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-primary font-medium mb-3">Exklusives Video-Training</p>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <p className="text-primary font-medium mb-2 sm:mb-3 text-sm sm:text-base">Exklusives Video-Training</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 px-2">
               Die KI-Klick Methode
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground px-2">
               Schaue dir jetzt das Video an und erfahre, wie DU dir ein zweites Standbein aufbauen kannst.
             </p>
           </div>
 
           {/* Video Player */}
-          <div className="relative aspect-video bg-card rounded-xl border border-border overflow-hidden mb-8">
+          <div className="relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6">
             {!showVideo ? (
               <div 
                 className="absolute inset-0 flex items-center justify-center cursor-pointer group"
@@ -159,10 +169,10 @@ export default function VSLPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="text-center relative z-10">
-                  <div className="h-20 w-20 mx-auto rounded-full bg-primary flex items-center justify-center transition-transform group-hover:scale-110 mb-4">
-                    <Play className="h-8 w-8 text-primary-foreground ml-1" />
+                  <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 mx-auto rounded-full bg-primary flex items-center justify-center transition-transform group-hover:scale-110 mb-3 sm:mb-4">
+                    <Play className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary-foreground ml-1" />
                   </div>
-                  <p className="text-white font-medium">Video starten</p>
+                  <p className="text-white font-medium text-sm sm:text-base">Video starten</p>
                 </div>
               </div>
             ) : (
@@ -171,30 +181,30 @@ export default function VSLPage() {
                 
                 {/* Custom Controls Overlay */}
                 {playerReady && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <div className="flex items-center gap-4">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 sm:p-3 md:p-4">
+                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
                       {/* Play/Pause Button */}
                       <button
                         onClick={togglePlay}
-                        className="h-10 w-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors"
+                        className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
                       >
                         {isPlaying ? (
-                          <Pause className="h-5 w-5 text-primary-foreground" />
+                          <Pause className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
                         ) : (
-                          <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
+                          <Play className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground ml-0.5" />
                         )}
                       </button>
 
                       {/* Volume Controls */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
                         <button
                           onClick={toggleMute}
-                          className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors touch-manipulation"
                         >
                           {isMuted || volume === 0 ? (
-                            <VolumeX className="h-4 w-4 text-white" />
+                            <VolumeX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                           ) : (
-                            <Volume2 className="h-4 w-4 text-white" />
+                            <Volume2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                           )}
                         </button>
                         <input
@@ -203,7 +213,7 @@ export default function VSLPage() {
                           max="100"
                           value={isMuted ? 0 : volume}
                           onChange={handleVolumeChange}
-                          className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-primary"
+                          className="w-16 sm:w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-primary touch-manipulation"
                         />
                       </div>
                     </div>
@@ -214,51 +224,68 @@ export default function VSLPage() {
           </div>
 
           {/* Key Points */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
             {[
               "Schritt-für-Schritt erklärt",
               "Sofort umsetzbar",
               "Kein Vorwissen nötig",
             ].map((point, index) => (
-              <div key={index} className="flex items-center gap-2 text-foreground">
-                <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
+              <div key={index} className="flex items-center gap-2 text-foreground text-sm sm:text-base">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                 <span>{point}</span>
               </div>
             ))}
           </div>
 
-          {/* Calendly Section */}
-          <div className="mt-12">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                Buche jetzt dein kostenloses Erstgespräch
-              </h2>
-              <p className="text-muted-foreground">
-                Wähle einen passenden Termin für dein persönliches Beratungsgespräch
-              </p>
-            </div>
-
-            {/* Calendly Container */}
-            <div className="relative rounded-xl overflow-hidden border border-border">
-              <iframe
-                src="https://calendly.com/florianbenedict/kostenloses-potenzialgesprach"
-                className="w-full h-[700px]"
-                title="Calendly Terminbuchung"
-              />
-            </div>
+          {/* CTA Button */}
+          <div className="text-center">
+            <Button
+              size="lg"
+              onClick={openCalendly}
+              className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold touch-manipulation active:scale-[0.98] transition-transform"
+            >
+              <Calendar className="mr-2 h-5 w-5" />
+              Kostenloses Potenzialgespräch
+            </Button>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">
+              Unverbindlich und 100% kostenlos
+            </p>
           </div>
+
+          {/* Calendly Section - Hidden until button clicked */}
+          {showCalendly && (
+            <div ref={calendlyRef} className="mt-8 sm:mt-10 md:mt-12">
+              <div className="text-center mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
+                  Buche jetzt dein kostenloses Erstgespräch
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Wähle einen passenden Termin für dein persönliches Beratungsgespräch
+                </p>
+              </div>
+
+              {/* Calendly Container */}
+              <div className="relative rounded-lg sm:rounded-xl overflow-hidden border border-border">
+                <iframe
+                  src="https://calendly.com/florianbenedict/kostenloses-potenzialgesprach"
+                  className="w-full h-[500px] sm:h-[600px] md:h-[700px]"
+                  title="Calendly Terminbuchung"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* WhatsApp Testimonials Section */}
-      <section className="py-16 px-4 border-t border-border">
+      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center text-foreground mb-10">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-6 sm:mb-8 md:mb-10">
             Das sagen unsere Teilnehmer
           </h2>
           
           {/* WhatsApp Screenshots */}
-          <div className="columns-2 sm:columns-3 gap-4 space-y-4">
+          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
             {[
               "/assets/testimonial2.png",
               "/assets/testimonial3.png",
@@ -268,7 +295,7 @@ export default function VSLPage() {
                 <img 
                   src={src} 
                   alt={`WhatsApp Testimonial ${index + 1}`}
-                  className="w-full h-auto rounded-xl shadow-lg"
+                  className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg"
                 />
               </div>
             ))}
@@ -277,14 +304,14 @@ export default function VSLPage() {
       </section>
 
       {/* Payout Screens Section */}
-      <section className="py-16 px-4 border-t border-border">
+      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center text-foreground mb-10">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-6 sm:mb-8 md:mb-10">
             Stell dir vor, dein Handybildschirm sieht bald so aus
           </h2>
           
           {/* Payout Screenshots */}
-          <div className="columns-2 sm:columns-3 gap-4 space-y-4">
+          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
             {[
               "/assets/testimonial1.jpeg",
               "/assets/testimonial6.jpeg",
@@ -294,7 +321,7 @@ export default function VSLPage() {
                 <img 
                   src={src} 
                   alt={`Auszahlung ${index + 1}`}
-                  className="w-full h-auto rounded-xl shadow-lg"
+                  className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg"
                 />
               </div>
             ))}
@@ -302,15 +329,29 @@ export default function VSLPage() {
         </div>
       </section>
 
+      {/* Floating CTA for Mobile */}
+      {!showCalendly && (
+        <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-sm border-t border-border sm:hidden z-50">
+          <Button
+            size="lg"
+            onClick={openCalendly}
+            className="w-full h-12 text-base font-semibold touch-manipulation active:scale-[0.98] transition-transform"
+          >
+            <Calendar className="mr-2 h-5 w-5" />
+            Kostenloses Potenzialgespräch
+          </Button>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="py-8 px-4 border-t border-border">
+      <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border pb-20 sm:pb-8">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="mb-6">
-            <p className="text-xs text-primary font-medium">© 2026 KI-Klick Methode</p>
-            <p className="text-xs text-primary">Alle Rechte vorbehalten.</p>
+          <div className="mb-4 sm:mb-6">
+            <p className="text-[10px] sm:text-xs text-primary font-medium">© 2026 KI-Klick Methode</p>
+            <p className="text-[10px] sm:text-xs text-primary">Alle Rechte vorbehalten.</p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
             <span>|</span>
             <a href="#" className="hover:text-foreground transition-colors">Datenschutzerklärung</a>
