@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GraduationCap, Users, Briefcase, XCircle, Check, ChevronRight, ChevronLeft, Euro, Home, MapPin } from "lucide-react";
+import { GraduationCap, Users, Briefcase, XCircle, Check, ChevronRight, ChevronLeft, Euro, Home, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
@@ -31,6 +31,7 @@ const questions: QuizQuestion[] = [
       { text: "Azubi/Student/in", icon: <GraduationCap className="h-6 w-6 sm:h-8 sm:w-8" /> },
       { text: "Angestellte/r", icon: <Users className="h-6 w-6 sm:h-8 sm:w-8" /> },
       { text: "Unternehmer/in", icon: <Briefcase className="h-6 w-6 sm:h-8 sm:w-8" /> },
+      { text: "Rentner/in", icon: <Clock className="h-6 w-6 sm:h-8 sm:w-8" />, disqualify: true },
       { text: "aktuell arbeitslos", icon: <XCircle className="h-6 w-6 sm:h-8 sm:w-8" />, disqualify: true },
     ],
   },
