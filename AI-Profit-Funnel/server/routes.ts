@@ -1,9 +1,33 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertLeadSchema, insertPageViewSchema, insertAnalyticsEventSchema } from "@shared/schema";
 import { z } from "zod";
 import { sendLeadNotification } from "./email";
+
+// Basic Auth middleware for admin routes
+const basicAuth = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Basic ')) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Admin Stats"');
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+  
+  const base64Credentials = authHeader.split(' ')[1];
+  const credentials = Buffer.from(base64Credentials, 'base64').toString('utf8');
+  const [username, password] = credentials.split(':');
+  
+  const validUsername = process.env.ADMIN_USERNAME || 'Admin';
+  const validPassword = process.env.ADMIN_PASSWORD || 'Erfolg2026!';
+  
+  if (username === validUsername && password === validPassword) {
+    next();
+  } else {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Admin Stats"');
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+};
 
 export async function registerRoutes(
   httpServer: Server,
@@ -137,8 +161,8 @@ export async function registerRoutes(
     }
   });
 
-  // Analytics: Get stats for date range
-  app.get("/api/analytics/stats", async (req, res) => {
+  // Analytics: Get stats for date range (protected with Basic Auth)
+  app.get("/api/analytics/stats", basicAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
