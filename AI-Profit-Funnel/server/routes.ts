@@ -13,7 +13,7 @@ export async function registerRoutes(
   // Lead capture endpoint
   app.post("/api/leads", async (req, res) => {
     try {
-      const validatedData = insertLeadSchema.parse(req.body);
+      const validatedData = insertLeadSchema.passthrough().parse(req.body);
       
       // Check if email already exists (only if email provided)
       if (validatedData.email) {
