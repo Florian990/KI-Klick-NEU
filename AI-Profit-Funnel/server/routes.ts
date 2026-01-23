@@ -13,20 +13,32 @@ export async function registerRoutes(
   // Lead capture endpoint
   app.post("/api/leads", async (req, res) => {
     try {
-      const validatedData = insertLeadSchema.passthrough().parse(req.body);
+      // Extract only the fields we need for the database
+      const { name, email, phone, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, source, quizAnswers } = req.body;
+      
+      const validatedData = {
+        name: name || '',
+        email: email || null,
+        phone: phone || null,
+        utmSource: utmSource || null,
+        utmMedium: utmMedium || null,
+        utmCampaign: utmCampaign || null,
+        utmContent: utmContent || null,
+        utmTerm: utmTerm || null,
+      };
       
       // Check if email already exists (only if email provided)
       if (validatedData.email) {
         const existingLead = await storage.getLeadByEmail(validatedData.email);
         if (existingLead) {
           // Still send email notification for existing leads
-          const source = req.body.source || 'Quiz Funnel';
+          const leadSource = source || 'Quiz Funnel';
           sendLeadNotification({
             name: existingLead.name,
             email: existingLead.email,
             phone: existingLead.phone,
-            source: source + ' (Wiederholung)',
-            quizAnswers: req.body.quizAnswers
+            source: leadSource + ' (Wiederholung)',
+            quizAnswers: quizAnswers
           });
           
           return res.status(200).json({ 
@@ -48,16 +60,16 @@ export async function registerRoutes(
         utmContent: lead.utmContent,
       });
       
-      console.log("Quiz answers received:", JSON.stringify(req.body.quizAnswers));
+      console.log("Quiz answers received:", JSON.stringify(quizAnswers));
       
       // Send email notification
-      const source = req.body.source || (lead.utmSource ? `UTM: ${lead.utmSource}` : 'Quiz Funnel');
+      const leadSource = source || (lead.utmSource ? `UTM: ${lead.utmSource}` : 'Quiz Funnel');
       sendLeadNotification({
         name: lead.name,
         email: lead.email,
         phone: lead.phone,
-        source: source,
-        quizAnswers: req.body.quizAnswers
+        source: leadSource,
+        quizAnswers: quizAnswers
       });
       
       res.status(201).json({ 
