@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle, Mail, BarChart3, RefreshCw } from "lucide-react";
+import { Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle, Mail, BarChart3, RefreshCw, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface StatsData {
   totalPageViews: number;
@@ -17,8 +18,14 @@ interface StatsData {
 
 export default function AdminStatsPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   const today = new Date();
   const [startDate, setStartDate] = useState(() => {
@@ -30,14 +37,39 @@ export default function AdminStatsPage() {
     return today.toISOString().split('T')[0];
   });
 
+  const getAuthHeader = () => {
+    const credentials = sessionStorage.getItem('adminCredentials');
+    if (credentials) {
+      return `Basic ${credentials}`;
+    }
+    return null;
+  };
+
   const fetchStats = async (start?: string, end?: string) => {
     const startParam = start || startDate;
     const endParam = end || endDate;
     
+    const authHeader = getAuthHeader();
+    if (!authHeader) {
+      setIsAuthenticated(false);
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/analytics/stats?startDate=${startParam}&endDate=${endParam}`);
+      const response = await fetch(`/api/analytics/stats?startDate=${startParam}&endDate=${endParam}`, {
+        headers: {
+          'Authorization': authHeader
+        }
+      });
+      
+      if (response.status === 401) {
+        sessionStorage.removeItem('adminCredentials');
+        setIsAuthenticated(false);
+        return;
+      }
+      
       const data = await response.json();
       if (data.success) {
         setStats(data.data);
@@ -52,8 +84,56 @@ export default function AdminStatsPage() {
   };
 
   useEffect(() => {
-    fetchStats();
+    const credentials = sessionStorage.getItem('adminCredentials');
+    if (credentials) {
+      setIsAuthenticated(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchStats();
+    }
+  }, [isAuthenticated]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError(null);
+    
+    const credentials = btoa(`${username}:${password}`);
+    
+    try {
+      const response = await fetch(`/api/analytics/stats?startDate=${startDate}&endDate=${endDate}`, {
+        headers: {
+          'Authorization': `Basic ${credentials}`
+        }
+      });
+      
+      if (response.status === 401) {
+        setLoginError('Falscher Benutzername oder Passwort');
+      } else {
+        sessionStorage.setItem('adminCredentials', credentials);
+        setIsAuthenticated(true);
+        const data = await response.json();
+        if (data.success) {
+          setStats(data.data);
+        }
+      }
+    } catch (err) {
+      setLoginError('Verbindungsfehler');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminCredentials');
+    setIsAuthenticated(false);
+    setStats(null);
+    setUsername("");
+    setPassword("");
+  };
 
   const handleFilter = () => {
     fetchStats();
@@ -91,6 +171,54 @@ export default function AdminStatsPage() {
     return date.toLocaleString('de-DE', { month: 'long' });
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Admin Login</CardTitle>
+            <p className="text-muted-foreground mt-2">Bitte melde dich an, um die Statistiken zu sehen.</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Benutzername</label>
+                <Input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Benutzername"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Passwort</label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Passwort"
+                  required
+                />
+              </div>
+              {loginError && (
+                <div className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">
+                  {loginError}
+                </div>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                {isLoggingIn ? 'Anmelden...' : 'Anmelden'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -99,15 +227,24 @@ export default function AdminStatsPage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Statistiken</h1>
             <p className="text-muted-foreground">Übersicht über Besucher und Quiz-Performance</p>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => fetchStats()}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Aktualisieren
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => fetchStats()}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Aktualisieren
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleLogout}
+            >
+              Abmelden
+            </Button>
+          </div>
         </div>
 
         <Card className="mb-6">
