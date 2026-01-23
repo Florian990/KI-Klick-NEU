@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle, Mail, BarChart3 } from "lucide-react";
+import { Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle, Mail, BarChart3, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -30,11 +30,14 @@ export default function AdminStatsPage() {
     return today.toISOString().split('T')[0];
   });
 
-  const fetchStats = async () => {
+  const fetchStats = async (start?: string, end?: string) => {
+    const startParam = start || startDate;
+    const endParam = end || endDate;
+    
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/analytics/stats?startDate=${startDate}&endDate=${endDate}`);
+      const response = await fetch(`/api/analytics/stats?startDate=${startParam}&endDate=${endParam}`);
       const data = await response.json();
       if (data.success) {
         setStats(data.data);
@@ -59,17 +62,27 @@ export default function AdminStatsPage() {
   const setPresetRange = (days: number) => {
     const end = new Date();
     const start = new Date();
-    start.setDate(start.getDate() - days);
-    setStartDate(start.toISOString().split('T')[0]);
-    setEndDate(end.toISOString().split('T')[0]);
+    if (days === 0) {
+      start.setHours(0, 0, 0, 0);
+    } else {
+      start.setDate(start.getDate() - days);
+    }
+    const newStart = start.toISOString().split('T')[0];
+    const newEnd = end.toISOString().split('T')[0];
+    setStartDate(newStart);
+    setEndDate(newEnd);
+    fetchStats(newStart, newEnd);
   };
 
   const setMonth = (monthsAgo: number) => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
     const end = new Date(now.getFullYear(), now.getMonth() - monthsAgo + 1, 0);
-    setStartDate(start.toISOString().split('T')[0]);
-    setEndDate(end.toISOString().split('T')[0]);
+    const newStart = start.toISOString().split('T')[0];
+    const newEnd = end.toISOString().split('T')[0];
+    setStartDate(newStart);
+    setEndDate(newEnd);
+    fetchStats(newStart, newEnd);
   };
 
   const getMonthName = (monthsAgo: number) => {
@@ -81,9 +94,20 @@ export default function AdminStatsPage() {
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Statistiken</h1>
-          <p className="text-muted-foreground">Übersicht über Besucher und Quiz-Performance</p>
+        <div className="mb-6 sm:mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Statistiken</h1>
+            <p className="text-muted-foreground">Übersicht über Besucher und Quiz-Performance</p>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => fetchStats()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Aktualisieren
+          </Button>
         </div>
 
         <Card className="mb-6">
@@ -95,7 +119,7 @@ export default function AdminStatsPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-4">
-              <Button variant="outline" size="sm" onClick={() => setPresetRange(1)}>
+              <Button variant="outline" size="sm" onClick={() => setPresetRange(0)}>
                 Heute
               </Button>
               <Button variant="outline" size="sm" onClick={() => setPresetRange(7)}>
