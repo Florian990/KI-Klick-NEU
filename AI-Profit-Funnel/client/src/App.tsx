@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import QuizLandingPage from "@/pages/quiz-landing";
 import VSLPage from "@/pages/vsl";
+import AdminStatsPage from "@/pages/admin-stats";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={QuizLandingPage} />
       <Route path="/vsl" component={VSLPage} />
+      <Route path="/admin/stats" component={AdminStatsPage} />
       <Route component={NotFound} />
     </Switch>
   );

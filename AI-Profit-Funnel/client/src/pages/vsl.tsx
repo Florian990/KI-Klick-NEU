@@ -1,6 +1,7 @@
 import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 declare global {
   interface Window {
@@ -19,8 +20,11 @@ export default function VSLPage() {
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { trackPageView, trackEvent } = useAnalytics();
 
   useEffect(() => {
+    trackPageView('/vsl');
+    
     const link = document.createElement('link');
     link.href = 'https://assets.calendly.com/assets/external/widget.css';
     link.rel = 'stylesheet';
@@ -151,9 +155,11 @@ export default function VSLPage() {
 
   const startVideo = () => {
     setShowVideo(true);
+    trackEvent('video_start');
   };
 
   const openCalendlyPopup = () => {
+    trackEvent('calendly_open');
     if (window.Calendly) {
       window.Calendly.initPopupWidget({
         url: 'https://calendly.com/florianbenedict/kostenloses-potenzialgesprach'

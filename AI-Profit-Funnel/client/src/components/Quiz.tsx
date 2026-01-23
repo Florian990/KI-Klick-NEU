@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { GraduationCap, Users, Briefcase, XCircle, Check, ChevronRight, ChevronLeft, Euro, Home, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export interface QuizAnswers {
   [questionId: number]: string;
@@ -95,6 +96,8 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [showFollowUp, setShowFollowUp] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
+  const { trackEvent } = useAnalytics();
+  const hasTrackedStart = useRef(false);
 
   const currentQuestions = showFollowUp ? [followUpQuestion] : questions;
   const currentQuestion = showFollowUp ? followUpQuestion : questions[currentStep];
@@ -102,8 +105,20 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const displayStep = showFollowUp ? 7 : currentStep + 1;
   const progress = (displayStep / totalSteps) * 100;
 
+  useEffect(() => {
+    if (!hasTrackedStart.current) {
+      trackEvent('quiz_start');
+      hasTrackedStart.current = true;
+    }
+  }, []);
+
   const handleAnswer = (answer: typeof currentQuestion.answers[0]) => {
     setSelectedAnswers(prev => ({ ...prev, [currentQuestion.id]: answer.text }));
+    
+    trackEvent(`quiz_step_${currentQuestion.id}`, { 
+      question: currentQuestion.question.substring(0, 50),
+      answer: answer.text 
+    });
 
     if (answer.disqualify) {
       onDisqualify();

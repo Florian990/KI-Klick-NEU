@@ -4,6 +4,7 @@ import Quiz, { QuizAnswers } from "@/components/Quiz";
 import LeadForm from "@/components/LeadForm";
 import DisqualifiedMessage from "@/components/DisqualifiedMessage";
 import { useToast } from "@/hooks/use-toast";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { apiRequest } from "@/lib/queryClient";
 import { CheckCircle, ChevronRight, Users, Star, TrendingUp, Clock, Target, Coins, GraduationCap, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,7 @@ export default function QuizLandingPage() {
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { trackPageView, trackEvent } = useAnalytics();
   const quizRef = useRef<HTMLDivElement>(null);
   const [utmParams, setUtmParams] = useState<UTMParams>({
     utmSource: null,
@@ -81,6 +83,8 @@ export default function QuizLandingPage() {
       utmTerm: params.get("utm_term"),
     });
 
+    trackPageView('/');
+
     if (typeof window !== "undefined" && (window as any).fbq) {
       (window as any).fbq("track", "PageView");
     }
@@ -93,10 +97,12 @@ export default function QuizLandingPage() {
   const handleQuizComplete = (answers: QuizAnswers) => {
     setQuizAnswers(answers);
     setFunnelState("form");
+    trackEvent('quiz_complete', { answers });
   };
 
   const handleDisqualify = () => {
     setFunnelState("disqualified");
+    trackEvent('quiz_disqualified');
   };
 
   const handleFormSubmit = async (data: { name: string; email: string; countryCode: string; phone: string }) => {
