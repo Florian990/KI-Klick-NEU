@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function DisqualifiedMessage() {
   const handleClick = () => {
-    window.open("https://www.digistore24.com/redir/453066/Florianbenedict/disq", "_blank");
+    window.open("https://www.digistore24.com/redir/454379/Florianbenedict/disq", "_blank");
   };
 
   return (
@@ -13,11 +13,11 @@ export default function DisqualifiedMessage() {
       </div>
       
       <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-3 sm:mb-4 leading-tight">
-        Entschuldige, die KI-Klick Methode ist für dich leider ungeeignet, ABER
+        Entschuldige, die KI-Klick Methode ist für dich leider ungeeignet, <span className="font-black">ABER</span>
       </h2>
       
       <p className="text-base sm:text-lg text-foreground mb-6 sm:mb-8 leading-relaxed">
-        Wir haben ebenfalls eine <span className="underline">Methode die kostenlos ist</span>, um 300 - 1000 Euro im Monat nebenbei online dazu zu verdienen:
+        Wir haben für dich eine <span className="underline">kostenlose Anleitung</span> um mit Apps 300 - 1000 Euro im Monat nebenbei online dazu zu verdienen:
       </p>
 
       <Button
@@ -25,7 +25,7 @@ export default function DisqualifiedMessage() {
         onClick={handleClick}
         className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold uppercase tracking-wide touch-manipulation active:scale-[0.98] transition-transform"
       >
-        Jetzt Methode entdecken
+        Anleitung kostenlos sichern
       </Button>
     </div>
   );
