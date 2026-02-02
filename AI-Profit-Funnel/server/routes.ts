@@ -5,12 +5,11 @@ import { insertLeadSchema, insertPageViewSchema, insertAnalyticsEventSchema } fr
 import { z } from "zod";
 import { sendLeadNotification } from "./email";
 
-// Basic Auth middleware for admin routes
+// Basic Auth middleware for admin routes (without WWW-Authenticate header to prevent browser popup)
 const basicAuth = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Basic ')) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Admin Stats"');
     return res.status(401).json({ message: 'Authentication required' });
   }
   
@@ -24,7 +23,6 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
   if (username === validUsername && password === validPassword) {
     next();
   } else {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Admin Stats"');
     return res.status(401).json({ message: 'Invalid credentials' });
   }
 };
