@@ -308,7 +308,7 @@ export default function QuizLandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
+            <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
             <span>|</span>
             <a href="#" className="hover:text-foreground transition-colors">Datenschutzerklärung</a>
             <span>|</span>

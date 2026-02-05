@@ -7,12 +7,14 @@ import NotFound from "@/pages/not-found";
 import QuizLandingPage from "@/pages/quiz-landing";
 import VSLPage from "@/pages/vsl";
 import AdminStatsPage from "@/pages/admin-stats";
+import ImpressumPage from "@/pages/impressum";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={QuizLandingPage} />
       <Route path="/vsl" component={VSLPage} />
+      <Route path="/impressum" component={ImpressumPage} />
       <Route path="/admin/stats" component={AdminStatsPage} />
       <Route component={NotFound} />
     </Switch>
