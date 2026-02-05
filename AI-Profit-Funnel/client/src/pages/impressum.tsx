@@ -45,13 +45,6 @@ export default function ImpressumPage() {
             <p>Keine Umsatzsteuer-Identifikationsnummer vorhanden, da Sitz außerhalb der EU.</p>
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:</h2>
-            <p className="font-semibold text-foreground">Florian Benedickt Mehler</p>
-            <p>30 N Gould St Ste N</p>
-            <p>Sheridan, WY 82801</p>
-            <p>USA</p>
-          </div>
         </div>
       </div>
     </div>
