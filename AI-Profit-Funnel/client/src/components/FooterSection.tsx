@@ -16,7 +16,7 @@ export default function FooterSection() {
               Impressum
             </a>
             <a 
-              href="#datenschutz" 
+              href="/datenschutz" 
               className="text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-datenschutz"
             >
