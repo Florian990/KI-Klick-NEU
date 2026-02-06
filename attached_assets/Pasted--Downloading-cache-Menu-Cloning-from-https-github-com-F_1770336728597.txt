@@ -1,0 +1,167 @@
+==> Downloading cache...
+Menu
+==> Cloning from https://github.com/Florian990/ki-klick
+==> Checking out commit 0e8dc1f35f8ff7d8973d9cdce321d05c86c42c2c in branch main
+==> Downloaded 283MB in 2s. Extraction took 6s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install && npm run build'...
+up to date, audited 536 packages in 1s
+74 packages are looking for funding
+  run `npm fund` for details
+13 vulnerabilities (3 low, 6 moderate, 4 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> tsx script/build.ts
+building client...
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 1724 modules transformed.
+x Build failed in 3.13s
+client/src/pages/quiz-landing.tsx (7:9): "useAnalytics" is not exported by "client/src/hooks/useAnalytics.ts", imported by "client/src/pages/quiz-landing.tsx".
+file: /opt/render/project/src/client/src/pages/quiz-landing.tsx:7:9
+5: import DisqualifiedMessage from "@/components/DisqualifiedMessage";
+6: import { useToast } from "@/hooks/use-toast";
+7: import { useAnalytics } from "@/hooks/useAnalytics";
+            ^
+8: import { apiRequest } from "@/lib/queryClient";
+9: import { CheckCircle, ChevronRight, Users, Star, TrendingUp, Clock, Target, Coins, GraduationCap, HeadphonesIcon } fr...
+    at getRollupError (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/parseAst.js:396:41)
+    at error (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/parseAst.js:392:42)
+    at Module.error (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:15588:16)
+    at Module.traceVariable (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:16037:29)
+    at ModuleScope.findVariable (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:13820:39)
+    at FunctionScope.findVariable (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:5283:38)
+    at FunctionBodyScope.findVariable (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:5283:38)
+    at Identifier.bind (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:5066:40)
+    at CallExpression.bind (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:2653:23)
+    at CallExpression.bind (/opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:11284:15) {
+  binding: 'useAnalytics',
+  code: 'MISSING_EXPORT',
+  exporter: '/opt/render/project/src/client/src/hooks/useAnalytics.ts',
+  id: '/opt/render/project/src/client/src/pages/quiz-landing.tsx',
+  url: 'https://rollupjs.org/troubleshooting/#error-name-is-not-exported-by-module',
+  pos: 345,
+  loc: {
+    column: 9,
+    file: '/opt/render/project/src/client/src/pages/quiz-landing.tsx',
+    line: 7
+  },
+  frame: '5: import DisqualifiedMessage from "@/components/DisqualifiedMessage";\n' +
+    '6: import { useToast } from "@/hooks/use-toast";\n' +
+    '7: import { useAnalytics } from "@/hooks/useAnalytics";\n' +
+    '            ^\n' +
+    '8: import { apiRequest } from "@/lib/queryClient";\n' +
+    '9: import { CheckCircle, ChevronRight, Users, Star, TrendingUp, Clock, Target, Coins, GraduationCap, HeadphonesIcon } fr...',
+  watchFiles: [
+    '/opt/render/project/src/client/index.html',
+    '/opt/render/project/src/client/src/main.tsx',
+    '/opt/render/project/src/package.json',
+    '/opt/render/project/src/node_modules/react/jsx-runtime.js',
+    '/opt/render/project/src/node_modules/react-dom/client.js',
+    '/opt/render/project/src/client/src/App.tsx',
+    '/opt/render/project/src/client/src/index.css',
+    '/opt/render/project/src/node_modules/react-dom/index.js',
+    '/opt/render/project/src/node_modules/react/cjs/react-jsx-runtime.production.min.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/index.js',
+    '/opt/render/project/src/node_modules/wouter/esm/index.js',
+    '/opt/render/project/src/client/src/components/ui/toaster.tsx',
+    '/opt/render/project/src/client/src/components/ui/tooltip.tsx',
+    '/opt/render/project/src/client/src/lib/queryClient.ts',
+    '/opt/render/project/src/client/src/pages/not-found.tsx',
+    '/opt/render/project/src/client/src/pages/admin-stats.tsx',
+    '/opt/render/project/src/client/src/pages/quiz-landing.tsx',
+    '/opt/render/project/src/client/src/pages/impressum.tsx',
+    '/opt/render/project/src/client/src/pages/vsl.tsx',
+    '/opt/render/project/src/client/src/pages/datenschutz.tsx',
+    '/opt/render/project/src/node_modules/react/index.js',
+    '/opt/render/project/src/node_modules/react-dom/cjs/react-dom.production.min.js',
+    '/opt/render/project/src/node_modules/@tanstack/query-core/build/modern/index.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/types.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useQueries.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useQuery.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/usePrefetchQuery.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/usePrefetchInfiniteQuery.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/queryOptions.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/infiniteQueryOptions.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useIsFetching.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useMutation.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useMutationState.js',
+    '/opt/render/project/src/node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js',
+    '/opt/render/project/src/client/src/hooks/use-toast.ts',
+    '/opt/render/project/src/client/src/hooks/useAnalytics.ts',
+    '/opt/render/project/src/client/src/lib/utils.ts',
+    '/opt/render/project/src/client/src/components/BenefitsSection.tsx',
+    '/opt/render/project/src/client/src/components/CTASection.tsx',
+    '/opt/render/project/src/client/src/components/ContactFormDialog.tsx',
+    '/opt/render/project/src/client/src/components/DisqualifiedMessage.tsx',
+    '/opt/render/project/src/client/src/components/FooterSection.tsx',
+    '/opt/render/project/src/client/src/components/HeroSection.tsx',
+    '/opt/render/project/src/client/src/components/LeadForm.tsx',
+    '/opt/render/project/src/client/src/components/Quiz.tsx',
+    '/opt/render/project/src/client/src/components/TestimonialsSection.tsx',
+    '/opt/render/project/src/client/src/components/VSLPlayer.tsx',
+    '/opt/render/project/src/client/src/hooks/use-mobile.tsx',
+    '/opt/render/project/src/client/src/pages/landing.tsx',
+    '/opt/render/project/src/client/src/components/examples/BenefitsSectionExample.tsx',
+    '/opt/render/project/src/client/src/components/examples/CTASectionExample.tsx',
+    '/opt/render/project/src/client/src/components/examples/ContactFormDialogExample.tsx',
+    '/opt/render/project/src/client/src/components/examples/FooterSectionExample.tsx',
+    '/opt/render/project/src/client/src/components/examples/HeroSectionExample.tsx',
+    '/opt/render/project/src/client/src/components/examples/TestimonialsSectionExample.tsx',
+    '/opt/render/project/src/client/src/components/examples/VSLPlayerExample.tsx',
+    '/opt/render/project/src/client/src/components/ui/accordion.tsx',
+    '/opt/render/project/src/client/src/components/ui/alert-dialog.tsx',
+    '/opt/render/project/src/client/src/components/ui/alert.tsx',
+    '/opt/render/project/src/client/src/components/ui/aspect-ratio.tsx',
+    '/opt/render/project/src/client/src/components/ui/avatar.tsx',
+    '/opt/render/project/src/client/src/components/ui/badge.tsx',
+    '/opt/render/project/src/client/src/components/ui/breadcrumb.tsx',
+    '/opt/render/project/src/client/src/components/ui/button.tsx',
+    '/opt/render/project/src/client/src/components/ui/calendar.tsx',
+    '/opt/render/project/src/client/src/components/ui/card.tsx',
+    '/opt/render/project/src/client/src/components/ui/carousel.tsx',
+    '/opt/render/project/src/client/src/components/ui/chart.tsx',
+    '/opt/render/project/src/client/src/components/ui/checkbox.tsx',
+    '/opt/render/project/src/client/src/components/ui/collapsible.tsx',
+    '/opt/render/project/src/client/src/components/ui/command.tsx',
+    '/opt/render/project/src/client/src/components/ui/context-menu.tsx',
+    '/opt/render/project/src/client/src/components/ui/dialog.tsx',
+    '/opt/render/project/src/client/src/components/ui/drawer.tsx',
+    '/opt/render/project/src/client/src/components/ui/dropdown-menu.tsx',
+    '/opt/render/project/src/client/src/components/ui/form.tsx',
+    '/opt/render/project/src/client/src/components/ui/hover-card.tsx',
+    '/opt/render/project/src/client/src/components/ui/input-otp.tsx',
+    '/opt/render/project/src/client/src/components/ui/input.tsx',
+    '/opt/render/project/src/client/src/components/ui/label.tsx',
+    '/opt/render/project/src/client/src/components/ui/menubar.tsx',
+    '/opt/render/project/src/client/src/components/ui/navigation-menu.tsx',
+    '/opt/render/project/src/client/src/components/ui/pagination.tsx',
+    '/opt/render/project/src/client/src/components/ui/popover.tsx',
+    '/opt/render/project/src/client/src/components/ui/progress.tsx',
+    '/opt/render/project/src/client/src/components/ui/radio-group.tsx',
+    '/opt/render/project/src/client/src/components/ui/resizable.tsx',
+    '/opt/render/project/src/client/src/components/ui/scroll-area.tsx',
+    '/opt/render/project/src/client/src/components/ui/select.tsx',
+    '/opt/render/project/src/client/src/components/ui/separator.tsx',
+    '/opt/render/project/src/client/src/components/ui/sheet.tsx',
+    '/opt/render/project/src/client/src/components/ui/sidebar.tsx',
+    '/opt/render/project/src/client/src/components/ui/skeleton.tsx',
+    '/opt/render/project/src/client/src/components/ui/slider.tsx',
+    ... 1658 more items
+  ],
+  [Symbol(augmented)]: true
+}
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
