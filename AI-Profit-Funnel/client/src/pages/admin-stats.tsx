@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle, Mail, BarChart3, RefreshCw, Lock } from "lucide-react";
+import { Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle, Mail, BarChart3, RefreshCw, Lock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -135,6 +135,31 @@ export default function AdminStatsPage() {
     setPassword("");
   };
 
+  const handleExportCSV = async () => {
+    const authHeader = getAuthHeader();
+    if (!authHeader) return;
+    
+    try {
+      const response = await fetch('/api/leads/export-csv', {
+        headers: { 'Authorization': authHeader }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'leads-export.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('CSV export failed:', err);
+    }
+  };
+
   const handleFilter = () => {
     fetchStats();
   };
@@ -228,6 +253,14 @@ export default function AdminStatsPage() {
             <p className="text-muted-foreground">Übersicht über Besucher und Quiz-Performance</p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleExportCSV}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Leads CSV
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 

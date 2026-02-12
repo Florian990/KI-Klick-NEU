@@ -159,6 +159,39 @@ export async function registerRoutes(
     }
   });
 
+  // CSV Export: Download all leads as CSV (protected with Basic Auth)
+  app.get("/api/leads/export-csv", basicAuth, async (req, res) => {
+    try {
+      const leads = await storage.getLeads();
+      
+      const csvHeader = "ID,Name,Email,Telefon,UTM Source,UTM Medium,UTM Campaign,UTM Content,UTM Term,Erstellt am\n";
+      const csvRows = leads.map(lead => {
+        const createdAt = lead.createdAt ? new Date(lead.createdAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : '';
+        return [
+          lead.id,
+          `"${(lead.name || '').replace(/"/g, '""')}"`,
+          `"${(lead.email || '').replace(/"/g, '""')}"`,
+          `"${(lead.phone || '').replace(/"/g, '""')}"`,
+          `"${(lead.utmSource || '').replace(/"/g, '""')}"`,
+          `"${(lead.utmMedium || '').replace(/"/g, '""')}"`,
+          `"${(lead.utmCampaign || '').replace(/"/g, '""')}"`,
+          `"${(lead.utmContent || '').replace(/"/g, '""')}"`,
+          `"${(lead.utmTerm || '').replace(/"/g, '""')}"`,
+          `"${createdAt}"`
+        ].join(',');
+      }).join('\n');
+
+      const csv = csvHeader + csvRows;
+      
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="leads-export.csv"');
+      res.send('\uFEFF' + csv);
+    } catch (error) {
+      console.error("Error exporting leads:", error);
+      res.status(500).json({ success: false, message: "Export fehlgeschlagen" });
+    }
+  });
+
   // Analytics: Get stats for date range (protected with Basic Auth)
   app.get("/api/analytics/stats", basicAuth, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
