@@ -9,6 +9,7 @@ import VSLPage from "@/pages/vsl";
 import AdminStatsPage from "@/pages/admin-stats";
 import ImpressumPage from "@/pages/impressum";
 import DatenschutzPage from "@/pages/datenschutz";
+import GarantiePage from "@/pages/garantie";
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/vsl" component={VSLPage} />
       <Route path="/impressum" component={ImpressumPage} />
       <Route path="/datenschutz" component={DatenschutzPage} />
+      <Route path="/garantie" component={GarantiePage} />
       <Route path="/admin/stats" component={AdminStatsPage} />
       <Route component={NotFound} />
     </Switch>
