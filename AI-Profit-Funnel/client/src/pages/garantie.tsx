@@ -1,12 +1,13 @@
 import { ArrowLeft, ShieldCheck, Target, Phone, MessageSquare, Mail, Users, CheckCircle, Clock, Calendar, Handshake } from "lucide-react";
 import { useLocation } from "wouter";
+import FooterSection from "@/components/FooterSection";
 
 export default function GarantiePage() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">
         <button
           onClick={() => setLocation("/")}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
@@ -19,6 +20,7 @@ export default function GarantiePage() {
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
             <ShieldCheck className="h-8 w-8 text-primary" />
           </div>
+          <p className="text-sm sm:text-base font-semibold text-primary tracking-widest uppercase mb-3">Die KI-Klick-Methode</p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
             Deine <span className="text-primary">Erster-Kunde-Garantie</span>
           </h1>
@@ -151,6 +153,7 @@ export default function GarantiePage() {
         </div>
 
       </div>
+      <FooterSection />
     </div>
   );
 }
