@@ -1,6 +1,5 @@
 import { ArrowLeft, ShieldCheck, Target, Phone, MessageSquare, Mail, Users, CheckCircle, Clock, Calendar, Handshake } from "lucide-react";
 import { useLocation } from "wouter";
-import FooterSection from "@/components/FooterSection";
 
 export default function GarantiePage() {
   const [, setLocation] = useLocation();
@@ -153,7 +152,21 @@ export default function GarantiePage() {
         </div>
 
       </div>
-      <FooterSection />
+      <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="mb-4 sm:mb-6">
+            <p className="text-[10px] sm:text-xs text-primary font-medium">© 2026 KI-Klick Methode</p>
+            <p className="text-[10px] sm:text-xs text-primary">Alle Rechte vorbehalten.</p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground">
+            <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
+            <span>|</span>
+            <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutzerklärung</a>
+            <span>|</span>
+            <a href="#" className="hover:text-foreground transition-colors">AGB</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
