@@ -173,13 +173,20 @@ export default function VSLPage() {
       <section className="py-6 sm:py-10 md:py-16 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-6 sm:mb-8 md:mb-10">
-            <p className="text-primary font-medium mb-2 sm:mb-3 text-sm sm:text-base">Exklusives Video-Training</p>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 px-2">
-              Die KI-Klick Methode
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 sm:mb-5 px-2 leading-tight">
+              Wie du dir als Anfänger mit KI, ohne Vorkenntnisse ein seriöses und nachhaltiges Nebeneinkommen aufbauen kannst
             </h1>
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground px-2">
-              Schaue dir jetzt das Video an und erfahre, wie DU dir ein zweites Standbein aufbauen kannst.
+            <p className="text-base sm:text-lg md:text-xl text-primary font-semibold mb-2">
+              Drücke jetzt auf Play
             </p>
+            <p className="text-sm sm:text-base text-muted-foreground mb-3 px-2">
+              Bitte schau dir das Video von Anfang bis Ende an (Dauer 15 min)
+            </p>
+            <div className="inline-block bg-primary/10 border border-primary/30 rounded-lg px-4 py-2">
+              <p className="text-xs sm:text-sm text-primary font-medium">
+                Achtung: Das Video kann bis zu 10 Sek. laden
+              </p>
+            </div>
           </div>
 
           {/* Video Player */}
@@ -246,18 +253,14 @@ export default function VSLPage() {
             )}
           </div>
 
-          {/* Key Points */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
-            {[
-              "Schritt-für-Schritt erklärt",
-              "Sofort umsetzbar",
-              "Kein Vorwissen nötig",
-            ].map((point, index) => (
-              <div key={index} className="flex items-center gap-2 text-foreground text-sm sm:text-base">
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                <span>{point}</span>
-              </div>
-            ))}
+          {/* Warning Text */}
+          <div className="text-center mb-6 sm:mb-8 space-y-3 sm:space-y-4">
+            <p className="text-sm sm:text-base md:text-lg text-primary font-semibold">
+              Achtung: Bitte schau dir zuerst das ganze Video Training an, bevor du dir einen Termin buchst
+            </p>
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Wir möchten nicht mit Menschen sprechen, welche sich ein hohes 4-5 stelliges Einkommen aufbauen wollen aber nicht bereit sind ein kurzes und wertvolles Videotraining anzusehen
+            </p>
           </div>
 
           {/* CTA Button */}
@@ -268,11 +271,8 @@ export default function VSLPage() {
               className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold touch-manipulation active:scale-[0.98] transition-transform"
             >
               <Calendar className="mr-2 h-5 w-5" />
-              Kostenloses Potenzialgespräch
+              Jetzt für einen der begrenzten 10 Plätze bewerben
             </Button>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">
-              Unverbindlich und 100% kostenlos
-            </p>
           </div>
         </div>
       </section>
@@ -337,7 +337,7 @@ export default function VSLPage() {
           className="w-full h-12 text-base font-semibold touch-manipulation active:scale-[0.98] transition-transform"
         >
           <Calendar className="mr-2 h-5 w-5" />
-          Kostenloses Potenzialgespräch
+          Jetzt für 10 Plätze bewerben
         </Button>
       </div>
 
