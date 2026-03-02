@@ -174,7 +174,7 @@ export default function VSLPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-6 sm:mb-8 md:mb-10">
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 sm:mb-5 px-2 leading-tight">
-              Wie du dir als Anfänger mit KI, ohne Vorkenntnisse ein seriöses und nachhaltiges Nebeneinkommen aufbauen kannst
+              Wie du dir als Anfänger mit KI, ohne Vorkenntnisse ein <span className="highlight-strong">seriöses und nachhaltiges Nebeneinkommen</span> aufbauen kannst
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-primary font-semibold mb-2">
               Drücke jetzt auf Play
@@ -197,7 +197,7 @@ export default function VSLPage() {
                 onClick={startVideo}
                 data-testid="button-play-video"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
                 <div className="text-center relative z-10">
                   <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 mx-auto rounded-full bg-primary flex items-center justify-center transition-transform group-hover:scale-110 mb-3 sm:mb-4">
                     <Play className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary-foreground ml-1" />
@@ -281,7 +281,7 @@ export default function VSLPage() {
       <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-6 sm:mb-8 md:mb-10">
-            Das sagen unsere Teilnehmer
+            Das sagen unsere <span className="highlight">Teilnehmer</span>
           </h2>
           
           {/* WhatsApp Screenshots */}
@@ -307,7 +307,7 @@ export default function VSLPage() {
       <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-6 sm:mb-8 md:mb-10">
-            Stell dir vor, dein Handybildschirm sieht bald so aus
+            Stell dir vor, dein Handybildschirm sieht <span className="highlight">bald so aus</span>
           </h2>
           
           {/* Payout Screenshots */}

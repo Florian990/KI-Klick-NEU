@@ -161,7 +161,7 @@ export default function QuizLandingPage() {
           </div>
           
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground leading-tight mb-2 sm:mb-3 px-2">
-            Finde in <span className="text-primary">30 Sekunden</span> heraus, ob du dafür geeignet bist.
+            Finde in <span className="highlight-strong text-primary font-extrabold">30 Sekunden</span> heraus, ob du dafür geeignet bist.
           </h1>
 
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-muted-foreground text-[10px] sm:text-xs md:text-sm">
@@ -220,7 +220,7 @@ export default function QuizLandingPage() {
       <section className="py-10 sm:py-14 md:py-20 px-3 sm:px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-12">
-            Das bekommst du als Partner
+            Das bekommst du als <span className="highlight">Partner</span>
           </h2>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
@@ -254,8 +254,8 @@ export default function QuizLandingPage() {
             </div>
 
             <div className="order-last lg:order-first">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary mb-4 sm:mb-5 text-center lg:text-left">
-                Das System für normale Angestellte
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-5 text-center lg:text-left">
+                Das System für <span className="highlight">normale Angestellte</span>
               </h2>
               <p className="text-sm sm:text-base text-foreground mb-4">
                 Baue dir neben deinem Job ein zweites Einkommen auf. Ohne verkaufen zu müssen oder ein eigenes Business von null zu starten.
@@ -283,7 +283,7 @@ export default function QuizLandingPage() {
       <section className="py-10 sm:py-14 md:py-20 px-3 sm:px-4 bg-muted/30">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-3 sm:mb-4">
-            Bereit für den ersten Schritt?
+            Bereit für den <span className="highlight">ersten Schritt</span>?
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-5 sm:mb-6">
             Finde jetzt heraus, ob das System zu dir passt.
