@@ -227,15 +227,15 @@
 @layer utilities {
 
   .highlight {
-    background: linear-gradient(180deg, transparent 50%, hsl(38 92% 45% / 0.25) 50%);
-    padding: 0 6px;
+    background-color: hsl(38 92% 45% / 0.2);
+    padding: 2px 6px;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
   }
 
   .highlight-strong {
-    background: linear-gradient(180deg, transparent 40%, hsl(38 92% 45% / 0.35) 40%);
-    padding: 0 6px;
+    background-color: hsl(38 92% 45% / 0.3);
+    padding: 2px 6px;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
   }
