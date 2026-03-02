@@ -329,20 +329,9 @@ export default function VSLPage() {
         </div>
       </section>
 
-      {/* Floating CTA for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-sm border-t border-border sm:hidden z-50">
-        <Button
-          size="lg"
-          onClick={openCalendlyPopup}
-          className="w-full h-12 text-base font-semibold touch-manipulation active:scale-[0.98] transition-transform"
-        >
-          <Calendar className="mr-2 h-5 w-5" />
-          Jetzt für 10 Plätze bewerben
-        </Button>
-      </div>
 
       {/* Footer */}
-      <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border pb-20 sm:pb-8">
+      <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
           <div className="mb-4 sm:mb-6">
             <p className="text-[10px] sm:text-xs text-primary font-medium">© 2026 KI-Klick Methode</p>
