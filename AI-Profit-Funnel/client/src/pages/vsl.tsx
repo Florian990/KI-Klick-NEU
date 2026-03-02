@@ -181,7 +181,7 @@ export default function VSLPage() {
             <p className="text-base sm:text-lg md:text-xl text-primary font-semibold mb-2">
               Drücke jetzt auf Play
             </p>
-            <p className="text-sm sm:text-base text-muted-foreground mb-3 px-2">
+            <p className="text-sm sm:text-base text-muted-foreground mb-3 px-2 underline decoration-primary/50 underline-offset-4">
               Bitte schau dir das Video von Anfang bis Ende an (Dauer 15 min)
             </p>
             <div className="inline-block bg-primary/10 border border-primary/30 rounded-lg px-4 py-2">
@@ -260,7 +260,7 @@ export default function VSLPage() {
             <p className="text-sm sm:text-base md:text-lg text-primary font-semibold">
               Achtung: Bitte schau dir zuerst das ganze Video Training an, bevor du dir einen Termin buchst
             </p>
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed underline decoration-primary/50 underline-offset-4">
               Wir möchten nicht mit Menschen sprechen, welche sich ein hohes 4-5 stelliges Einkommen aufbauen wollen aber nicht bereit sind ein kurzes und wertvolles Videotraining anzusehen
             </p>
           </div>
