@@ -228,14 +228,16 @@
 
   .highlight {
     background: linear-gradient(180deg, transparent 50%, hsl(38 92% 45% / 0.25) 50%);
-    padding: 0 4px;
-    display: inline;
+    padding: 0 6px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   .highlight-strong {
     background: linear-gradient(180deg, transparent 40%, hsl(38 92% 45% / 0.35) 40%);
-    padding: 0 4px;
-    display: inline;
+    padding: 0 6px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */

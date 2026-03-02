@@ -173,9 +173,11 @@ export default function VSLPage() {
       <section className="py-6 sm:py-10 md:py-16 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-6 sm:mb-8 md:mb-10">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 sm:mb-5 px-2 leading-tight">
-              Wie du dir als Anfänger mit KI, ohne Vorkenntnisse ein <span className="highlight-strong">seriöses und nachhaltiges Nebeneinkommen</span> aufbauen kannst
-            </h1>
+            <div className="mb-4 sm:mb-5 px-2">
+              <span className="highlight-strong text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-relaxed">
+                Wie du dir als Anfänger mit KI, ohne Vorkenntnisse ein seriöses und nachhaltiges Nebeneinkommen aufbauen kannst
+              </span>
+            </div>
             <p className="text-base sm:text-lg md:text-xl text-primary font-semibold mb-2">
               Drücke jetzt auf Play
             </p>
@@ -280,9 +282,11 @@ export default function VSLPage() {
       {/* WhatsApp Testimonials Section */}
       <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-6 sm:mb-8 md:mb-10">
-            Das sagen unsere <span className="highlight">Teilnehmer</span>
-          </h2>
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <span className="highlight text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed">
+              Das sagen unsere Teilnehmer
+            </span>
+          </div>
           
           {/* WhatsApp Screenshots */}
           <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
@@ -306,9 +310,11 @@ export default function VSLPage() {
       {/* Payout Screens Section */}
       <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-6 sm:mb-8 md:mb-10">
-            Stell dir vor, dein Handybildschirm sieht <span className="highlight">bald so aus</span>
-          </h2>
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <span className="highlight text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed">
+              Stell dir vor, dein Handybildschirm sieht bald so aus
+            </span>
+          </div>
           
           {/* Payout Screenshots */}
           <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4">
