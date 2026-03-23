@@ -32,10 +32,7 @@ Preferred communication style: Simple, everyday language.
 **Design:** Light theme (white background), gold primary color (`38 92% 45%`), text-highlighter effect via `.highlight` and `.highlight-strong` CSS classes.
 
 **Key Components:**
-- `MiniFunnel.tsx` - NEW: 3-question mini-funnel after CTA click (Zeit / Budget / Alter)
-- `Quiz.tsx` - OLD: 7-question quiz (kept but no longer used on homepage)
-- `LeadForm.tsx` - OLD: Lead capture form (kept but no longer used)
-- `DisqualifiedMessage.tsx` - OLD: Disqualification message (kept but no longer used)
+- `MiniFunnel.tsx` - 3-question mini-funnel after CTA click (Zeit / Budget / Alter)
 
 ### Backend Architecture
 - **Framework:** Express.js with TypeScript
