@@ -95,6 +95,8 @@ export default function QuizLandingPage() {
     };
   }, [showVideo]);
 
+  const milestonesFiredRef = useRef<Set<number>>(new Set());
+
   const startProgressTracking = useCallback(() => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
@@ -104,6 +106,16 @@ export default function QuizLandingPage() {
       const current = playerRef.current.getCurrentTime();
       const duration = playerRef.current.getDuration();
       if (!duration || duration <= 0) return;
+
+      const pct = (current / duration) * 100;
+
+      // Fire milestone events exactly once each
+      for (const milestone of [25, 50, 75, 100]) {
+        if (pct >= milestone && !milestonesFiredRef.current.has(milestone)) {
+          milestonesFiredRef.current.add(milestone);
+          trackEvent(`video_${milestone}`);
+        }
+      }
 
       const halfwayPoint = duration * 0.5;
       const remaining = halfwayPoint - current;
@@ -116,7 +128,7 @@ export default function QuizLandingPage() {
         setTimeToUnlock(remaining);
       }
     }, 500);
-  }, []);
+  }, [trackEvent]);
 
   const startSeekProtection = useCallback(() => {
     if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
@@ -189,13 +201,23 @@ export default function QuizLandingPage() {
     }
   };
 
+  const ctaShownTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (ctaUnlocked && !ctaShownTrackedRef.current) {
+      ctaShownTrackedRef.current = true;
+      trackEvent("cta_shown");
+    }
+  }, [ctaUnlocked, trackEvent]);
+
   const startVideo = () => {
     setShowVideo(true);
     trackEvent("video_start");
   };
 
   const handleCtaClick = () => {
-    trackEvent("cta_click_book_appointment");
+    trackEvent("cta_click");
+    trackEvent("funnel_start");
     setShowMiniFunnel(true);
     setTimeout(() => {
       miniFunnelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -368,7 +390,7 @@ export default function QuizLandingPage() {
                   Damit wir sicherstellen, dass wir die richtige Lösung für dich haben.
                 </p>
               </div>
-              <MiniFunnel onComplete={openCalendlyPopup} />
+              <MiniFunnel onComplete={openCalendlyPopup} onTrackEvent={trackEvent} />
             </div>
           )}
         </div>

@@ -49,20 +49,25 @@ const questions: Question[] = [
 
 interface MiniFunnelProps {
   onComplete: () => void;
+  onTrackEvent: (event: string) => void;
 }
 
-export default function MiniFunnel({ onComplete }: MiniFunnelProps) {
+export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps) {
   const [step, setStep] = useState(0);
 
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;
 
   const handleAnswer = (answer: Answer) => {
+    onTrackEvent(`funnel_q${step + 1}`);
+
     if (answer.disqualify) {
+      onTrackEvent("funnel_disqualified");
       window.location.href = DISQ_URL;
       return;
     }
     if (step === questions.length - 1) {
+      onTrackEvent("funnel_qualified");
       onComplete();
       return;
     }

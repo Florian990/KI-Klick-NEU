@@ -222,26 +222,35 @@ export async function registerRoutes(
 
       const leadsInRange = leads.filter(l => l.createdAt >= start && l.createdAt <= end);
 
-      const quizStarted = events.filter(e => e.eventType === 'quiz_start').length;
-      const quizCompleted = events.filter(e => e.eventType === 'quiz_complete').length;
-      const quizDisqualified = events.filter(e => e.eventType === 'quiz_disqualified').length;
-
-      const quizStepCounts: Record<string, number> = {};
-      events.filter(e => e.eventType.startsWith('quiz_step_')).forEach(e => {
-        quizStepCounts[e.eventType] = (quizStepCounts[e.eventType] || 0) + 1;
-      });
+      const count = (type: string) => events.filter(e => e.eventType === type).length;
 
       res.json({
         success: true,
         data: {
+          // Traffic
           totalPageViews: pageViews.length,
           uniqueVisitors,
           returningVisitors,
           newVisitors: uniqueVisitors - returningVisitors,
-          quizStarted,
-          quizCompleted,
-          quizDisqualified,
-          quizStepCounts,
+          // Video
+          videoStart: count('video_start'),
+          video25: count('video_25'),
+          video50: count('video_50'),
+          video75: count('video_75'),
+          video100: count('video_100'),
+          // CTA
+          ctaShown: count('cta_shown'),
+          ctaClick: count('cta_click'),
+          // Funnel
+          funnelStart: count('funnel_start'),
+          funnelQ1: count('funnel_q1'),
+          funnelQ2: count('funnel_q2'),
+          funnelQ3: count('funnel_q3'),
+          funnelDisqualified: count('funnel_disqualified'),
+          funnelQualified: count('funnel_qualified'),
+          // Sales
+          calendlyOpen: count('calendly_open'),
+          // Legacy support
           leadsGenerated: leadsInRange.length,
         }
       });
