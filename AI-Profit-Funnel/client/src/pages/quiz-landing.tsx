@@ -409,13 +409,15 @@ export default function QuizLandingPage() {
             </div>
             {/* Right: Portrait */}
             <div className="flex-shrink-0 flex flex-col items-center gap-3">
-              <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-amber-300">
-                <img
-                  src="/assets/florian-mehler.png"
-                  alt="Florian Mehler"
-                  className="w-full h-full object-cover object-right"
-                />
-              </div>
+              <div
+                className="w-52 h-52 sm:w-64 sm:h-64 rounded-full border-4 border-amber-300"
+                style={{
+                  backgroundImage: "url('/assets/florian-mehler.png')",
+                  backgroundSize: "560%",
+                  backgroundPosition: "95% 38%",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
               <div className="text-center">
                 <p className="font-bold text-foreground">Florian Mehler</p>
                 <p className="text-sm text-muted-foreground">Gründer der KI-Klick Methode</p>
