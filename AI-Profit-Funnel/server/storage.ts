@@ -17,6 +17,7 @@ export interface IStorage {
   getAnalyticsEvents(startDate: Date, endDate: Date): Promise<AnalyticsEvent[]>;
   getUniqueVisitors(startDate: Date, endDate: Date): Promise<number>;
   getReturningVisitors(startDate: Date, endDate: Date): Promise<number>;
+  clearAllAnalyticsData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -120,6 +121,11 @@ export class DatabaseStorage implements IStorage {
     ).groupBy(pageViews.visitorId);
     
     return result.filter(r => Number(r.count) > 1).length;
+  }
+
+  async clearAllAnalyticsData(): Promise<void> {
+    await db.delete(analyticsEvents);
+    await db.delete(pageViews);
   }
 }
 

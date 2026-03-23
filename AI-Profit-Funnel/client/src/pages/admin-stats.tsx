@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle,
   RefreshCw, Lock, Download, Eye, MousePointer, TrendingUp, PhoneCall,
-  ChevronRight, BarChart3
+  ChevronRight, BarChart3, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,6 +118,7 @@ export default function AdminStatsPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const today = new Date();
   const [startDate, setStartDate] = useState(() => {
@@ -200,6 +201,34 @@ export default function AdminStatsPage() {
     setStats(null);
     setUsername("");
     setPassword("");
+  };
+
+  const handleReset = async () => {
+    const confirmed = window.confirm(
+      "⚠️ ACHTUNG: Alle Tracking-Daten (Seitenaufrufe + Events) werden unwiderruflich gelöscht. Leads bleiben erhalten.\n\nWirklich zurücksetzen?"
+    );
+    if (!confirmed) return;
+    const authHeader = getAuthHeader();
+    if (!authHeader) return;
+    setIsResetting(true);
+    try {
+      const res = await fetch("/api/analytics/reset", {
+        method: "DELETE",
+        headers: { Authorization: authHeader },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStats(null);
+        alert("✅ Alle Tracking-Daten wurden erfolgreich gelöscht.");
+        fetchStats();
+      } else {
+        alert("Fehler beim Zurücksetzen: " + data.message);
+      }
+    } catch {
+      alert("Verbindungsfehler");
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const handleExportCSV = async () => {
@@ -298,6 +327,16 @@ export default function AdminStatsPage() {
             <Button variant="outline" size="sm" onClick={() => fetchStats()} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
               Aktualisieren
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              disabled={isResetting}
+              className="text-destructive border-destructive/40 hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isResetting ? "Wird gelöscht..." : "Daten zurücksetzen"}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               Abmelden

@@ -260,5 +260,16 @@ export async function registerRoutes(
     }
   });
 
+  // Reset all analytics data (protected with Basic Auth)
+  app.delete("/api/analytics/reset", basicAuth, async (req, res) => {
+    try {
+      await storage.clearAllAnalyticsData();
+      res.json({ success: true, message: "Alle Tracking-Daten wurden gelöscht." });
+    } catch (error) {
+      console.error("Error resetting analytics:", error);
+      res.status(500).json({ success: false, message: "Fehler beim Zurücksetzen" });
+    }
+  });
+
   return httpServer;
 }
