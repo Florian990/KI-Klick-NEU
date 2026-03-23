@@ -527,8 +527,6 @@ export default function QuizLandingPage() {
             <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
             <span>|</span>
             <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutzerklärung</a>
-            <span>|</span>
-            <a href="#" className="hover:text-foreground transition-colors">AGB</a>
           </div>
         </div>
       </footer>
