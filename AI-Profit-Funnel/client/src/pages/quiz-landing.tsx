@@ -374,6 +374,57 @@ export default function QuizLandingPage() {
         </div>
       </section>
 
+      {/* Das System Section */}
+      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+            {/* Left: Text */}
+            <div className="flex-1">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 leading-relaxed">
+                <span className="highlight">Das System für normale</span>
+                <br />
+                <span className="highlight">Angestellte</span>
+              </h2>
+              <p className="text-base text-muted-foreground mb-6">
+                Baue dir neben deinem Job ein zweites Einkommen auf. Ohne verkaufen zu müssen oder ein eigenes Business von null zu starten.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  "Keine Vorerfahrung nötig",
+                  "Nur 1-2h Zeitaufwand pro Tag",
+                  "Von überall aus möglich",
+                  "Neben dem Job machbar",
+                  "Ohne dein Gesicht zu zeigen",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-foreground">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    <span className="text-sm sm:text-base">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Right: Portrait */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-3">
+              <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-amber-300">
+                <img
+                  src="/assets/florian-mehler.png"
+                  alt="Florian Mehler"
+                  className="w-full h-full object-cover object-right"
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-bold text-foreground">Florian Mehler</p>
+                <p className="text-sm text-muted-foreground">Gründer der KI-Klick Methode</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* WhatsApp Testimonials Section */}
       <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
