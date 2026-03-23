@@ -226,6 +226,15 @@
  */
 @layer utilities {
 
+  @keyframes cta-blink {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(38 92% 45% / 0.7); }
+    50% { box-shadow: 0 0 0 12px hsl(38 92% 45% / 0); }
+  }
+
+  .cta-blink {
+    animation: cta-blink 1.4s ease-in-out infinite;
+  }
+
   .highlight {
     background-color: hsl(38 92% 45% / 0.2);
     padding: 0 4px;

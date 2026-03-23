@@ -1,13 +1,18 @@
-# KI-Lizenzpartner Quiz Funnel
+# KI-Klick Methode – VSL-first Funnel
 
 ## Overview
 
-A German-language lead generation quiz funnel for AI license partnerships. The application qualifies leads through a multi-step quiz before collecting contact information and redirecting to a Video Sales Letter (VSL) page.
+A German-language VSL-first lead generation funnel for AI license partnerships. The application shows a video first, unlocks a booking CTA after 50% watch-time, then qualifies leads through a 3-question mini-funnel before opening a Calendly booking popup.
 
-**Purpose:** Convert Meta Ads traffic into qualified leads for an AI license partner program by:
-1. Qualifying visitors through a 5-question quiz with disqualification logic
-2. Collecting Name + Email from qualified leads
-3. Redirecting to VSL page with video content and booking CTA
+**Purpose:** Convert Meta Ads traffic into qualified Calendly appointments by:
+1. Showing the VSL video on the homepage (YouTube embed with seek protection)
+2. Unlocking the "Jetzt Termin buchen" CTA after 50% of video is watched (with countdown timer)
+3. Qualifying leads through a 3-question mini-funnel (disqualify on wrong answers)
+4. Opening Calendly popup directly after passing all 3 questions
+
+**Funnel Flow:**
+- `/` - Homepage: Headline → Video → Timer → CTA (unlocks at 50%) → Mini-Funnel → Calendly popup
+- `/vsl` - Legacy VSL page (kept for backwards compatibility, not actively linked)
 
 **Target Audience:** German-speaking professionals interested in earning commissions through AI product sales.
 
@@ -21,19 +26,16 @@ Preferred communication style: Simple, everyday language.
 - **Framework:** React 18 with TypeScript
 - **Routing:** Wouter (lightweight client-side router)
 - **State Management:** TanStack React Query for server state, React useState for local UI state
-- **Styling:** Tailwind CSS with shadcn/ui component library (New York style, dark theme with gold/amber accents)
-- **Forms:** React Hook Form with Zod validation
+- **Styling:** Tailwind CSS with shadcn/ui component library (New York style, light theme with gold/amber accents)
 - **Build Tool:** Vite
 
-**Design Pattern:** Quiz funnel with progressive disclosure:
-- `/` - Quiz landing page with hero, multi-step quiz, and lead capture form
-- `/vsl` - Video sales letter page with application form
+**Design:** Light theme (white background), gold primary color (`38 92% 45%`), text-highlighter effect via `.highlight` and `.highlight-strong` CSS classes.
 
 **Key Components:**
-- `Quiz.tsx` - Multi-step qualification quiz with progress bar and disqualification handling
-- `LeadForm.tsx` - Simple Name + Email capture after quiz completion
-- `DisqualifiedMessage.tsx` - Shown when user selects disqualifying answers
-- `VSLPlayer.tsx` - Video player component using react-player
+- `MiniFunnel.tsx` - NEW: 3-question mini-funnel after CTA click (Zeit / Budget / Alter)
+- `Quiz.tsx` - OLD: 7-question quiz (kept but no longer used on homepage)
+- `LeadForm.tsx` - OLD: Lead capture form (kept but no longer used)
+- `DisqualifiedMessage.tsx` - OLD: Disqualification message (kept but no longer used)
 
 ### Backend Architecture
 - **Framework:** Express.js with TypeScript
