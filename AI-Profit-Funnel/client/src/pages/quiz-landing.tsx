@@ -202,12 +202,14 @@ export default function QuizLandingPage() {
     }, 100);
   };
 
+  const CALENDLY_URL = "https://calendly.com/florianbenedict/kostenloses-potenzialgesprach";
+
   const openCalendlyPopup = () => {
     trackEvent("calendly_open");
     if (window.Calendly) {
-      window.Calendly.initPopupWidget({
-        url: "https://calendly.com/florianbenedict/kostenloses-potenzialgesprach",
-      });
+      window.Calendly.initPopupWidget({ url: CALENDLY_URL });
+    } else {
+      window.open(CALENDLY_URL, "_blank");
     }
   };
 

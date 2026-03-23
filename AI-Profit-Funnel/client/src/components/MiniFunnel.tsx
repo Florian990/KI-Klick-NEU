@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, X, ChevronLeft, Calendar } from "lucide-react";
+import { Check, X, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
