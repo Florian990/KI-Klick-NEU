@@ -6,6 +6,7 @@ packages = ["unzip"]
 [agent]
 expertMode = true
 integrations = ["resend:1.0.0"]
+stack = "BEST_EFFORT_FALLBACK"
 
 [workflows]
 runButton = "Project"
