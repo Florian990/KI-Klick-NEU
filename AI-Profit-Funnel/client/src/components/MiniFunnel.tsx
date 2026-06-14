@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-
-const DISQ_URL = "https://www.digistore24.com/redir/454379/Florianbenedict/disq";
 
 interface Answer {
   text: string;
@@ -83,6 +81,7 @@ interface MiniFunnelProps {
 export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [disqualified, setDisqualified] = useState(false);
 
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;
@@ -92,7 +91,7 @@ export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps
 
     if (answer.disqualify) {
       onTrackEvent("funnel_disqualified");
-      window.location.href = DISQ_URL;
+      setDisqualified(true);
       return;
     }
 
@@ -110,6 +109,27 @@ export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps
   const handleBack = () => {
     if (step > 0) setStep((prev) => prev - 1);
   };
+
+  if (disqualified) {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-6 sm:py-8">
+        <div className="flex justify-center mb-5">
+          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-red-500/10 flex items-center justify-center">
+            <XCircle className="h-9 w-9 sm:h-11 sm:w-11 text-red-500" />
+          </div>
+        </div>
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3 leading-tight">
+          Die KI-Klick Methode ist leider nicht geeignet für dich
+        </h2>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed mb-6">
+          Basierend auf deinen Antworten passt die KI-Klick Methode aktuell nicht zu deiner Situation. Wir möchten nur mit Menschen arbeiten, bei denen wir auch wirklich Ergebnisse garantieren können.
+        </p>
+        <div className="inline-block bg-muted/60 border border-border rounded-xl px-5 py-4 text-sm text-muted-foreground">
+          Vielleicht ist der Zeitpunkt zu einem späteren Zeitpunkt besser. Wir wünschen dir alles Gute! 🙏
+        </div>
+      </div>
+    );
+  }
 
   const cols =
     currentQuestion.answers.length >= 5
