@@ -27,11 +27,28 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  
+
+  // Zapier proxy — forwards quiz answers server-side to avoid CORS
+  app.post("/api/quiz-complete", async (req, res) => {
+    try {
+      const response = await fetch(ZAPIER_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(req.body),
+      });
+      return res.status(response.ok ? 200 : 502).json({ success: response.ok });
+    } catch (err) {
+      console.error("Zapier webhook error:", err);
+      return res.status(502).json({ success: false });
+    }
+  });
+
   // Lead capture endpoint
   app.post("/api/leads", async (req, res) => {
     try {

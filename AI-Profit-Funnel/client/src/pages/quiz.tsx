@@ -12,7 +12,7 @@ export default function QuizPage() {
   }, []);
 
   const handleComplete = (answers: Record<number, string>) => {
-    fetch("https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/", {
+    fetch("/api/quiz-complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
