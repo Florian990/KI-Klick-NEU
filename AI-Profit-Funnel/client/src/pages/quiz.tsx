@@ -11,20 +11,30 @@ export default function QuizPage() {
     trackPageView("/quiz");
   }, []);
 
-  const handleComplete = (answers: Record<number, string>) => {
-    fetch("/api/quiz-complete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        frage_1_alter: answers[1] ?? "",
-        frage_2_situation: answers[2] ?? "",
-        frage_3_ziel: answers[3] ?? "",
-        frage_4_finanzielles_ziel: answers[4] ?? "",
-        frage_5_zeitaufwand: answers[5] ?? "",
-        quelle: "KI-Klick Methode Quiz",
-        timestamp: new Date().toISOString(),
-      }),
-    }).catch(() => {});
+  const handleComplete = async (answers: Record<number, string>) => {
+    const payload = JSON.stringify({
+      frage_1_alter: answers[1] ?? "",
+      frage_2_situation: answers[2] ?? "",
+      frage_3_ziel: answers[3] ?? "",
+      frage_4_finanzielles_ziel: answers[4] ?? "",
+      frage_5_zeitaufwand: answers[5] ?? "",
+      quelle: "KI-Klick Methode Quiz",
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      await fetch("/api/quiz-complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      });
+    } catch {
+      navigator.sendBeacon(
+        "/api/quiz-complete",
+        new Blob([payload], { type: "application/json" })
+      );
+    }
+
     navigate("/thankyou");
   };
 
