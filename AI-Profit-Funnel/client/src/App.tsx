@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import QuizLandingPage from "@/pages/quiz-landing";
+import QuizPage from "@/pages/quiz";
+import ThankYouPage from "@/pages/thankyou";
 import AdminStatsPage from "@/pages/admin-stats";
 import ImpressumPage from "@/pages/impressum";
 import DatenschutzPage from "@/pages/datenschutz";
@@ -14,6 +16,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={QuizLandingPage} />
+      <Route path="/quiz" component={QuizPage} />
+      <Route path="/thankyou" component={ThankYouPage} />
       <Route path="/impressum" component={ImpressumPage} />
       <Route path="/datenschutz" component={DatenschutzPage} />
       <Route path="/garantie" component={GarantiePage} />
