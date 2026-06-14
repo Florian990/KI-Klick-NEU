@@ -11,7 +11,20 @@ export default function QuizPage() {
     trackPageView("/quiz");
   }, []);
 
-  const handleComplete = (_answers: Record<number, string>) => {
+  const handleComplete = (answers: Record<number, string>) => {
+    fetch("https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        frage_1_alter: answers[1] ?? "",
+        frage_2_situation: answers[2] ?? "",
+        frage_3_ziel: answers[3] ?? "",
+        frage_4_finanzielles_ziel: answers[4] ?? "",
+        frage_5_zeitaufwand: answers[5] ?? "",
+        quelle: "KI-Klick Methode Quiz",
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {});
     navigate("/thankyou");
   };
 

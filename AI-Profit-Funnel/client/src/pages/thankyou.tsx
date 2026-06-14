@@ -2,6 +2,26 @@ import { useEffect } from "react";
 import { CheckCircle, Star } from "lucide-react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
+declare namespace JSX {
+  interface IntrinsicElements {
+    "close-form": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { id?: string }, HTMLElement>;
+  }
+}
+
+function CloseForm() {
+  useEffect(() => {
+    if (document.querySelector('script[src*="closeiocdn.com"]')) return;
+    const script = document.createElement("script");
+    script.src = "https://webforms.closeiocdn.com/webforms.js";
+    script.type = "module";
+    script.crossOrigin = "anonymous";
+    script.defer = true;
+    document.head.appendChild(script);
+  }, []);
+
+  return <close-form id="form_033YOL9ssAohiPddd1DgOk" />;
+}
+
 const TESTIMONIAL_IMAGES = [
   "/assets/testimonial2.png",
   "/assets/testimonial3.png",
@@ -90,13 +110,7 @@ export default function ThankYouPage() {
               <p className="text-sm text-muted-foreground">100% kostenlos & unverbindlich</p>
             </div>
 
-            {/* ⬇️ HIER KOMMT EUER CRM-FORMULAR-CODE ⬇️ */}
-            <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 text-center bg-primary/5">
-              <div className="text-3xl mb-3">📋</div>
-              <p className="font-semibold text-foreground mb-1">CRM-Formular Platzhalter</p>
-              <p className="text-sm text-muted-foreground">Fügt hier euren CRM-Formular-Code ein</p>
-            </div>
-            {/* ⬆️ ENDE CRM-FORMULAR-CODE ⬆️ */}
+            <CloseForm />
 
             <div className="mt-5 flex flex-col gap-2">
               {[
