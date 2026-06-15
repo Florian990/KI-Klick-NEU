@@ -77,6 +77,13 @@ const PAYOUT_IMAGES = [
   "/assets/testimonial7.jpeg",
 ];
 
+// YouTube Video-Testimonials — hier einfach die Video-IDs eintragen.
+// Aus einem Link wie https://www.youtube.com/watch?v=ABC123  →  "ABC123"
+// Aus einem Short  https://www.youtube.com/shorts/XYZ789      →  "XYZ789"
+const YOUTUBE_TESTIMONIALS: { id: string; name?: string }[] = [
+  // { id: "ABC123", name: "Max M." },
+];
+
 function StarRow({ count = 5 }: { count?: number }) {
   return (
     <div className="flex gap-0.5">
@@ -175,7 +182,78 @@ export default function ThankYouPage() {
         {/* ── SOCIAL PROOF ── */}
         <div className="max-w-4xl mx-auto">
 
-          {/* Section header */}
+          {/* ── 1. WhatsApp Proof ── */}
+          <div className="text-center mb-5 sm:mb-8">
+            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">WhatsApp Nachrichten unserer Teilnehmer</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
+              Lass uns gemeinsam deine Erfolgsgeschichte schreiben
+            </h2>
+          </div>
+          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
+            {WHATSAPP_IMAGES.map((src, i) => (
+              <div key={i} className="break-inside-avoid">
+                <img src={src} alt={`WhatsApp Feedback ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
+              </div>
+            ))}
+          </div>
+
+          {/* ── 2. Payout screenshots ── */}
+          <div className="text-center mb-5 sm:mb-8">
+            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Echte Auszahlungen</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
+              Stell dir vor, dein Handy sieht bald so aus 💰
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2">Neben dem Job — ohne Vorkenntnisse</p>
+          </div>
+          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
+            {PAYOUT_IMAGES.map((src, i) => (
+              <div key={i} className="break-inside-avoid">
+                <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
+              </div>
+            ))}
+          </div>
+
+          {/* ── 3. YouTube Video-Testimonials ── */}
+          {YOUTUBE_TESTIMONIALS.length > 0 && (
+            <>
+              <div className="text-center mb-5 sm:mb-8">
+                <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Video-Testimonials</p>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
+                  Resultate lügen nicht
+                </h2>
+                <p className="text-sm text-muted-foreground mt-2">Echte Teilnehmer erzählen von ihren Ergebnissen</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-12 sm:mb-16">
+                {YOUTUBE_TESTIMONIALS.map((video, i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                    <div className="relative aspect-video bg-black">
+                      <iframe
+                        className="absolute inset-0 w-full h-full"
+                        src={`https://www.youtube-nocookie.com/embed/${video.id}`}
+                        title={video.name ? `Testimonial ${video.name}` : `Video-Testimonial ${i + 1}`}
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        loading="lazy"
+                      />
+                    </div>
+                    {video.name && (
+                      <div className="flex items-center justify-between px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm">
+                            {video.name.charAt(0)}
+                          </div>
+                          <p className="font-semibold text-foreground text-sm">{video.name}</p>
+                        </div>
+                        <StarRow count={5} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* ── 4. Text Reviews ── */}
           <div className="text-center mb-7 sm:mb-9">
             <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Echte Ergebnisse · Echte Menschen</p>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
@@ -185,9 +263,7 @@ export default function ThankYouPage() {
               aus 350+ glücklichen Kunden
             </p>
           </div>
-
-          {/* Text Reviews with highlight badges */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-12 sm:mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {TEXT_REVIEWS.map((review, i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-sm flex flex-col gap-3">
                 <div className="inline-flex">
@@ -211,37 +287,6 @@ export default function ThankYouPage() {
                   </div>
                   <StarRow count={review.stars} />
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* WhatsApp Proof */}
-          <div className="text-center mb-5 sm:mb-8">
-            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">WhatsApp Nachrichten unserer Teilnehmer</p>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
-              Lass uns gemeinsam deine Erfolgsgeschichte schreiben
-            </h2>
-          </div>
-          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
-            {WHATSAPP_IMAGES.map((src, i) => (
-              <div key={i} className="break-inside-avoid">
-                <img src={src} alt={`WhatsApp Feedback ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
-              </div>
-            ))}
-          </div>
-
-          {/* Payout screenshots */}
-          <div className="text-center mb-5 sm:mb-8">
-            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Echte Auszahlungen</p>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
-              Stell dir vor, dein Handy sieht bald so aus 💰
-            </h2>
-            <p className="text-sm text-muted-foreground mt-2">Neben dem Job — ohne Vorkenntnisse</p>
-          </div>
-          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12">
-            {PAYOUT_IMAGES.map((src, i) => (
-              <div key={i} className="break-inside-avoid">
-                <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
               </div>
             ))}
           </div>
