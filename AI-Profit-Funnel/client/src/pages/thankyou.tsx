@@ -51,7 +51,6 @@ const WHATSAPP_IMAGES = [
   "/assets/testimonial2.png",
   "/assets/testimonial3.png",
   "/assets/testimonial5.jpeg",
-  "/assets/testimonial4.jpeg",
 ];
 
 const PAYOUT_IMAGES = [
@@ -187,17 +186,6 @@ export default function ThankYouPage() {
                 <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
               </div>
             ))}
-          </div>
-
-          {/* Final reassurance */}
-          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 sm:p-8 text-center mb-8">
-            <div className="text-3xl mb-3">📞</div>
-            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
-              Wir melden uns persönlich bei dir!
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Unser Team schaut sich deine Antworten an und ruft dich <strong className="text-foreground">innerhalb von 24 Stunden</strong> an — per WhatsApp oder Telefon. Kein Skript, kein Druck. Nur ein echtes Gespräch.
-            </p>
           </div>
 
         </div>
