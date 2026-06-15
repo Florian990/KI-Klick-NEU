@@ -37,18 +37,32 @@ export async function registerRoutes(
   // Zapier proxy — forwards quiz answers + contact data server-side to avoid CORS
   app.post("/api/quiz-complete", async (req, res) => {
     try {
-      // Also save lead to DB
-      const { name, email, phone } = req.body;
+      const { name, email, phone, answers } = req.body;
+
+      // Save lead to DB
       if (name || email || phone) {
         try {
           await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
         } catch {}
       }
-      const response = await fetch(ZAPIER_WEBHOOK_URL, {
+
+      // Forward to Zapier (Close CRM)
+      const zapierPromise = fetch(ZAPIER_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(req.body),
       });
+
+      // Send email notification independently — never blocks or breaks the main flow
+      sendLeadNotification({
+        name: name || "Unbekannt",
+        email: email || null,
+        phone: phone || null,
+        source: "Quiz Funnel (Vollständig)",
+        quizAnswers: answers,
+      }).catch((err) => console.error("Email notification error:", err));
+
+      const response = await zapierPromise;
       return res.status(response.ok ? 200 : 502).json({ success: response.ok });
     } catch (err) {
       console.error("Zapier webhook error:", err);

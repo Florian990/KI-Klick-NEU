@@ -24,13 +24,11 @@ interface LeadData {
 }
 
 const questionTexts: { [key: number]: string } = {
-  1: "Was ist dein aktueller Beruf?",
-  2: "Bist du mit deiner aktuellen Situation zufrieden?",
-  3: "Wie alt bist du?",
-  4: "Wie viel Zeit hast du am Tag?",
-  5: "High Income Skill bewusst?",
-  6: "Was ist dir am Wichtigsten?",
-  7: "Garantie - Bereit das System zu nutzen?"
+  1: "Wie alt bist du?",
+  2: "Was ist deine aktuelle Situation?",
+  3: "Was möchtest du mit der KI-Klick Methode erreichen?",
+  4: "Was ist dein finanzielles Ziel pro Monat?",
+  5: "Wie viel Zeit kannst du täglich investieren?",
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {
