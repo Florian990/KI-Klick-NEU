@@ -72,7 +72,7 @@ Automatisch gesendet von deinem KI-Klick Methode Funnel
 
     const result = await client.emails.send({
       from: 'KI-Klick Methode <onboarding@resend.dev>',
-      to: 'ki.klick.methode@gmail.com',
+      to: 'agenturmehler@gmail.com',
       subject: `🎯 Neuer Lead: ${lead.name}`,
       text: emailContent,
     });
