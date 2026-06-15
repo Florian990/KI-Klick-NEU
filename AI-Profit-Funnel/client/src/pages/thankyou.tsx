@@ -81,7 +81,8 @@ const PAYOUT_IMAGES = [
 // Aus einem Link wie https://www.youtube.com/watch?v=ABC123  →  "ABC123"
 // Aus einem Short  https://www.youtube.com/shorts/XYZ789      →  "XYZ789"
 const YOUTUBE_TESTIMONIALS: { id: string; name?: string }[] = [
-  // { id: "ABC123", name: "Max M." },
+  { id: "n3f7cc5d0qo" },
+  { id: "q6q_x_SVbT8" },
 ];
 
 function StarRow({ count = 5 }: { count?: number }) {
@@ -189,10 +190,10 @@ export default function ThankYouPage() {
               Lass uns gemeinsam deine Erfolgsgeschichte schreiben
             </h2>
           </div>
-          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 mb-12 sm:mb-16 max-w-3xl mx-auto">
             {WHATSAPP_IMAGES.map((src, i) => (
-              <div key={i} className="break-inside-avoid">
-                <img src={src} alt={`WhatsApp Feedback ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
+              <div key={i} className="bg-card border border-border rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-md">
+                <img src={src} alt={`WhatsApp Feedback ${i + 1}`} className="w-full h-auto rounded-lg" />
               </div>
             ))}
           </div>
@@ -205,10 +206,10 @@ export default function ThankYouPage() {
             </h2>
             <p className="text-sm text-muted-foreground mt-2">Neben dem Job — ohne Vorkenntnisse</p>
           </div>
-          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 mb-12 sm:mb-16 max-w-3xl mx-auto">
             {PAYOUT_IMAGES.map((src, i) => (
-              <div key={i} className="break-inside-avoid">
-                <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
+              <div key={i} className="bg-card border border-border rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-md">
+                <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg" />
               </div>
             ))}
           </div>
@@ -223,10 +224,10 @@ export default function ThankYouPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-2">Echte Teilnehmer erzählen von ihren Ergebnissen</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-12 sm:mb-16">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-6 mb-12 sm:mb-16">
                 {YOUTUBE_TESTIMONIALS.map((video, i) => (
-                  <div key={i} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-                    <div className="relative aspect-video bg-black">
+                  <div key={i} className="w-full max-w-[300px] bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+                    <div className="relative aspect-[9/16] bg-black">
                       <iframe
                         className="absolute inset-0 w-full h-full"
                         src={`https://www.youtube-nocookie.com/embed/${video.id}`}
