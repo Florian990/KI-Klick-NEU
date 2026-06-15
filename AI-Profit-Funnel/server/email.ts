@@ -7,7 +7,7 @@ function getResendClient() {
   }
   return {
     client: new Resend(apiKey),
-    fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@geheime-ki-klickmethode.de'
+    fromEmail: 'KI-Klick Methode <onboarding@resend.dev>',
   };
 }
 
@@ -71,9 +71,9 @@ Automatisch gesendet von deinem KI-Klick Methode Funnel
     `.trim();
 
     const result = await client.emails.send({
-      from: fromEmail || 'onboarding@resend.dev',
-      to: 'ki-klick-leads@web.de',
-      subject: `Neuer Lead: ${lead.name}`,
+      from: 'KI-Klick Methode <onboarding@resend.dev>',
+      to: 'ki.klick.methode@gmail.com',
+      subject: `🎯 Neuer Lead: ${lead.name}`,
       text: emailContent,
     });
 
