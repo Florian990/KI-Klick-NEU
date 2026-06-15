@@ -107,7 +107,7 @@ const CONTACT_STEPS = [
     placeholder: "max@beispiel.de",
     type: "email",
     hint: null,
-    buttonLabel: "Jetzt kostenloses Gespräch sichern 🚀",
+    buttonLabel: "Ja, ich will starten — kostenlos & unverbindlich →",
   },
 ];
 

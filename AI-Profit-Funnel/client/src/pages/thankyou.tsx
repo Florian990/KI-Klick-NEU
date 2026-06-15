@@ -1,74 +1,74 @@
 import { useEffect } from "react";
-import { CheckCircle, Star } from "lucide-react";
+import { CheckCircle, Star, Quote } from "lucide-react";
 import { useAnalytics } from "@/hooks/useAnalytics";
-
-declare namespace JSX {
-  interface IntrinsicElements {
-    "close-form": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { id?: string }, HTMLElement>;
-  }
-}
-
-function CloseForm() {
-  useEffect(() => {
-    if (document.querySelector('script[src*="closeiocdn.com"]')) return;
-    const script = document.createElement("script");
-    script.src = "https://webforms.closeiocdn.com/webforms.js";
-    script.type = "module";
-    script.crossOrigin = "anonymous";
-    script.defer = true;
-    document.head.appendChild(script);
-  }, []);
-
-  return <close-form id="form_033YOL9ssAohiPddd1DgOk" />;
-}
-
-const TESTIMONIAL_IMAGES = [
-  "/assets/testimonial2.png",
-  "/assets/testimonial3.png",
-  "/assets/testimonial5.jpeg",
-  "/assets/testimonial1.jpeg",
-  "/assets/testimonial6.jpeg",
-  "/assets/testimonial7.jpeg",
-];
 
 const TEXT_REVIEWS = [
   {
-    name: "Marco B.",
+    name: "Dennis W.",
     stars: 5,
-    date: "vor 2 Wochen",
-    text: "Ich war ehrlich gesagt skeptisch am Anfang. Aber nach den ersten 3 Wochen hatte ich meinen ersten Auftrag und 800 € auf dem Konto. Das System ist wirklich simpel und nachvollziehbar erklärt.",
+    date: "vor 2 Monaten",
+    highlight: "2.300 € im ersten vollen Monat",
+    text: "2.300 € im ersten vollen Monat. Neben meinem 40h Job. Ich habe nicht geglaubt, dass das realistisch ist. War es aber. Die Community und der Support machen den Unterschied.",
   },
   {
     name: "Sabrina K.",
     stars: 5,
     date: "vor 1 Monat",
+    highlight: "1.400 € Zusatzeinnahmen nach 6 Wochen",
     text: "Als Vollzeit-Angestellte dachte ich, ich hätte keine Zeit dafür. Falsch gedacht. Morgens 1 Stunde vor der Arbeit — nach 6 Wochen: 1.400 € Zusatzeinnahmen. Mein Mann kann es nicht glauben.",
+  },
+  {
+    name: "Marco B.",
+    stars: 5,
+    date: "vor 2 Wochen",
+    highlight: "Erste 800 € nach nur 3 Wochen",
+    text: "Ich war ehrlich gesagt skeptisch am Anfang. Aber nach den ersten 3 Wochen hatte ich meinen ersten Auftrag und 800 € auf dem Konto. Das System ist wirklich simpel und nachvollziehbar erklärt.",
   },
   {
     name: "Tobias H.",
     stars: 5,
     date: "vor 3 Wochen",
+    highlight: "Erste Ergebnisse bereits in Woche 2",
     text: "Florian erklärt alles Schritt für Schritt. Keine technischen Vorkenntnisse nötig. Ich habe 0 Ahnung von KI gehabt und trotzdem in Woche 2 die ersten Ergebnisse gesehen.",
   },
   {
     name: "Melanie R.",
     stars: 5,
     date: "vor 5 Tagen",
+    highlight: "Kein Druck — kein einziges Mal bereut",
     text: "Das Gespräch war super angenehm, kein Druck, kein Verkaufsgespräch. Man merkt, dass es wirklich darum geht, ob es zu einem passt. Ich bin jetzt seit 5 Wochen dabei — kein einziges Mal bereut.",
-  },
-  {
-    name: "Dennis W.",
-    stars: 5,
-    date: "vor 2 Monaten",
-    text: "2.300 € im ersten vollen Monat. Neben meinem 40h Job. Ich habe nicht geglaubt, dass das realistisch ist. War es aber. Die Community und der Support machen den Unterschied.",
   },
   {
     name: "Lena F.",
     stars: 5,
     date: "vor 3 Tagen",
+    highlight: "Authentisch, glaubwürdig, total happy",
     text: "Endlich ein System, das nicht verspricht, über Nacht reich zu werden — sondern zeigt, wie man konsequent aufbaut. Sehr authentisch und glaubwürdig. Bin total happy mit meiner Entscheidung.",
   },
 ];
+
+const WHATSAPP_IMAGES = [
+  "/assets/testimonial2.png",
+  "/assets/testimonial3.png",
+  "/assets/testimonial5.jpeg",
+  "/assets/testimonial4.jpeg",
+];
+
+const PAYOUT_IMAGES = [
+  "/assets/testimonial1.jpeg",
+  "/assets/testimonial6.jpeg",
+  "/assets/testimonial7.jpeg",
+];
+
+function StarRow({ count = 5 }: { count?: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: count }).map((_, i) => (
+        <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+      ))}
+    </div>
+  );
+}
 
 export default function ThankYouPage() {
   const { trackPageView } = useAnalytics();
@@ -83,124 +83,123 @@ export default function ThankYouPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <section className="py-10 sm:py-14 px-3 sm:px-4">
-        <div className="max-w-2xl mx-auto">
 
-          {/* Thank You Header */}
-          <div className="text-center mb-8 sm:mb-10">
-            <div className="flex justify-center mb-5">
-              <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
-                <CheckCircle className="h-11 w-11 text-green-500" />
-              </div>
+        {/* ── THANK YOU HEADER ── */}
+        <div className="max-w-2xl mx-auto text-center mb-10 sm:mb-14">
+          <div className="flex justify-center mb-5">
+            <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle className="h-11 w-11 text-green-500" />
             </div>
-            <div className="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs sm:text-sm font-semibold mb-4">
-              ✅ Hat geklappt!
-            </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
-              Danke — wir melden uns bald bei dir! 🎉
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Deine Anfrage ist bei uns angekommen. Wir melden uns in der Regel <strong className="text-foreground">innerhalb von 24 Stunden</strong> persönlich bei dir.
-            </p>
           </div>
+          <div className="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs sm:text-sm font-semibold mb-4">
+            ✅ Deine Anfrage ist angekommen!
+          </div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
+            Danke — wir melden uns bald bei dir! 🎉
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed mb-6">
+            Wir melden uns in der Regel <strong className="text-foreground">innerhalb von 24 Stunden</strong> persönlich bei dir. Bis dahin — schau dir an, was andere mit der KI-Klick Methode bereits erreicht haben.
+          </p>
 
-          {/* CRM Form Placeholder */}
-          <div className="bg-card border border-primary/20 rounded-2xl p-6 sm:p-8 shadow-lg shadow-primary/5 mb-10 sm:mb-14">
-            <div className="text-center mb-6">
-              <p className="text-base font-semibold text-foreground mb-1">Kostenloses Strategiegespräch sichern</p>
-              <p className="text-sm text-muted-foreground">100% kostenlos & unverbindlich</p>
-            </div>
-
-            <CloseForm />
-
-            <div className="mt-5 flex flex-col gap-2">
-              {[
-                "🔒 Deine Daten sind 100% sicher",
-                "✅ Kein Spam, nur persönlicher Kontakt",
-                "⚡ Wir melden uns innerhalb von 24h",
-              ].map((item, i) => (
-                <p key={i} className="text-xs sm:text-sm text-muted-foreground text-center">{item}</p>
-              ))}
-            </div>
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+            {[
+              "✅ 350+ erfolgreiche Partner",
+              "⭐ 5,0 Ø Bewertung",
+              "🔒 100% unverbindlich",
+            ].map((badge, i) => (
+              <span key={i} className="text-xs sm:text-sm font-medium text-muted-foreground bg-muted/50 border border-border rounded-full px-3 py-1">
+                {badge}
+              </span>
+            ))}
           </div>
         </div>
 
-        {/* Testimonials — full width container */}
+        {/* ── SOCIAL PROOF ── */}
         <div className="max-w-4xl mx-auto">
 
-          {/* Trust divider */}
+          {/* Section header */}
           <div className="text-center mb-7 sm:mb-9">
-            <span className="highlight text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed">
-              Was andere über die KI-Klick Methode sagen
-            </span>
-            <p className="text-sm text-muted-foreground mt-2">
-              Echte Ergebnisse von echten Menschen
+            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Echte Ergebnisse · Echte Menschen</p>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
+              Du bist in guter Gesellschaft 👇
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
+              Über 350 Menschen haben bereits mit der KI-Klick Methode gestartet — hier sind ihre Ergebnisse.
             </p>
           </div>
 
-          {/* Text Reviews */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-10 sm:mb-14">
+          {/* Text Reviews with highlight badges */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-12 sm:mb-16">
             {TEXT_REVIEWS.map((review, i) => (
-              <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
+              <div key={i} className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-sm flex flex-col gap-3">
+                <div className="inline-flex">
+                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full">
+                    💬 {review.highlight}
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Quote className="h-4 w-4 text-primary/40 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-muted-foreground leading-relaxed">{review.text}</p>
+                </div>
+                <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
                   <div className="flex items-center gap-2">
-                    <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm">
+                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm">
                       {review.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-semibold text-foreground text-sm">{review.name}</p>
+                      <p className="font-semibold text-foreground text-xs">{review.name}</p>
                       <p className="text-xs text-muted-foreground">{review.date}</p>
                     </div>
                   </div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: review.stars }).map((_, si) => (
-                      <Star key={si} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
+                  <StarRow count={review.stars} />
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{review.text}</p>
               </div>
             ))}
           </div>
 
-          {/* Screenshot / WhatsApp Testimonials */}
-          <div className="text-center mb-5 sm:mb-7">
-            <span className="highlight text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-relaxed">
-              Das sagen unsere Teilnehmer
-            </span>
+          {/* WhatsApp Proof */}
+          <div className="text-center mb-5 sm:mb-8">
+            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">WhatsApp Nachrichten unserer Teilnehmer</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
+              So reagieren unsere Partner wenn es klappt 🔥
+            </h2>
           </div>
-          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-10">
-            {TESTIMONIAL_IMAGES.map((src, i) => (
+          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
+            {WHATSAPP_IMAGES.map((src, i) => (
               <div key={i} className="break-inside-avoid">
-                <img
-                  src={src}
-                  alt={`Testimonial ${i + 1}`}
-                  className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg"
-                />
+                <img src={src} alt={`WhatsApp Feedback ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
               </div>
             ))}
           </div>
 
-          {/* Payout Screenshots */}
-          <div className="text-center mb-5 sm:mb-7">
-            <span className="highlight text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-relaxed">
-              Stell dir vor, dein Handybildschirm sieht bald so aus
-            </span>
+          {/* Payout screenshots */}
+          <div className="text-center mb-5 sm:mb-8">
+            <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Echte Auszahlungen</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
+              Stell dir vor, dein Handy sieht bald so aus 💰
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2">Neben dem Job — ohne Vorkenntnisse</p>
           </div>
-          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-10">
-            {[
-              "/assets/testimonial1.jpeg",
-              "/assets/testimonial6.jpeg",
-              "/assets/testimonial7.jpeg",
-            ].map((src, i) => (
+          <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12">
+            {PAYOUT_IMAGES.map((src, i) => (
               <div key={i} className="break-inside-avoid">
-                <img
-                  src={src}
-                  alt={`Auszahlung ${i + 1}`}
-                  className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg"
-                />
+                <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg" />
               </div>
             ))}
           </div>
+
+          {/* Final reassurance */}
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 sm:p-8 text-center mb-8">
+            <div className="text-3xl mb-3">📞</div>
+            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
+              Wir melden uns persönlich bei dir!
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+              Unser Team schaut sich deine Antworten an und ruft dich <strong className="text-foreground">innerhalb von 24 Stunden</strong> an — per WhatsApp oder Telefon. Kein Skript, kein Druck. Nur ein echtes Gespräch.
+            </p>
+          </div>
+
         </div>
       </section>
 
