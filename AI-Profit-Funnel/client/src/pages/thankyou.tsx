@@ -219,7 +219,7 @@ export default function ThankYouPage() {
           <div className="text-center mb-5 sm:mb-8">
             <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">WhatsApp Nachrichten unserer Teilnehmer</p>
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
-              So reagieren unsere Partner wenn es klappt 🔥
+              Lass uns gemeinsam deine Erfolgsgeschichte schreiben 🔥
             </h2>
           </div>
           <div className="columns-2 sm:columns-3 gap-3 sm:gap-4 space-y-3 sm:space-y-4 mb-12 sm:mb-16">
