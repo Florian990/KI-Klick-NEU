@@ -134,6 +134,11 @@ export default function QuizLandingPage() {
       playerRef.current.unMute();
       playerRef.current.setVolume(volume);
       setIsMuted(false);
+      expectedTimeRef.current = 0;
+      milestonesFiredRef.current.clear();
+      playerRef.current.seekTo(0, true);
+      playerRef.current.playVideo();
+      return;
     }
     if (!isPlaying) {
       playerRef.current.playVideo();
