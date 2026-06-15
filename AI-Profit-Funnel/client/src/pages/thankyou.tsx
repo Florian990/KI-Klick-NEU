@@ -190,11 +190,14 @@ export default function ThankYouPage() {
               Lass uns gemeinsam deine Erfolgsgeschichte schreiben
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 mb-12 sm:mb-16 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 mb-12 sm:mb-16 max-w-3xl mx-auto items-start">
             {WHATSAPP_IMAGES.map((src, i) => (
-              <div key={i} className="bg-card border border-border rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-md">
-                <img src={src} alt={`WhatsApp Feedback ${i + 1}`} className="w-full h-auto rounded-lg" />
-              </div>
+              <img
+                key={i}
+                src={src}
+                alt={`WhatsApp Feedback ${i + 1}`}
+                className="w-full h-auto rounded-xl border border-border shadow-md"
+              />
             ))}
           </div>
 
@@ -206,11 +209,14 @@ export default function ThankYouPage() {
             </h2>
             <p className="text-sm text-muted-foreground mt-2">Neben dem Job — ohne Vorkenntnisse</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 mb-12 sm:mb-16 max-w-3xl mx-auto">
+          <div className="columns-2 md:columns-3 gap-3 sm:gap-5 mb-12 sm:mb-16 max-w-3xl mx-auto [&>img]:mb-3 sm:[&>img]:mb-5">
             {PAYOUT_IMAGES.map((src, i) => (
-              <div key={i} className="bg-card border border-border rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-md">
-                <img src={src} alt={`Auszahlung ${i + 1}`} className="w-full h-auto rounded-lg" />
-              </div>
+              <img
+                key={i}
+                src={src}
+                alt={`Auszahlung ${i + 1}`}
+                className="w-full h-auto rounded-xl border border-border shadow-md break-inside-avoid"
+              />
             ))}
           </div>
 
