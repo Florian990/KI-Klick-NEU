@@ -41,6 +41,7 @@ const questions: Question[] = [
     subtitle: "Wähle die Option, die am besten auf dich zutrifft.",
     answers: [
       { text: "Angestellter / Festangestellt", emoji: "💼", disqualify: false },
+      { text: "Selbständig / Unternehmer", emoji: "🚀", disqualify: false },
       { text: "In Ausbildung / Azubi", emoji: "📚", disqualify: false },
       { text: "Student", emoji: "🎓", disqualify: true },
       { text: "Schüler", emoji: "📓", disqualify: true },
