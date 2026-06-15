@@ -130,10 +130,14 @@ export default function QuizLandingPage() {
 
   const handleVideoClick = () => {
     if (!playerRef.current) return;
-    expectedTimeRef.current = 0;
-    milestonesFiredRef.current.clear();
-    playerRef.current.seekTo(0, true);
-    playerRef.current.playVideo();
+    if (isMuted) {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(volume);
+      setIsMuted(false);
+    }
+    if (!isPlaying) {
+      playerRef.current.playVideo();
+    }
   };
 
   const togglePlay = (e: React.MouseEvent) => {
@@ -207,6 +211,20 @@ export default function QuizLandingPage() {
             onClick={handleVideoClick}
           >
             <div id="yt-player-home" className="absolute inset-0 w-full h-full pointer-events-none" />
+
+            {playerReady && isMuted && (
+              <div
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 cursor-pointer"
+                onClick={handleVideoClick}
+              >
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/40 animate-pulse">
+                  <Volume2 className="h-7 w-7 sm:h-9 sm:w-9 text-primary-foreground" />
+                </div>
+                <span className="text-white font-semibold text-sm sm:text-base px-4 py-2 rounded-full bg-black/70">
+                  🔊 Tippe für Ton
+                </span>
+              </div>
+            )}
 
             {playerReady && (
               <div
