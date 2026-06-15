@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { CheckCircle, Star, Quote, ClipboardCheck, PhoneCall, CalendarCheck, BellRing } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle, Star, Quote, ClipboardCheck, PhoneCall, CalendarCheck, BellRing, Play } from "lucide-react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 const NEXT_STEPS = [
@@ -92,6 +92,44 @@ function StarRow({ count = 5 }: { count?: number }) {
         <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
       ))}
     </div>
+  );
+}
+
+function YouTubeFacade({ id, label }: { id: string; label: string }) {
+  const [playing, setPlaying] = useState(false);
+
+  if (playing) {
+    return (
+      <iframe
+        className="absolute inset-0 w-full h-full"
+        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+        title={label}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setPlaying(true)}
+      className="absolute inset-0 w-full h-full group"
+      aria-label={`${label} abspielen`}
+    >
+      <img
+        src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+        alt={label}
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="h-16 w-16 rounded-full bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+          <Play className="h-7 w-7 text-primary fill-primary translate-x-0.5" />
+        </div>
+      </div>
+    </button>
   );
 }
 
@@ -234,13 +272,9 @@ export default function ThankYouPage() {
                 {YOUTUBE_TESTIMONIALS.map((video, i) => (
                   <div key={i} className="w-full max-w-[300px] bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
                     <div className="relative aspect-[9/16] bg-black">
-                      <iframe
-                        className="absolute inset-0 w-full h-full"
-                        src={`https://www.youtube-nocookie.com/embed/${video.id}`}
-                        title={video.name ? `Testimonial ${video.name}` : `Video-Testimonial ${i + 1}`}
-                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        loading="lazy"
+                      <YouTubeFacade
+                        id={video.id}
+                        label={video.name ? `Testimonial ${video.name}` : `Video-Testimonial ${i + 1}`}
                       />
                     </div>
                     {video.name && (
