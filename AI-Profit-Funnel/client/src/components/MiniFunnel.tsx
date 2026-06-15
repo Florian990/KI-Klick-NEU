@@ -178,8 +178,36 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
 
   const validateContactInput = (val: string, key: keyof ContactData) => {
     if (!val.trim()) return "Bitte füll dieses Feld aus";
-    if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val))
-      return "Bitte gib eine gültige E-Mail ein";
+
+    if (key === "phone") {
+      const digits = val.replace(/\D/g, "");
+      const cleaned = val.trim();
+
+      // Must contain only valid phone characters
+      if (/[a-zA-Z]/.test(cleaned)) {
+        return "Bitte keine Buchstaben — nur Ziffern eingeben";
+      }
+      // German mobile (015x, 016x, 017x) or landline or international
+      if (digits.length < 10) {
+        return `Nummer zu kurz — bitte vollständig eingeben (${digits.length} von mind. 10 Ziffern)`;
+      }
+      if (digits.length > 15) {
+        return "Nummer zu lang — bitte prüfen";
+      }
+      // Must start with + or 0 or country code digit
+      if (!/^(\+|00|0)[1-9]/.test(cleaned) && !/^[1-9]/.test(cleaned)) {
+        return "Ungültiges Format — z.B. +49 151 12345678";
+      }
+    }
+
+    if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      return "Bitte gib eine gültige E-Mail ein (z.B. max@gmail.com)";
+    }
+
+    if (key === "name" && val.trim().length < 2) {
+      return "Bitte gib deinen vollständigen Namen ein";
+    }
+
     return "";
   };
 
