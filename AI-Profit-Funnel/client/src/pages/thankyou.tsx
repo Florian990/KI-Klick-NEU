@@ -1,6 +1,24 @@
 import { useEffect } from "react";
-import { CheckCircle, Star, Quote } from "lucide-react";
+import { CheckCircle, Star, Quote, ClipboardCheck, PhoneCall, CalendarCheck, BellRing } from "lucide-react";
 import { useAnalytics } from "@/hooks/useAnalytics";
+
+const NEXT_STEPS = [
+  {
+    icon: ClipboardCheck,
+    title: "Wir prüfen deine Antworten",
+    text: "Unser Team schaut sich deine Angaben persönlich an, um dich optimal vorzubereiten.",
+  },
+  {
+    icon: PhoneCall,
+    title: "Wir melden uns bei dir",
+    text: "Innerhalb von 24 Stunden bekommst du eine Nachricht oder einen Anruf von uns.",
+  },
+  {
+    icon: CalendarCheck,
+    title: "Dein kostenloses Erstgespräch",
+    text: "Gemeinsam klären wir unverbindlich, ob die KI-Klick Methode zu dir passt.",
+  },
+];
 
 const TEXT_REVIEWS = [
   {
@@ -114,6 +132,46 @@ export default function ThankYouPage() {
           </div>
         </div>
 
+        {/* ── WHAT HAPPENS NEXT ── */}
+        <div className="max-w-2xl mx-auto mb-12 sm:mb-16">
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-8 shadow-sm">
+            <div className="text-center mb-7">
+              <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Deine nächsten Schritte</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">So geht es jetzt weiter</h2>
+            </div>
+
+            <div className="relative flex flex-col gap-5 sm:gap-6">
+              {/* connecting line */}
+              <div className="absolute left-[19px] sm:left-[23px] top-3 bottom-3 w-px bg-border" aria-hidden="true" />
+              {NEXT_STEPS.map((step, i) => {
+                const Icon = step.icon;
+                return (
+                  <div key={i} className="relative flex items-start gap-4">
+                    <div className="relative z-10 h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                    </div>
+                    <div className="pt-1 sm:pt-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-primary">Schritt {i + 1}</span>
+                      </div>
+                      <h3 className="font-semibold text-foreground text-sm sm:text-base">{step.title}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-0.5">{step.text}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Important reminder */}
+            <div className="mt-7 flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-xl p-4">
+              <BellRing className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-xs sm:text-sm text-foreground leading-relaxed">
+                <strong>Wichtig:</strong> Sei in den nächsten 24 Stunden gut erreichbar und behalte dein Postfach im Blick — schau bei E-Mails auch im <strong>Spam-Ordner</strong> nach, damit du unsere Nachricht nicht verpasst.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* ── SOCIAL PROOF ── */}
         <div className="max-w-4xl mx-auto">
 
@@ -123,6 +181,16 @@ export default function ThankYouPage() {
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
               Du bist in guter Gesellschaft 👇
             </h2>
+            {/* Aggregate rating */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-5 w-5 sm:h-6 sm:w-6 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <span className="text-lg sm:text-xl font-bold text-foreground">5,0</span>
+              <span className="text-sm text-muted-foreground">aus 350+ Bewertungen</span>
+            </div>
             <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
               Über 350 Menschen haben bereits mit der KI-Klick Methode gestartet — hier sind ihre Ergebnisse.
             </p>
