@@ -1,14 +1,15 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-function getResendClient() {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    throw new Error('RESEND_API_KEY not configured');
+function getTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) {
+    throw new Error('GMAIL_USER oder GMAIL_APP_PASSWORD nicht konfiguriert');
   }
-  return {
-    client: new Resend(apiKey),
-    fromEmail: 'KI-Klick Methode <onboarding@resend.dev>',
-  };
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+  });
 }
 
 interface QuizAnswers {
@@ -32,56 +33,50 @@ const questionTexts: { [key: number]: string } = {
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {
-  if (!answers || Object.keys(answers).length === 0) {
-    return '';
-  }
-  
+  if (!answers || Object.keys(answers).length === 0) return '';
+
   let result = '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
   result += '📋 QUIZ-ANTWORTEN\n';
   result += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-  
+
   for (const [questionId, answer] of Object.entries(answers)) {
     const questionText = questionTexts[Number(questionId)] || `Frage ${questionId}`;
     result += `❓ ${questionText}\n`;
-    result += `➡️ ${answer}\n\n`;
+    result += `➡️  ${answer}\n\n`;
   }
   return result;
 }
 
 export async function sendLeadNotification(lead: LeadData) {
   try {
-    const { client, fromEmail } = getResendClient();
-    
+    const transporter = getTransporter();
+    const fromUser = process.env.GMAIL_USER!;
     const quizSection = formatQuizAnswers(lead.quizAnswers);
-    
+
     const emailContent = `
 🎯 NEUER LEAD EINGEGANGEN!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-👤 Name: ${lead.name}
-
-📧 E-Mail: ${lead.email || 'Nicht angegeben'}
-
+👤 Name:    ${lead.name}
+📧 E-Mail:  ${lead.email || 'Nicht angegeben'}
 📱 Telefon: ${lead.phone || 'Nicht angegeben'}
-
-📍 Quelle: ${lead.source || 'Quiz Funnel'}
+📍 Quelle:  ${lead.source || 'Quiz Funnel'}
 ${quizSection}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Automatisch gesendet von deinem KI-Klick Methode Funnel
     `.trim();
 
-    const result = await client.emails.send({
-      from: 'KI-Klick Methode <onboarding@resend.dev>',
-      to: 'agenturmehler@gmail.com',
+    await transporter.sendMail({
+      from: `KI-Klick Methode <${fromUser}>`,
+      to: fromUser,
       subject: `🎯 Neuer Lead: ${lead.name}`,
       text: emailContent,
     });
 
-    console.log(`Lead notification email result:`, JSON.stringify(result, null, 2));
-    console.log(`Lead notification email sent for: ${lead.name}`);
+    console.log(`✅ Lead-Mail gesendet für: ${lead.name}`);
     return true;
   } catch (error) {
-    console.error('Error sending lead notification email:', error);
+    console.error('❌ Fehler beim E-Mail-Versand:', error);
     return false;
   }
 }
