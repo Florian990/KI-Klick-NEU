@@ -34,9 +34,16 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
-  // Zapier proxy — forwards quiz answers server-side to avoid CORS
+  // Zapier proxy — forwards quiz answers + contact data server-side to avoid CORS
   app.post("/api/quiz-complete", async (req, res) => {
     try {
+      // Also save lead to DB
+      const { name, email, phone } = req.body;
+      if (name || email || phone) {
+        try {
+          await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
+        } catch {}
+      }
       const response = await fetch(ZAPIER_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,6 +53,20 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Zapier webhook error:", err);
       return res.status(502).json({ success: false });
+    }
+  });
+
+  // Partial save — stores contact data even if quiz not fully completed
+  app.post("/api/quiz-partial", async (req, res) => {
+    try {
+      const { name, email, phone } = req.body;
+      if (!email && !phone) return res.status(200).json({ success: true });
+      try {
+        await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
+      } catch {}
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      return res.status(500).json({ success: false });
     }
   });
 

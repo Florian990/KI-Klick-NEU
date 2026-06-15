@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { ChevronLeft, XCircle } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronLeft, XCircle, CheckCircle, ArrowRight, User, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Answer {
   text: string;
@@ -14,6 +16,12 @@ interface Question {
   question: string;
   subtitle?: string;
   answers: Answer[];
+}
+
+export interface ContactData {
+  name: string;
+  phone: string;
+  email: string;
 }
 
 const questions: Question[] = [
@@ -73,18 +81,30 @@ const questions: Question[] = [
   },
 ];
 
+type Stage = "quiz" | "qualified" | "contact";
+
 interface MiniFunnelProps {
-  onComplete: (answers: Record<number, string>) => void;
+  onComplete: (answers: Record<number, string>, contact: ContactData) => void;
+  onPartialSave?: (contact: Partial<ContactData>, answers: Record<number, string>) => void;
   onTrackEvent: (event: string) => void;
 }
 
-export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps) {
+export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: MiniFunnelProps) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [disqualified, setDisqualified] = useState(false);
+  const [stage, setStage] = useState<Stage>("quiz");
+  const [contact, setContact] = useState<ContactData>({ name: "", phone: "", email: "" });
+  const [errors, setErrors] = useState<Partial<ContactData>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const partialSavedRef = useRef<Set<string>>(new Set());
 
   const currentQuestion = questions[step];
-  const progress = ((step + 1) / questions.length) * 100;
+  const progress = stage === "contact"
+    ? 100
+    : stage === "qualified"
+    ? 95
+    : ((step + 1) / questions.length) * 100;
 
   const handleAnswer = (answer: Answer) => {
     onTrackEvent(`funnel_q${step + 1}`);
@@ -100,16 +120,48 @@ export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps
 
     if (step === questions.length - 1) {
       onTrackEvent("funnel_qualified");
-      onComplete(newAnswers);
+      setStage("qualified");
+      setTimeout(() => setStage("contact"), 2000);
       return;
     }
     setStep((prev) => prev + 1);
   };
 
   const handleBack = () => {
-    if (step > 0) setStep((prev) => prev - 1);
+    if (stage === "contact") {
+      setStage("quiz");
+      setStep(questions.length - 1);
+    } else if (step > 0) {
+      setStep((prev) => prev - 1);
+    }
   };
 
+  const handlePartialSave = (field: keyof ContactData, value: string) => {
+    if (!value || partialSavedRef.current.has(field)) return;
+    partialSavedRef.current.add(field);
+    onPartialSave?.({ ...contact, [field]: value }, answers);
+  };
+
+  const validateContact = () => {
+    const errs: Partial<ContactData> = {};
+    if (!contact.name.trim()) errs.name = "Bitte gib deinen Namen ein";
+    if (!contact.phone.trim()) errs.phone = "Bitte gib deine Telefonnummer ein";
+    if (!contact.email.trim()) errs.email = "Bitte gib deine E-Mail ein";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) errs.email = "Bitte gib eine gültige E-Mail ein";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateContact()) return;
+    setSubmitting(true);
+    onTrackEvent("funnel_contact_submitted");
+    await onComplete(answers, contact);
+    setSubmitting(false);
+  };
+
+  // DISQUALIFIED
   if (disqualified) {
     return (
       <div className="w-full max-w-2xl mx-auto text-center py-6 sm:py-8">
@@ -131,6 +183,166 @@ export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps
     );
   }
 
+  // QUALIFIED TRANSITION
+  if (stage === "qualified") {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-8 sm:py-12 animate-in fade-in duration-500">
+        <div className="flex justify-center mb-5">
+          <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-green-500/10 flex items-center justify-center">
+            <CheckCircle className="h-11 w-11 sm:h-14 sm:w-14 text-green-500" />
+          </div>
+        </div>
+        <div className="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs sm:text-sm font-semibold mb-4">
+          ✅ Du bist qualifiziert!
+        </div>
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
+          Perfekt — du passt zu uns! 🎉
+        </h2>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-sm mx-auto leading-relaxed">
+          Einen Moment noch — wir leiten dich gleich zum nächsten Schritt weiter...
+        </p>
+        <div className="mt-6 flex justify-center">
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-2 w-2 rounded-full bg-primary animate-bounce"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CONTACT FORM
+  if (stage === "contact") {
+    return (
+      <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="mb-5 sm:mb-7">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+              Letzter Schritt
+            </span>
+            <span className="text-xs sm:text-sm text-primary font-bold">
+              100% abgeschlossen
+            </span>
+          </div>
+          <Progress value={100} className="h-2 sm:h-2.5" />
+        </div>
+
+        <div className="text-center mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 leading-tight">
+            Wo sollen wir dich erreichen?
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Damit wir uns persönlich bei dir melden können 👇
+          </p>
+        </div>
+
+        <form onSubmit={handleContactSubmit} className="space-y-4 sm:space-y-5">
+          {/* Name */}
+          <div className="space-y-1.5">
+            <Label htmlFor="name" className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5 text-primary" />
+              Vor- & Nachname
+            </Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Max Mustermann"
+              value={contact.name}
+              onChange={(e) => {
+                setContact((c) => ({ ...c, name: e.target.value }));
+                if (errors.name) setErrors((er) => ({ ...er, name: undefined }));
+              }}
+              onBlur={(e) => handlePartialSave("name", e.target.value)}
+              className={`h-12 text-base ${errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+            />
+            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+          </div>
+
+          {/* Phone */}
+          <div className="space-y-1.5">
+            <Label htmlFor="phone" className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <Phone className="h-3.5 w-3.5 text-primary" />
+              Handynummer
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+49 151 12345678"
+              value={contact.phone}
+              onChange={(e) => {
+                setContact((c) => ({ ...c, phone: e.target.value }));
+                if (errors.phone) setErrors((er) => ({ ...er, phone: undefined }));
+              }}
+              onBlur={(e) => handlePartialSave("phone", e.target.value)}
+              className={`h-12 text-base ${errors.phone ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+            />
+            {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+            <p className="text-xs text-muted-foreground">📱 Wird auch für WhatsApp genutzt</p>
+          </div>
+
+          {/* Email */}
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5 text-primary" />
+              E-Mail Adresse
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="max@beispiel.de"
+              value={contact.email}
+              onChange={(e) => {
+                setContact((c) => ({ ...c, email: e.target.value }));
+                if (errors.email) setErrors((er) => ({ ...er, email: undefined }));
+              }}
+              onBlur={(e) => handlePartialSave("email", e.target.value)}
+              className={`h-12 text-base ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+            />
+            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+          </div>
+
+          <Button
+            type="submit"
+            size="lg"
+            disabled={submitting}
+            className="w-full h-13 text-base font-bold mt-2"
+          >
+            {submitting ? (
+              <span className="flex items-center gap-2">
+                <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                Wird gesendet...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                Jetzt kostenloses Gespräch sichern
+                <ArrowRight className="h-5 w-5" />
+              </span>
+            )}
+          </Button>
+
+          <div className="flex flex-col gap-1.5 pt-1">
+            {["🔒 100% sicher — keine Weitergabe an Dritte", "✅ Kein Spam, nur persönlicher Kontakt", "⚡ Wir melden uns innerhalb von 24h"].map((item, i) => (
+              <p key={i} className="text-xs text-muted-foreground text-center">{item}</p>
+            ))}
+          </div>
+        </form>
+
+        <div className="mt-4 flex justify-center">
+          <Button variant="ghost" onClick={handleBack} className="text-muted-foreground h-10 touch-manipulation">
+            <ChevronLeft className="h-4 w-4 mr-1.5" />
+            <span className="text-sm">Zurück</span>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // QUIZ QUESTIONS
   const cols =
     currentQuestion.answers.length >= 5
       ? "grid-cols-1 sm:grid-cols-2"
@@ -184,11 +396,7 @@ export default function MiniFunnel({ onComplete, onTrackEvent }: MiniFunnelProps
 
       {step > 0 && (
         <div className="mt-4 sm:mt-5 flex justify-center">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="text-muted-foreground h-10 sm:h-11 touch-manipulation"
-          >
+          <Button variant="ghost" onClick={handleBack} className="text-muted-foreground h-10 sm:h-11 touch-manipulation">
             <ChevronLeft className="h-4 w-4 mr-1.5" />
             <span className="text-sm sm:text-base">Zurück</span>
           </Button>

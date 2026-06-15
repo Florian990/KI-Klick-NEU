@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import MiniFunnel from "@/components/MiniFunnel";
+import MiniFunnel, { ContactData } from "@/components/MiniFunnel";
 import { useEffect } from "react";
 
 export default function QuizPage() {
@@ -11,8 +11,30 @@ export default function QuizPage() {
     trackPageView("/quiz");
   }, []);
 
-  const handleComplete = async (answers: Record<number, string>) => {
+  const handlePartialSave = (contact: Partial<ContactData>, answers: Record<number, string>) => {
+    const payload = {
+      name: contact.name ?? "",
+      phone: contact.phone ?? "",
+      email: contact.email ?? "",
+      frage_1_alter: answers[1] ?? "",
+      frage_2_situation: answers[2] ?? "",
+      frage_3_ziel: answers[3] ?? "",
+      frage_4_finanzielles_ziel: answers[4] ?? "",
+      frage_5_zeitaufwand: answers[5] ?? "",
+      quelle: "KI-Klick Methode Quiz (Partial)",
+      partial: true,
+    };
+    navigator.sendBeacon(
+      "/api/quiz-partial",
+      new Blob([JSON.stringify(payload)], { type: "application/json" })
+    );
+  };
+
+  const handleComplete = async (answers: Record<number, string>, contact: ContactData) => {
     const payload = JSON.stringify({
+      name: contact.name,
+      phone: contact.phone,
+      email: contact.email,
       frage_1_alter: answers[1] ?? "",
       frage_2_situation: answers[2] ?? "",
       frage_3_ziel: answers[3] ?? "",
@@ -55,7 +77,11 @@ export default function QuizPage() {
           </div>
 
           <div className="bg-card/80 backdrop-blur-sm border border-primary/20 rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg shadow-primary/5">
-            <MiniFunnel onComplete={handleComplete} onTrackEvent={trackEvent} />
+            <MiniFunnel
+              onComplete={handleComplete}
+              onPartialSave={handlePartialSave}
+              onTrackEvent={trackEvent}
+            />
           </div>
         </div>
       </section>
