@@ -107,7 +107,7 @@ const CONTACT_STEPS = [
     placeholder: "max@beispiel.de",
     type: "email",
     hint: null,
-    buttonLabel: "Ja, ich will starten — kostenlos & unverbindlich →",
+    buttonLabel: "Nächster Schritt →",
   },
 ];
 
@@ -245,12 +245,20 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
   const handleBack = () => {
     setInputError("");
     if (stage === "contact") {
+      // Always save whatever was typed before going back so it's restored if they come forward again
+      const savedContact = inputValue.trim()
+        ? { ...contact, [currentContactStep.key]: inputValue }
+        : contact;
+      setContact(savedContact);
+
       if (contactStep === 0) {
         setStage("quiz");
         setQuizStep(questions.length - 1);
+        setInputValue("");
       } else {
+        const prevKey = CONTACT_STEPS[contactStep - 1].key;
         setContactStep((prev) => prev - 1);
-        setInputValue(contact[CONTACT_STEPS[contactStep - 1].key]);
+        setInputValue(savedContact[prevKey]);
       }
     } else if (quizStep > 0) {
       setQuizStep((prev) => prev - 1);
