@@ -1,13 +1,15 @@
 import nodemailer from 'nodemailer';
 
 function getTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
+  const user = process.env.BREVO_SMTP_USER;
+  const pass = process.env.BREVO_SMTP_KEY;
   if (!user || !pass) {
-    throw new Error('GMAIL_USER oder GMAIL_APP_PASSWORD nicht konfiguriert');
+    throw new Error('BREVO_SMTP_USER oder BREVO_SMTP_KEY nicht konfiguriert');
   }
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
     auth: { user, pass },
   });
 }
@@ -50,7 +52,6 @@ function formatQuizAnswers(answers?: QuizAnswers): string {
 export async function sendLeadNotification(lead: LeadData) {
   try {
     const transporter = getTransporter();
-    const fromUser = process.env.GMAIL_USER!;
     const quizSection = formatQuizAnswers(lead.quizAnswers);
 
     const emailContent = `
@@ -67,8 +68,8 @@ Automatisch gesendet von deinem KI-Klick Methode Funnel
     `.trim();
 
     await transporter.sendMail({
-      from: `KI-Klick Methode <${fromUser}>`,
-      to: fromUser,
+      from: 'KI-Klick Methode <noreply@geheime-ki-klickmethode.de>',
+      to: 'ki.klick.methode@gmail.com',
       subject: `🎯 Neuer Lead: ${lead.name}`,
       text: emailContent,
     });
