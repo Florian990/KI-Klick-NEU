@@ -1,19 +1,3 @@
-import nodemailer from 'nodemailer';
-
-function getTransporter() {
-  const user = process.env.BREVO_SMTP_USER;
-  const pass = process.env.BREVO_SMTP_KEY;
-  if (!user || !pass) {
-    throw new Error('BREVO_SMTP_USER oder BREVO_SMTP_KEY nicht konfiguriert');
-  }
-  return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
-    auth: { user, pass },
-  });
-}
-
 interface QuizAnswers {
   [questionId: number]: string;
 }
@@ -50,11 +34,15 @@ function formatQuizAnswers(answers?: QuizAnswers): string {
 }
 
 export async function sendLeadNotification(lead: LeadData) {
-  try {
-    const transporter = getTransporter();
-    const quizSection = formatQuizAnswers(lead.quizAnswers);
+  const apiKey = process.env.BREVO_SMTP_KEY;
+  if (!apiKey) {
+    console.warn('⚠️  BREVO_SMTP_KEY nicht gesetzt — E-Mail wird übersprungen');
+    return false;
+  }
 
-    const emailContent = `
+  const quizSection = formatQuizAnswers(lead.quizAnswers);
+
+  const textContent = `
 🎯 NEUER LEAD EINGEGANGEN!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -65,16 +53,32 @@ export async function sendLeadNotification(lead: LeadData) {
 ${quizSection}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Automatisch gesendet von deinem KI-Klick Methode Funnel
-    `.trim();
+  `.trim();
 
-    await transporter.sendMail({
-      from: 'KI-Klick Methode <noreply@geheime-ki-klickmethode.de>',
-      to: 'ki.klick.methode@gmail.com',
-      subject: `🎯 Neuer Lead: ${lead.name}`,
-      text: emailContent,
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'KI-Klick Methode', email: 'ki.klick.methode@gmail.com' },
+        to: [{ email: 'ki.klick.methode@gmail.com' }],
+        subject: `🎯 Neuer Lead: ${lead.name}`,
+        textContent,
+      }),
     });
 
-    console.log(`✅ Lead-Mail gesendet für: ${lead.name}`);
+    const data = await response.json() as any;
+
+    if (!response.ok) {
+      console.error('❌ Brevo API Fehler:', JSON.stringify(data));
+      return false;
+    }
+
+    console.log(`✅ Lead-Mail gesendet für: ${lead.name} (ID: ${data.messageId})`);
     return true;
   } catch (error) {
     console.error('❌ Fehler beim E-Mail-Versand:', error);
