@@ -122,7 +122,7 @@ export default function ThankYouPage() {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
             {[
               "✅ 350+ erfolgreiche Partner",
-              "⭐ 5,0 Ø Bewertung",
+              "⭐ Top bewertet",
               "🔒 100% unverbindlich",
             ].map((badge, i) => (
               <span key={i} className="text-xs sm:text-sm font-medium text-muted-foreground bg-muted/50 border border-border rounded-full px-3 py-1">
@@ -166,7 +166,7 @@ export default function ThankYouPage() {
             <div className="mt-7 flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-xl p-4">
               <BellRing className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-xs sm:text-sm text-foreground leading-relaxed">
-                <strong>Wichtig:</strong> Sei in den nächsten 24 Stunden gut erreichbar und behalte dein Postfach im Blick — schau bei E-Mails auch im <strong>Spam-Ordner</strong> nach, damit du unsere Nachricht nicht verpasst.
+                <strong>Wichtig:</strong> Sei in den nächsten 24 Stunden gut erreichbar und halte dein Telefon bereit, damit du unsere Nachricht nicht verpasst.
               </p>
             </div>
           </div>
@@ -179,20 +179,10 @@ export default function ThankYouPage() {
           <div className="text-center mb-7 sm:mb-9">
             <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-semibold mb-2">Echte Ergebnisse · Echte Menschen</p>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
-              Du bist in guter Gesellschaft 👇
+              Einige unserer Bewertungen
             </h2>
-            {/* Aggregate rating */}
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-5 w-5 sm:h-6 sm:w-6 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-foreground">5,0</span>
-              <span className="text-sm text-muted-foreground">aus 350+ Bewertungen</span>
-            </div>
             <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
-              Über 350 Menschen haben bereits mit der KI-Klick Methode gestartet — hier sind ihre Ergebnisse.
+              aus 350+ glücklichen Kunden
             </p>
           </div>
 
