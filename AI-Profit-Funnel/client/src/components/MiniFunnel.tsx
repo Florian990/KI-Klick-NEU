@@ -1,9 +1,8 @@
-import { useState, useRef } from "react";
-import { ChevronLeft, XCircle, CheckCircle, ArrowRight, User, Phone, Mail } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, XCircle, CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface Answer {
   text: string;
@@ -81,6 +80,40 @@ const questions: Question[] = [
   },
 ];
 
+// Contact steps after quiz
+const CONTACT_STEPS = [
+  {
+    key: "name" as keyof ContactData,
+    question: "Wie heißt du?",
+    subtitle: "Damit wir dich persönlich ansprechen können.",
+    placeholder: "Vor- & Nachname",
+    type: "text",
+    hint: null,
+    buttonLabel: "Weiter",
+  },
+  {
+    key: "phone" as keyof ContactData,
+    question: "Wie lautet deine Handynummer?",
+    subtitle: "Wir melden uns persönlich bei dir.",
+    placeholder: "+49 151 12345678",
+    type: "tel",
+    hint: "(am besten WhatsApp vorhanden)",
+    buttonLabel: "Weiter",
+  },
+  {
+    key: "email" as keyof ContactData,
+    question: "Wie lautet deine E-Mail Adresse?",
+    subtitle: "Du erhältst eine kurze Bestätigung von uns.",
+    placeholder: "max@beispiel.de",
+    type: "email",
+    hint: null,
+    buttonLabel: "Jetzt kostenloses Gespräch sichern 🚀",
+  },
+];
+
+// Total visual steps: 5 quiz + 3 contact = 8
+const TOTAL_STEPS = questions.length + CONTACT_STEPS.length;
+
 type Stage = "quiz" | "qualified" | "contact";
 
 interface MiniFunnelProps {
@@ -90,75 +123,110 @@ interface MiniFunnelProps {
 }
 
 export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: MiniFunnelProps) {
-  const [step, setStep] = useState(0);
+  const [quizStep, setQuizStep] = useState(0);
+  const [contactStep, setContactStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [contact, setContact] = useState<ContactData>({ name: "", phone: "", email: "" });
+  const [inputValue, setInputValue] = useState("");
+  const [inputError, setInputError] = useState("");
   const [disqualified, setDisqualified] = useState(false);
   const [stage, setStage] = useState<Stage>("quiz");
-  const [contact, setContact] = useState<ContactData>({ name: "", phone: "", email: "" });
-  const [errors, setErrors] = useState<Partial<ContactData>>({});
   const [submitting, setSubmitting] = useState(false);
   const partialSavedRef = useRef<Set<string>>(new Set());
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const currentQuestion = questions[step];
-  const progress = stage === "contact"
-    ? 100
+  // Focus input when entering contact step
+  useEffect(() => {
+    if (stage === "contact") {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [stage, contactStep]);
+
+  const currentQuestion = questions[quizStep];
+  const currentContactStep = CONTACT_STEPS[contactStep];
+
+  // Progress calculation
+  const visualStep = stage === "quiz"
+    ? quizStep + 1
     : stage === "qualified"
-    ? 95
-    : ((step + 1) / questions.length) * 100;
+    ? questions.length + 0.5
+    : questions.length + contactStep + 1;
+
+  const progress = Math.round((visualStep / TOTAL_STEPS) * 100);
 
   const handleAnswer = (answer: Answer) => {
-    onTrackEvent(`funnel_q${step + 1}`);
-
+    onTrackEvent(`funnel_q${quizStep + 1}`);
     if (answer.disqualify) {
       onTrackEvent("funnel_disqualified");
       setDisqualified(true);
       return;
     }
-
     const newAnswers = { ...answers, [currentQuestion.id]: answer.text };
     setAnswers(newAnswers);
 
-    if (step === questions.length - 1) {
+    if (quizStep === questions.length - 1) {
       onTrackEvent("funnel_qualified");
       setStage("qualified");
-      setTimeout(() => setStage("contact"), 2000);
+      setTimeout(() => {
+        setStage("contact");
+        setInputValue("");
+      }, 1800);
       return;
     }
-    setStep((prev) => prev + 1);
+    setQuizStep((prev) => prev + 1);
+  };
+
+  const validateContactInput = (val: string, key: keyof ContactData) => {
+    if (!val.trim()) return "Bitte füll dieses Feld aus";
+    if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val))
+      return "Bitte gib eine gültige E-Mail ein";
+    return "";
+  };
+
+  const handlePartialSave = (key: keyof ContactData, val: string) => {
+    if (!val || partialSavedRef.current.has(key)) return;
+    partialSavedRef.current.add(key);
+    const updated = { ...contact, [key]: val };
+    onPartialSave?.(updated, answers);
+  };
+
+  const handleContactNext = async () => {
+    const err = validateContactInput(inputValue, currentContactStep.key);
+    if (err) { setInputError(err); return; }
+
+    const updated = { ...contact, [currentContactStep.key]: inputValue };
+    setContact(updated);
+    handlePartialSave(currentContactStep.key, inputValue);
+
+    if (contactStep === CONTACT_STEPS.length - 1) {
+      setSubmitting(true);
+      onTrackEvent("funnel_contact_submitted");
+      await onComplete(answers, updated);
+      setSubmitting(false);
+    } else {
+      setContactStep((prev) => prev + 1);
+      setInputValue("");
+      setInputError("");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleContactNext();
   };
 
   const handleBack = () => {
+    setInputError("");
     if (stage === "contact") {
-      setStage("quiz");
-      setStep(questions.length - 1);
-    } else if (step > 0) {
-      setStep((prev) => prev - 1);
+      if (contactStep === 0) {
+        setStage("quiz");
+        setQuizStep(questions.length - 1);
+      } else {
+        setContactStep((prev) => prev - 1);
+        setInputValue(contact[CONTACT_STEPS[contactStep - 1].key]);
+      }
+    } else if (quizStep > 0) {
+      setQuizStep((prev) => prev - 1);
     }
-  };
-
-  const handlePartialSave = (field: keyof ContactData, value: string) => {
-    if (!value || partialSavedRef.current.has(field)) return;
-    partialSavedRef.current.add(field);
-    onPartialSave?.({ ...contact, [field]: value }, answers);
-  };
-
-  const validateContact = () => {
-    const errs: Partial<ContactData> = {};
-    if (!contact.name.trim()) errs.name = "Bitte gib deinen Namen ein";
-    if (!contact.phone.trim()) errs.phone = "Bitte gib deine Telefonnummer ein";
-    if (!contact.email.trim()) errs.email = "Bitte gib deine E-Mail ein";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) errs.email = "Bitte gib eine gültige E-Mail ein";
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateContact()) return;
-    setSubmitting(true);
-    onTrackEvent("funnel_contact_submitted");
-    await onComplete(answers, contact);
-    setSubmitting(false);
   };
 
   // DISQUALIFIED
@@ -186,29 +254,28 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
   // QUALIFIED TRANSITION
   if (stage === "qualified") {
     return (
-      <div className="w-full max-w-2xl mx-auto text-center py-8 sm:py-12 animate-in fade-in duration-500">
-        <div className="flex justify-center mb-5">
-          <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-green-500/10 flex items-center justify-center">
-            <CheckCircle className="h-11 w-11 sm:h-14 sm:w-14 text-green-500" />
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="mb-5 sm:mb-7">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs sm:text-sm text-muted-foreground font-medium">Fast fertig...</span>
+            <span className="text-xs sm:text-sm text-primary font-bold">{progress}% abgeschlossen</span>
           </div>
+          <Progress value={progress} className="h-2 sm:h-2.5" />
         </div>
-        <div className="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs sm:text-sm font-semibold mb-4">
-          ✅ Du bist qualifiziert!
-        </div>
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
-          Perfekt — du passt zu uns! 🎉
-        </h2>
-        <p className="text-sm sm:text-base text-muted-foreground max-w-sm mx-auto leading-relaxed">
-          Einen Moment noch — wir leiten dich gleich zum nächsten Schritt weiter...
-        </p>
-        <div className="mt-6 flex justify-center">
-          <div className="flex gap-1.5">
+        <div className="text-center py-6 sm:py-10 animate-in fade-in duration-500">
+          <div className="flex justify-center mb-5">
+            <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle className="h-12 w-12 text-green-500" />
+            </div>
+          </div>
+          <div className="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs sm:text-sm font-semibold mb-4">
+            ✅ Du bist qualifiziert!
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3">Perfekt — du passt zu uns! 🎉</h2>
+          <p className="text-sm text-muted-foreground">Einen Moment noch...</p>
+          <div className="mt-5 flex justify-center gap-1.5">
             {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-2 w-2 rounded-full bg-primary animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              />
+              <div key={i} className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
             ))}
           </div>
         </div>
@@ -216,101 +283,52 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
     );
   }
 
-  // CONTACT FORM
+  // CONTACT INPUT STEP (fließend)
   if (stage === "contact") {
+    const isLast = contactStep === CONTACT_STEPS.length - 1;
     return (
-      <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-400">
         <div className="mb-5 sm:mb-7">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-              Letzter Schritt
+              Schritt {questions.length + contactStep + 1} von {TOTAL_STEPS}
             </span>
-            <span className="text-xs sm:text-sm text-primary font-bold">
-              100% abgeschlossen
-            </span>
+            <span className="text-xs sm:text-sm text-primary font-bold">{progress}% abgeschlossen</span>
           </div>
-          <Progress value={100} className="h-2 sm:h-2.5" />
+          <Progress value={progress} className="h-2 sm:h-2.5" />
         </div>
 
-        <div className="text-center mb-6">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 leading-tight">
-            Wo sollen wir dich erreichen?
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Damit wir uns persönlich bei dir melden können 👇
-          </p>
-        </div>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground text-center mb-2 leading-tight px-1">
+          {currentContactStep.question}
+        </h2>
+        <p className="text-sm text-muted-foreground text-center mb-5 sm:mb-6 px-2">
+          {currentContactStep.subtitle}
+        </p>
 
-        <form onSubmit={handleContactSubmit} className="space-y-4 sm:space-y-5">
-          {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="name" className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-              <User className="h-3.5 w-3.5 text-primary" />
-              Vor- & Nachname
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Max Mustermann"
-              value={contact.name}
-              onChange={(e) => {
-                setContact((c) => ({ ...c, name: e.target.value }));
-                if (errors.name) setErrors((er) => ({ ...er, name: undefined }));
-              }}
-              onBlur={(e) => handlePartialSave("name", e.target.value)}
-              className={`h-12 text-base ${errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-            />
-            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
-          </div>
-
-          {/* Phone */}
-          <div className="space-y-1.5">
-            <Label htmlFor="phone" className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-              <Phone className="h-3.5 w-3.5 text-primary" />
-              Handynummer
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="+49 151 12345678"
-              value={contact.phone}
-              onChange={(e) => {
-                setContact((c) => ({ ...c, phone: e.target.value }));
-                if (errors.phone) setErrors((er) => ({ ...er, phone: undefined }));
-              }}
-              onBlur={(e) => handlePartialSave("phone", e.target.value)}
-              className={`h-12 text-base ${errors.phone ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-            />
-            {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
-            <p className="text-xs text-muted-foreground">📱 Wird auch für WhatsApp genutzt</p>
-          </div>
-
-          {/* Email */}
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5 text-primary" />
-              E-Mail Adresse
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="max@beispiel.de"
-              value={contact.email}
-              onChange={(e) => {
-                setContact((c) => ({ ...c, email: e.target.value }));
-                if (errors.email) setErrors((er) => ({ ...er, email: undefined }));
-              }}
-              onBlur={(e) => handlePartialSave("email", e.target.value)}
-              className={`h-12 text-base ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-            />
-            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
-          </div>
+        <div className="space-y-3">
+          <Input
+            ref={inputRef}
+            type={currentContactStep.type}
+            placeholder={currentContactStep.placeholder}
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              if (inputError) setInputError("");
+            }}
+            onKeyDown={handleKeyDown}
+            onBlur={(e) => handlePartialSave(currentContactStep.key, e.target.value)}
+            className={`h-14 text-base text-center rounded-xl border-2 ${inputError ? "border-red-500 focus-visible:ring-red-500" : "border-primary/30 focus-visible:border-primary"}`}
+          />
+          {currentContactStep.hint && (
+            <p className="text-xs text-muted-foreground text-center">{currentContactStep.hint}</p>
+          )}
+          {inputError && <p className="text-xs text-red-500 text-center">{inputError}</p>}
 
           <Button
-            type="submit"
-            size="lg"
+            onClick={handleContactNext}
             disabled={submitting}
-            className="w-full h-13 text-base font-bold mt-2"
+            size="lg"
+            className={`w-full h-13 font-bold mt-1 ${isLast ? "cta-blink" : ""}`}
           >
             {submitting ? (
               <span className="flex items-center gap-2">
@@ -319,18 +337,12 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                Jetzt kostenloses Gespräch sichern
-                <ArrowRight className="h-5 w-5" />
+                {currentContactStep.buttonLabel}
+                {!isLast && <ArrowRight className="h-5 w-5" />}
               </span>
             )}
           </Button>
-
-          <div className="flex flex-col gap-1.5 pt-1">
-            {["🔒 100% sicher — keine Weitergabe an Dritte", "✅ Kein Spam, nur persönlicher Kontakt", "⚡ Wir melden uns innerhalb von 24h"].map((item, i) => (
-              <p key={i} className="text-xs text-muted-foreground text-center">{item}</p>
-            ))}
-          </div>
-        </form>
+        </div>
 
         <div className="mt-4 flex justify-center">
           <Button variant="ghost" onClick={handleBack} className="text-muted-foreground h-10 touch-manipulation">
@@ -342,7 +354,7 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
     );
   }
 
-  // QUIZ QUESTIONS
+  // QUIZ ANSWER STEP
   const cols =
     currentQuestion.answers.length >= 5
       ? "grid-cols-1 sm:grid-cols-2"
@@ -357,11 +369,9 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
       <div className="mb-5 sm:mb-7">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-            Schritt {step + 1} von {questions.length}
+            Schritt {quizStep + 1} von {TOTAL_STEPS}
           </span>
-          <span className="text-xs sm:text-sm text-primary font-bold">
-            {Math.round(progress)}% abgeschlossen
-          </span>
+          <span className="text-xs sm:text-sm text-primary font-bold">{progress}% abgeschlossen</span>
         </div>
         <Progress value={progress} className="h-2 sm:h-2.5" />
       </div>
@@ -394,7 +404,7 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
         ))}
       </div>
 
-      {step > 0 && (
+      {quizStep > 0 && (
         <div className="mt-4 sm:mt-5 flex justify-center">
           <Button variant="ghost" onClick={handleBack} className="text-muted-foreground h-10 sm:h-11 touch-manipulation">
             <ChevronLeft className="h-4 w-4 mr-1.5" />
