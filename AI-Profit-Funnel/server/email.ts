@@ -65,7 +65,7 @@ Automatisch gesendet von deinem KI-Klick Methode Funnel
       },
       body: JSON.stringify({
         sender: { name: 'KI-Klick Methode', email: 'noreply@geheime-ki-klickmethode.de' },
-        to: [{ email: 'ki.klick.methode@gmail.com' }],
+        to: [{ email: 'agenturmehler@gmail.com' }],
         subject: `🎯 Neuer Lead: ${lead.name}`,
         textContent,
       }),
