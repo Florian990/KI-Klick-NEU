@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-  Calendar, Users, UserPlus, UserCheck, Play, CheckCircle, XCircle,
-  RefreshCw, Lock, Download, Eye, MousePointer, TrendingUp, PhoneCall,
-  ChevronRight, BarChart3, Trash2
+  Users, UserPlus, UserCheck, Play, CheckCircle,
+  RefreshCw, Lock, Download, Eye, MousePointer, TrendingUp,
+  BarChart3, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,10 +24,16 @@ interface StatsData {
   funnelQ1: number;
   funnelQ2: number;
   funnelQ3: number;
+  funnelQ4: number;
+  funnelQ5: number;
   funnelDisqualified: number;
   funnelQualified: number;
-  calendlyOpen: number;
+  contactViewName: number;
+  contactViewPhone: number;
+  contactViewEmail: number;
+  contactSubmitted: number;
   leadsGenerated: number;
+  calendlyOpen: number;
 }
 
 function pct(num: number, denom: number) {
@@ -87,7 +93,7 @@ function FunnelRow({
       <div className="flex-1 bg-muted rounded-full h-2.5">
         <div
           className={`h-2.5 rounded-full transition-all ${color}`}
-          style={{ width: `${percentage}%` }}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </div>
       <span className="text-sm font-bold tabular-nums text-foreground w-10 text-right flex-shrink-0">{value}</span>
@@ -406,6 +412,39 @@ export default function AdminStatsPage() {
         {!isLoading && stats && (
           <div className="space-y-6">
 
+            {/* CONVERSION ÜBERSICHT */}
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-5 sm:p-6">
+                <SectionHeader
+                  icon={<CheckCircle className="h-4 w-4 text-primary" />}
+                  title="Conversion-Übersicht"
+                  color="bg-primary/10"
+                />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
+                    <p className="text-xs text-muted-foreground mb-1">Eintragungen</p>
+                    <p className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">{stats.contactSubmitted}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Formular abgeschlossen</p>
+                  </div>
+                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
+                    <p className="text-xs text-muted-foreground mb-1">Besucher → Eintragung</p>
+                    <p className="text-3xl sm:text-4xl font-bold text-green-600 tabular-nums">{pct(stats.contactSubmitted, stats.uniqueVisitors)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.contactSubmitted} von {stats.uniqueVisitors} Besuchern</p>
+                  </div>
+                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
+                    <p className="text-xs text-muted-foreground mb-1">Qualifiziert → Eintragung</p>
+                    <p className="text-3xl sm:text-4xl font-bold text-green-600 tabular-nums">{pct(stats.contactSubmitted, stats.funnelQualified)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.contactSubmitted} von {stats.funnelQualified} Qualifizierten</p>
+                  </div>
+                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
+                    <p className="text-xs text-muted-foreground mb-1">CTA-Klickrate</p>
+                    <p className="text-3xl sm:text-4xl font-bold text-amber-600 tabular-nums">{pct(stats.ctaClick, stats.ctaShown)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.ctaClick} von {stats.ctaShown} Aufrufen</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* TRAFFIC */}
             <Card>
               <CardContent className="p-5 sm:p-6">
@@ -465,7 +504,7 @@ export default function AdminStatsPage() {
                 <div className="space-y-1.5">
                   <FunnelRow step="▶" label="Video gestartet" value={stats.videoStart} base={stats.uniqueVisitors} color="bg-orange-400" />
                   <FunnelRow step="25" label="25% gesehen" value={stats.video25} base={stats.videoStart} color="bg-orange-400" />
-                  <FunnelRow step="50" label="50% gesehen (CTA-Unlock)" value={stats.video50} base={stats.videoStart} color="bg-orange-400" />
+                  <FunnelRow step="50" label="50% gesehen" value={stats.video50} base={stats.videoStart} color="bg-orange-400" />
                   <FunnelRow step="75" label="75% gesehen" value={stats.video75} base={stats.videoStart} color="bg-orange-400" />
                   <FunnelRow step="✓" label="100% gesehen" value={stats.video100} base={stats.videoStart} color="bg-green-500" />
                 </div>
@@ -484,7 +523,7 @@ export default function AdminStatsPage() {
                   <StatCard
                     label="CTA eingeblendet"
                     value={stats.ctaShown}
-                    sub={pct(stats.ctaShown, stats.videoStart) + " der Video-Starts"}
+                    sub={pct(stats.ctaShown, stats.uniqueVisitors) + " der Besucher"}
                     icon={<Eye className="h-5 w-5 text-amber-600" />}
                     color="bg-amber-500/10"
                   />
@@ -530,34 +569,48 @@ export default function AdminStatsPage() {
                   <FunnelRow step="1" label="Frage 1 beantwortet" value={stats.funnelQ1} base={stats.funnelStart} color="bg-indigo-400" />
                   <FunnelRow step="2" label="Frage 2 beantwortet" value={stats.funnelQ2} base={stats.funnelStart} color="bg-indigo-400" />
                   <FunnelRow step="3" label="Frage 3 beantwortet" value={stats.funnelQ3} base={stats.funnelStart} color="bg-indigo-400" />
+                  <FunnelRow step="4" label="Frage 4 beantwortet" value={stats.funnelQ4} base={stats.funnelStart} color="bg-indigo-400" />
+                  <FunnelRow step="5" label="Frage 5 beantwortet" value={stats.funnelQ5} base={stats.funnelStart} color="bg-indigo-400" />
                   <FunnelRow step="✓" label="Qualifiziert" value={stats.funnelQualified} base={stats.funnelStart} color="bg-green-500" />
                   <FunnelRow step="✗" label="Disqualifiziert" value={stats.funnelDisqualified} base={stats.funnelStart} color="bg-red-400" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* SALES */}
+            {/* OPT-IN / EINTRAGUNG */}
             <Card>
               <CardContent className="p-5 sm:p-6">
                 <SectionHeader
-                  icon={<PhoneCall className="h-4 w-4 text-green-600" />}
-                  title="Sales"
+                  icon={<UserPlus className="h-4 w-4 text-green-600" />}
+                  title="Opt-in / Eintragung"
                   color="bg-green-500/10"
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <StatCard
-                    label="Calendly geöffnet"
-                    value={stats.calendlyOpen}
-                    sub={pct(stats.calendlyOpen, stats.funnelQualified) + " der Qualifizierten"}
-                    icon={<Calendar className="h-5 w-5 text-green-600" />}
-                    color="bg-green-500/10"
-                  />
-                  <div className="bg-muted/50 rounded-xl p-5 flex flex-col justify-center">
-                    <p className="text-xs text-muted-foreground mb-1">Gesamt-Conversion</p>
-                    <p className="text-4xl font-bold text-green-600 tabular-nums">{pct(stats.calendlyOpen, stats.uniqueVisitors)}</p>
-                    <p className="text-sm text-muted-foreground mt-1">Besucher → Calendly</p>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="bg-muted/50 rounded-xl p-4 text-center">
+                    <p className="text-3xl font-bold tabular-nums text-green-600">{stats.funnelQualified}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Qualifiziert</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-xl p-4 text-center">
+                    <p className="text-3xl font-bold tabular-nums text-primary">{stats.contactSubmitted}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Formular abgeschlossen</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-xl p-4 text-center">
+                    <p className="text-3xl font-bold tabular-nums text-foreground">{stats.leadsGenerated}</p>
+                    <p className="text-xs text-muted-foreground mt-1">DB-Einträge*</p>
                   </div>
                 </div>
+                <div className="space-y-1.5">
+                  <FunnelRow step="✓" label="Qualifiziert" value={stats.funnelQualified} base={stats.funnelQualified} color="bg-green-500" />
+                  <FunnelRow step="1" label="Name-Schritt gesehen" value={stats.contactViewName} base={stats.funnelQualified} color="bg-teal-400" />
+                  <FunnelRow step="2" label="Telefon-Schritt gesehen" value={stats.contactViewPhone} base={stats.funnelQualified} color="bg-teal-400" />
+                  <FunnelRow step="3" label="E-Mail-Schritt gesehen" value={stats.contactViewEmail} base={stats.funnelQualified} color="bg-teal-400" />
+                  <FunnelRow step="📨" label="Formular abgeschlossen" value={stats.contactSubmitted} base={stats.funnelQualified} color="bg-indigo-500" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+                  Zeigt, wo qualifizierte Nutzer beim Ausfüllen des Kontaktformulars abspringen. „Formular abgeschlossen" ist die verlässliche Eintragungs-Zahl (genau 1 Event pro Abschluss).
+                  <br />
+                  <span className="text-muted-foreground/80">*„DB-Einträge" zählt alle Lead-Zeilen in der Datenbank im Zeitraum. Durch automatische Zwischenspeicherung (ab dem Telefon-Schritt) kann eine Person mehrere Zeilen erzeugen — diese Zahl ist daher meist höher als die abgeschlossenen Eintragungen.</span>
+                </p>
               </CardContent>
             </Card>
 

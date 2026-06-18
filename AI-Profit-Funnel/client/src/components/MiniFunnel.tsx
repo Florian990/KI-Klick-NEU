@@ -134,11 +134,18 @@ export default function MiniFunnel({ onComplete, onPartialSave, onTrackEvent }: 
   const [stage, setStage] = useState<Stage>("quiz");
   const [submitting, setSubmitting] = useState(false);
   const partialSavedRef = useRef<Set<string>>(new Set());
+  const viewedContactStepsRef = useRef<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input when entering contact step
+  // Focus input + track which contact step is viewed — fired ONCE per step per funnel run
+  // (back-navigation does NOT re-fire, so drop-off counts stay clean and never exceed 100%)
   useEffect(() => {
     if (stage === "contact") {
+      const key = CONTACT_STEPS[contactStep].key;
+      if (!viewedContactStepsRef.current.has(key)) {
+        viewedContactStepsRef.current.add(key);
+        onTrackEvent(`contact_view_${key}`);
+      }
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [stage, contactStep]);

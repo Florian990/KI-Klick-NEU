@@ -26,6 +26,7 @@ export default function QuizLandingPage() {
 
   useEffect(() => {
     trackPageView("/");
+    trackEvent("cta_shown");
     if (typeof window !== "undefined" && (window as any).fbq) {
       (window as any).fbq("track", "PageView");
     }

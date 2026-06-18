@@ -178,8 +178,8 @@ export async function registerRoutes(
     }
   });
 
-  // Get all leads (for admin purposes - could be protected later)
-  app.get("/api/leads", async (req, res) => {
+  // Get all leads (admin only — returns lead PII, must stay behind Basic Auth)
+  app.get("/api/leads", basicAuth, async (req, res) => {
     try {
       const leads = await storage.getLeads();
       res.json(leads);
@@ -304,17 +304,24 @@ export async function registerRoutes(
           // CTA
           ctaShown: count('cta_shown'),
           ctaClick: count('cta_click'),
-          // Funnel
+          // Quiz funnel (all 5 questions)
           funnelStart: count('funnel_start'),
           funnelQ1: count('funnel_q1'),
           funnelQ2: count('funnel_q2'),
           funnelQ3: count('funnel_q3'),
+          funnelQ4: count('funnel_q4'),
+          funnelQ5: count('funnel_q5'),
           funnelDisqualified: count('funnel_disqualified'),
           funnelQualified: count('funnel_qualified'),
-          // Sales
-          calendlyOpen: count('calendly_open'),
-          // Legacy support
+          // Opt-in / contact form (drop-off analysis)
+          contactViewName: count('contact_view_name'),
+          contactViewPhone: count('contact_view_phone'),
+          contactViewEmail: count('contact_view_email'),
+          contactSubmitted: count('funnel_contact_submitted'),
+          // Leads actually saved to the database (source of truth)
           leadsGenerated: leadsInRange.length,
+          // Legacy (kept for backward compatibility; no longer featured)
+          calendlyOpen: count('calendly_open'),
         }
       });
     } catch (error) {
