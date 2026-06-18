@@ -29,6 +29,18 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
 
 const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/";
 
+// Secret that authorizes "test mode" (skips DB + CRM writes for the admin's own runs).
+// Fail-safe: if it is not configured, NO request can ever suppress a real lead.
+const ADMIN_TEST_TOKEN = process.env.ADMIN_TEST_TOKEN || "";
+function isAuthorizedTest(body: any): boolean {
+  return (
+    body?.test === true &&
+    ADMIN_TEST_TOKEN.length > 0 &&
+    typeof body?.testToken === "string" &&
+    body.testToken === ADMIN_TEST_TOKEN
+  );
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -41,13 +53,6 @@ export async function registerRoutes(
         frage_1_alter, frage_2_situation, frage_3_ziel,
         frage_4_finanzielles_ziel, frage_5_zeitaufwand } = req.body;
 
-      // Save lead to DB
-      if (name || email || phone) {
-        try {
-          await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
-        } catch {}
-      }
-
       // Reconstruct answers object from either format the frontend may send
       const quizAnswers = answers ?? {
         ...(frage_1_alter       && { 1: frage_1_alter }),
@@ -57,11 +62,32 @@ export async function registerRoutes(
         ...(frage_5_zeitaufwand && { 5: frage_5_zeitaufwand }),
       };
 
-      // Forward to Zapier (Close CRM)
+      // TEST MODE (admin only, token-verified): still send the notification email so the
+      // funnel can be verified, but never write to the DB or forward to the CRM.
+      if (isAuthorizedTest(req.body)) {
+        sendLeadNotification({
+          name: name || "Unbekannt",
+          email: email || null,
+          phone: phone || null,
+          source: "Quiz Funnel (TEST)",
+          quizAnswers,
+        }).catch((err) => console.error("Email notification error:", err));
+        return res.status(200).json({ success: true, test: true });
+      }
+
+      // Save lead to DB
+      if (name || email || phone) {
+        try {
+          await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
+        } catch {}
+      }
+
+      // Forward to Zapier (Close CRM) — strip internal test fields from the payload
+      const { test: _omitTest, testToken: _omitTestToken, ...zapierPayload } = req.body || {};
       const zapierPromise = fetch(ZAPIER_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(req.body),
+        body: JSON.stringify(zapierPayload),
       });
 
       // Send email notification independently — never blocks or breaks the main flow
@@ -85,6 +111,7 @@ export async function registerRoutes(
   app.post("/api/quiz-partial", async (req, res) => {
     try {
       const { name, email, phone } = req.body;
+      if (isAuthorizedTest(req.body)) return res.status(200).json({ success: true, test: true });
       if (!email && !phone) return res.status(200).json({ success: true });
       try {
         await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
@@ -253,6 +280,13 @@ export async function registerRoutes(
       console.error("Error exporting leads:", error);
       res.status(500).json({ success: false, message: "Export fehlgeschlagen" });
     }
+  });
+
+  // Returns the admin test token to an authenticated admin, so the dashboard toggle
+  // can activate test mode on this device. Returns null when not configured.
+  app.get("/api/test-token", basicAuth, (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ token: ADMIN_TEST_TOKEN || null });
   });
 
   // Analytics: Get stats for date range (protected with Basic Auth)

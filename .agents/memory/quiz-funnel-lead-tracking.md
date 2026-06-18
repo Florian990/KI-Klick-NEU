@@ -30,3 +30,24 @@ history and only collect from deploy forward — tell the user this.
 
 **How to apply:** Per-funnel-run dedup of view events uses a `useRef<Set>` in MiniFunnel
 (`viewedContactStepsRef`) so back-navigation never double-counts (keeps drop-off ≤100%).
+
+# Admin "test mode" must be gated by a server secret, not a client flag
+
+The funnel completion endpoints (`/api/quiz-complete`, `/api/quiz-partial`) are PUBLIC.
+A client-supplied boolean (`test:true`) must NEVER be allowed to skip `createLead` /
+Zapier forwarding — any visitor or script could send it and suppress real leads.
+
+**Rule:** Suppression is gated by `isAuthorizedTest(body)` = `body.test===true &&
+ADMIN_TEST_TOKEN.length>0 && body.testToken===process.env.ADMIN_TEST_TOKEN`. Fail-safe:
+if the env var is unset, nothing can suppress a lead. The admin obtains the token via
+`GET /api/test-token` (behind basicAuth); the dashboard toggle fetches+stores it, and
+`?test=<token>` works on other devices. Client side (useAnalytics.ts) only prefixes the
+visitorId with `test-` (the stats-exclusion mechanism) when a token is stored locally —
+that part is best-effort (a visitor can only hide themselves from analytics, not affect
+leads). Strip `test`/`testToken` from the outbound Zapier payload. Don't log response
+bodies for `/api/test-token` or `/api/leads` (token + PII) in server/index.ts.
+
+**Why:** Architect FAILed the first version (client-trusted suppression = data-integrity
+bypass). **Render deploy note:** this app runs on Render (Replit env vars do NOT
+propagate there) — the SAME `ADMIN_TEST_TOKEN` must be set in Render's env for prod test
+mode; until then prod test mode is inert (safe).

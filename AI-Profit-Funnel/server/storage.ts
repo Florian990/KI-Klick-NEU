@@ -83,7 +83,8 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(pageViews).where(
       and(
         gte(pageViews.createdAt, startDate),
-        lte(pageViews.createdAt, endDate)
+        lte(pageViews.createdAt, endDate),
+        sql`${pageViews.visitorId} NOT LIKE 'test-%'`
       )
     ).orderBy(sql`${pageViews.createdAt} DESC`);
   }
@@ -92,7 +93,8 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(analyticsEvents).where(
       and(
         gte(analyticsEvents.createdAt, startDate),
-        lte(analyticsEvents.createdAt, endDate)
+        lte(analyticsEvents.createdAt, endDate),
+        sql`${analyticsEvents.visitorId} NOT LIKE 'test-%'`
       )
     ).orderBy(sql`${analyticsEvents.createdAt} DESC`);
   }
@@ -103,7 +105,8 @@ export class DatabaseStorage implements IStorage {
     }).from(pageViews).where(
       and(
         gte(pageViews.createdAt, startDate),
-        lte(pageViews.createdAt, endDate)
+        lte(pageViews.createdAt, endDate),
+        sql`${pageViews.visitorId} NOT LIKE 'test-%'`
       )
     );
     return Number(result[0]?.count || 0);
@@ -116,7 +119,8 @@ export class DatabaseStorage implements IStorage {
     }).from(pageViews).where(
       and(
         gte(pageViews.createdAt, startDate),
-        lte(pageViews.createdAt, endDate)
+        lte(pageViews.createdAt, endDate),
+        sql`${pageViews.visitorId} NOT LIKE 'test-%'`
       )
     ).groupBy(pageViews.visitorId);
     

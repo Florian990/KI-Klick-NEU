@@ -41,6 +41,7 @@ externalPort = 80
 [userenv.shared]
 ADMIN_USERNAME = "Admin"
 ADMIN_PASSWORD = "Erfolg2026!"
+ADMIN_TEST_TOKEN = "4a2e524aba36ca315f8131cc30a3e98acf35"
 
 [deployment]
 deploymentTarget = "autoscale"

@@ -44,11 +44,16 @@ app.use((req, res, next) => {
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
+  // Endpoints whose responses contain secrets or personal data must not have their
+  // bodies written to the request log.
+  const sensitivePaths = ["/api/test-token", "/api/leads"];
+
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
+      const isSensitive = sensitivePaths.some((p) => path.startsWith(p));
+      if (capturedJsonResponse && !isSensitive) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 

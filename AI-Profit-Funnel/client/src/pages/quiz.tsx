@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAnalytics, getTestToken } from "@/hooks/useAnalytics";
 import MiniFunnel, { ContactData } from "@/components/MiniFunnel";
 import { useEffect } from "react";
 
@@ -12,6 +12,7 @@ export default function QuizPage() {
   }, []);
 
   const handlePartialSave = (contact: Partial<ContactData>, answers: Record<number, string>) => {
+    const testToken = getTestToken();
     const payload = {
       name: contact.name ?? "",
       phone: contact.phone ?? "",
@@ -23,6 +24,8 @@ export default function QuizPage() {
       frage_5_zeitaufwand: answers[5] ?? "",
       quelle: "KI-Klick Methode Quiz (Partial)",
       partial: true,
+      test: testToken !== null,
+      testToken: testToken ?? undefined,
     };
     navigator.sendBeacon(
       "/api/quiz-partial",
@@ -31,6 +34,7 @@ export default function QuizPage() {
   };
 
   const handleComplete = async (answers: Record<number, string>, contact: ContactData) => {
+    const testToken = getTestToken();
     const payload = JSON.stringify({
       name: contact.name,
       phone: contact.phone,
@@ -42,6 +46,8 @@ export default function QuizPage() {
       frage_5_zeitaufwand: answers[5] ?? "",
       quelle: "KI-Klick Methode Quiz",
       timestamp: new Date().toISOString(),
+      test: testToken !== null,
+      testToken: testToken ?? undefined,
     });
 
     try {

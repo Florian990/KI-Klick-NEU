@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { isTestMode, setTestToken } from "@/hooks/useAnalytics";
 
 interface StatsData {
   totalPageViews: number;
@@ -125,6 +126,7 @@ export default function AdminStatsPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [testMode, setTestModeState] = useState(() => isTestMode());
 
   const today = new Date();
   const [startDate, setStartDate] = useState(() => {
@@ -137,6 +139,28 @@ export default function AdminStatsPage() {
   const getAuthHeader = () => {
     const credentials = sessionStorage.getItem("adminCredentials");
     return credentials ? `Basic ${credentials}` : null;
+  };
+
+  const handleToggleTestMode = async () => {
+    if (testMode) {
+      setTestToken(null);
+      setTestModeState(false);
+      return;
+    }
+    const authHeader = getAuthHeader();
+    if (!authHeader) { setIsAuthenticated(false); return; }
+    try {
+      const res = await fetch("/api/test-token", { headers: { Authorization: authHeader } });
+      const data = await res.json();
+      if (data?.token) {
+        setTestToken(data.token);
+        setTestModeState(true);
+      } else {
+        setError("Kein Test-Token konfiguriert. Bitte ADMIN_TEST_TOKEN in den Secrets setzen (in Replit und auf Render).");
+      }
+    } catch {
+      setError("Testmodus konnte nicht aktiviert werden.");
+    }
   };
 
   const fetchStats = async (start?: string, end?: string) => {
@@ -344,11 +368,26 @@ export default function AdminStatsPage() {
               <Trash2 className="h-4 w-4 mr-2" />
               {isResetting ? "Wird gelöscht..." : "Daten zurücksetzen"}
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleTestMode}
+              className={testMode ? "text-amber-600 border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20" : ""}
+              title="Wenn aktiv, werden deine eigenen Durchläufe auf diesem Gerät nicht mitgezählt."
+            >
+              {testMode ? "🧪 Testmodus AN" : "Testmodus aus"}
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               Abmelden
             </Button>
           </div>
         </div>
+
+        {testMode && (
+          <div className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+            🧪 <strong>Testmodus ist aktiv</strong> – Deine eigenen Funnel-Durchläufe auf diesem Gerät/Browser werden NICHT in den Statistiken gezählt und erzeugen keinen Lead-Eintrag (die Test-Mail wird trotzdem versendet). Zum echten Tracken wieder ausschalten.
+          </div>
+        )}
 
         {/* Time Filter */}
         <Card className="mb-6">
