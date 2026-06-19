@@ -35,6 +35,23 @@ export default function VSLPage() {
     script.async = true;
     document.body.appendChild(script);
 
+    // Preload YouTube so the player appears fast and the box doesn't stay black.
+    // Idempotent: never add duplicates across re-mounts.
+    if (!document.querySelector('link[data-yt-preconnect]')) {
+      const ytPreconnect = document.createElement('link');
+      ytPreconnect.rel = 'preconnect';
+      ytPreconnect.href = 'https://www.youtube.com';
+      ytPreconnect.setAttribute('data-yt-preconnect', '');
+      document.head.appendChild(ytPreconnect);
+    }
+
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const ytApi = document.createElement('script');
+      ytApi.src = 'https://www.youtube.com/iframe_api';
+      ytApi.async = true;
+      document.head.appendChild(ytApi);
+    }
+
     return () => {
       document.head.removeChild(link);
       document.body.removeChild(script);
@@ -44,10 +61,12 @@ export default function VSLPage() {
   useEffect(() => {
     if (!showVideo) return;
 
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    if (!window.YT && !document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
 
     window.onYouTubeIframeAPIReady = () => {
       playerRef.current = new window.YT.Player('youtube-player', {
@@ -199,6 +218,14 @@ export default function VSLPage() {
                 onClick={startVideo}
                 data-testid="button-play-video"
               >
+                <img
+                  src="https://img.youtube.com/vi/ZYc4uDJxE2A/maxresdefault.jpg"
+                  alt="Video Vorschau"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://img.youtube.com/vi/ZYc4uDJxE2A/hqdefault.jpg";
+                  }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
                 <div className="text-center relative z-10">
                   <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 mx-auto rounded-full bg-primary flex items-center justify-center transition-transform group-hover:scale-110 mb-3 sm:mb-4">
