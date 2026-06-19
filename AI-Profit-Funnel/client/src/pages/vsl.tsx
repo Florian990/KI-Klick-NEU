@@ -1,4 +1,4 @@
-import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar } from "lucide-react";
+import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar, Star } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -334,6 +334,41 @@ export default function VSLPage() {
         </div>
       </section>
 
+      {/* Video Testimonials Section */}
+      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <span className="highlight text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed">
+              Echte Erfahrungsberichte unserer Teilnehmer
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-3xl mx-auto">
+            {[
+              { id: "q6q_x_SVbT8", name: "Eric" },
+              { id: "n3f7cc5d0qo", name: "Andrea" },
+            ].map((video) => (
+              <div key={video.id} className="space-y-3">
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg bg-card">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${video.id}`}
+                    title={`Bewertung KI-Klick Methode – ${video.name}`}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    loading="lazy"
+                    allowFullScreen
+                  />
+                </div>
+                <p className="text-center text-sm sm:text-base font-semibold text-foreground">
+                  {video.name} über die KI-Klick Methode
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Payout Screens Section */}
       <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
         <div className="max-w-5xl mx-auto">
@@ -362,6 +397,53 @@ export default function VSLPage() {
         </div>
       </section>
 
+
+      {/* Written Reviews Section */}
+      <section className="py-10 sm:py-12 md:py-16 px-3 sm:px-4 border-t border-border">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <span className="highlight text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-relaxed">
+              Das schreiben unsere Teilnehmer
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            {[
+              {
+                name: "Markus W.",
+                text: "Ehrlich gesagt war ich anfangs skeptisch. Aber das Training ist verständlich erklärt und der Support hat sich wirklich Zeit für mich genommen. Die ersten Ergebnisse haben mich überzeugt.",
+              },
+              {
+                name: "Sandra L.",
+                text: "Ich hatte vorher null Erfahrung. Genau deshalb hat mir der Schritt-für-Schritt-Aufbau so geholfen. Man wird nicht alleingelassen, das war mir am wichtigsten.",
+              },
+              {
+                name: "Daniel K.",
+                text: "Was mir gefällt: keine leeren Versprechen, sondern ein klarer Plan. Es ist Arbeit, aber wenn man dranbleibt, lohnt es sich. Kann ich nur weiterempfehlen.",
+              },
+              {
+                name: "Julia P.",
+                text: "Neben meinem Hauptjob konnte ich mir nach und nach etwas aufbauen. Die Termine waren persönlich und nicht aufdringlich. Fühlt sich seriös an.",
+              },
+            ].map((review) => (
+              <div
+                key={review.name}
+                className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm"
+              >
+                <div className="flex items-center gap-1 mb-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-3">
+                  „{review.text}“
+                </p>
+                <p className="text-sm font-semibold text-foreground">{review.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="py-6 sm:py-8 px-3 sm:px-4 border-t border-border">
