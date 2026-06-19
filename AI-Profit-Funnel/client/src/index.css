@@ -236,7 +236,8 @@
   }
 
   .highlight {
-    background-color: hsl(38 92% 45% / 0.2);
+    background-color: hsl(38 92% 45%);
+    color: hsl(0 0% 10%);
     padding: 0 4px;
     line-height: 2 !important;
     -webkit-box-decoration-break: clone;
@@ -244,7 +245,8 @@
   }
 
   .highlight-strong {
-    background-color: hsl(38 92% 45% / 0.3);
+    background-color: hsl(43 96% 52%);
+    color: hsl(0 0% 10%);
     padding: 0 4px;
     line-height: 2 !important;
     -webkit-box-decoration-break: clone;
