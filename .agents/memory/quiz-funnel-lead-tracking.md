@@ -51,3 +51,19 @@ bodies for `/api/test-token` or `/api/leads` (token + PII) in server/index.ts.
 bypass). **Render deploy note:** this app runs on Render (Replit env vars do NOT
 propagate there) — the SAME `ADMIN_TEST_TOKEN` must be set in Render's env for prod test
 mode; until then prod test mode is inert (safe).
+
+# Lead-capture endpoint must persist UTM, and dashboard base depends on funnel shape
+
+`/api/quiz-complete` is THE lead-capture path for the restored (original) funnel —
+the contact form posts there (not `/api/leads`) so it gets email + Zapier + secure
+test-mode in one call. It MUST pass utm* through to `storage.createLead`, otherwise
+DB/CSV/CRM attribution is silently lost (name/email/phone-only save is a regression).
+
+**Funnel shape drives dashboard denominators:** the original funnel opens the quiz
+immediately on `/` (no CTA-gate / no `/quiz` step), so `cta_shown`/`cta_click` stay 0.
+The admin-stats "Funnel gestartet" row must be based on `uniqueVisitors`, NOT `ctaClick`
+(dividing by 0 makes the first conversion row meaningless). The CTA cards stay in the UI
+but read 0 by design for this flow.
+
+**Why:** Architect FAILed the restore for dropping UTM in DB and for CTA-based funnel
+math that no longer matches the immediate-quiz flow.

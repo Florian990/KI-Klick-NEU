@@ -11,11 +11,14 @@ interface LeadData {
 }
 
 const questionTexts: { [key: number]: string } = {
-  1: "Wie alt bist du?",
-  2: "Was ist deine aktuelle Situation?",
-  3: "Was möchtest du mit der KI-Klick Methode erreichen?",
-  4: "Was ist dein finanzielles Ziel pro Monat?",
-  5: "Wie viel Zeit kannst du täglich investieren?",
+  1: "Was ist dein aktueller Beruf?",
+  2: "Bist du mit deiner aktuellen Situation zufrieden?",
+  3: "Wie alt bist du?",
+  4: "Wie viel Zeit kannst du täglich investieren?",
+  5: "Warum möchtest du dir ein zweites Standbein aufbauen?",
+  6: "Wärst du bereit, 200€/Monat für Umsetzungskosten einzuplanen?",
+  7: "Ist dir bewusst, dass es ein High Income Skill ist (kein Job-Angebot)?",
+  8: "Würdest du das System bei schriftlicher Garantie nutzen?",
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {

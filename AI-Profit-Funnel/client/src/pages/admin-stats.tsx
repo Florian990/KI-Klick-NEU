@@ -604,7 +604,7 @@ export default function AdminStatsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <FunnelRow step="S" label="Funnel gestartet" value={stats.funnelStart} base={stats.ctaClick} color="bg-indigo-400" />
+                  <FunnelRow step="S" label="Funnel gestartet" value={stats.funnelStart} base={stats.uniqueVisitors} color="bg-indigo-400" />
                   <FunnelRow step="1" label="Frage 1 beantwortet" value={stats.funnelQ1} base={stats.funnelStart} color="bg-indigo-400" />
                   <FunnelRow step="2" label="Frage 2 beantwortet" value={stats.funnelQ2} base={stats.funnelStart} color="bg-indigo-400" />
                   <FunnelRow step="3" label="Frage 3 beantwortet" value={stats.funnelQ3} base={stats.funnelStart} color="bg-indigo-400" />

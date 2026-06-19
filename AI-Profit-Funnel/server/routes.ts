@@ -75,20 +75,30 @@ export async function registerRoutes(
         return res.status(200).json({ success: true, test: true });
       }
 
-      // Save lead to DB
+      // Save lead to DB (include UTM attribution so reporting/CSV keep campaign source)
       if (name || email || phone) {
         try {
-          await storage.createLead({ name: name || "", email: email || null, phone: phone || null });
+          await storage.createLead({
+            name: name || "",
+            email: email || null,
+            phone: phone || null,
+            utmSource: req.body.utmSource || null,
+            utmMedium: req.body.utmMedium || null,
+            utmCampaign: req.body.utmCampaign || null,
+            utmContent: req.body.utmContent || null,
+            utmTerm: req.body.utmTerm || null,
+          });
         } catch {}
       }
 
-      // Forward to Zapier (Close CRM) — strip internal test fields from the payload
+      // Forward to Zapier (Close CRM) — best-effort, strip internal test fields.
+      // Never block the funnel on CRM availability: the lead is already saved + emailed.
       const { test: _omitTest, testToken: _omitTestToken, ...zapierPayload } = req.body || {};
-      const zapierPromise = fetch(ZAPIER_WEBHOOK_URL, {
+      fetch(ZAPIER_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(zapierPayload),
-      });
+      }).catch((err) => console.error("Zapier webhook error:", err));
 
       // Send email notification independently — never blocks or breaks the main flow
       sendLeadNotification({
@@ -99,8 +109,7 @@ export async function registerRoutes(
         quizAnswers,
       }).catch((err) => console.error("Email notification error:", err));
 
-      const response = await zapierPromise;
-      return res.status(response.ok ? 200 : 502).json({ success: response.ok });
+      return res.status(200).json({ success: true });
     } catch (err) {
       console.error("Zapier webhook error:", err);
       return res.status(502).json({ success: false });
