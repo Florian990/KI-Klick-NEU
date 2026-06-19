@@ -153,7 +153,7 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
                 </>
               ) : (
                 <>
-                  <span>Jetzt Video ansehen</span>
+                  <span>Jetzt Video Freischalten</span>
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </>
               )}
