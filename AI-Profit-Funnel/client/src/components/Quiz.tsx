@@ -75,14 +75,6 @@ const questions: QuizQuestion[] = [
     ],
   },
   {
-    id: 6,
-    question: "Wäre es für dich realistisch, 200€ pro Monat für Umsetzungskosten (Tools, Software, Tests) einzuplanen um sie in dich und dein zweites Standbein zu investieren?",
-    answers: [
-      { text: "Ja", icon: <Check className="h-6 w-6 sm:h-8 sm:w-8" /> },
-      { text: "Nein", icon: <XCircle className="h-6 w-6 sm:h-8 sm:w-8" />, disqualify: true },
-    ],
-  },
-  {
     id: 7,
     question: "Ist dir bewusst, dass es sich hier um einen High Income Skill handelt den du lernen kannst und NICHT um ein Job Angebot?",
     answers: [
@@ -109,8 +101,8 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const hasTrackedStart = useRef(false);
 
   const currentQuestion = showFollowUp ? followUpQuestion : questions[currentStep];
-  const totalSteps = showFollowUp ? 8 : 7;
-  const displayStep = showFollowUp ? 8 : currentStep + 1;
+  const totalSteps = showFollowUp ? questions.length + 1 : questions.length;
+  const displayStep = showFollowUp ? questions.length + 1 : currentStep + 1;
   const progress = (displayStep / totalSteps) * 100;
 
   useEffect(() => {
