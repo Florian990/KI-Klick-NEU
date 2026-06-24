@@ -676,8 +676,8 @@ export default function AdminStatsPage() {
 
                 <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
                   So erkennst du, ob du zu <strong>wenig Volumen</strong> hast (oben wenige Besucher / Funnel-Starts) oder ob die Besucher
-                  <strong> unqualifiziert</strong> sind (viele rote Disqualifikationen bei einer bestimmten Frage). Hinweis: Die Auswertung
-                  pro Frage sammelt erst ab jetzt Daten – frühere Durchläufe sind nicht rückwirkend erfasst.
+                  <strong> unqualifiziert</strong> sind (viele rote Disqualifikationen bei einer bestimmten Frage). Die Zahlen pro Frage
+                  werden aus den gespeicherten Antworten berechnet und gelten daher auch <strong>rückwirkend</strong>.
                 </p>
               </CardContent>
             </Card>

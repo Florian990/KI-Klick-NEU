@@ -29,16 +29,18 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
 
 const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/";
 
-// Quiz questions in funnel order (ids skip 6 by design). Used to label per-question
-// drop-off stats with the real question wording instead of a generic "Frage N".
-const QUIZ_QUESTIONS: { id: number; label: string }[] = [
-  { id: 1, label: "Was ist dein aktueller Beruf?" },
-  { id: 2, label: "Bist du mit deiner aktuellen Situation zufrieden?" },
-  { id: 3, label: "Wie alt bist du?" },
-  { id: 4, label: "Wie viel Zeit hast du am Tag um sie in dein zweites Standbein zu investieren?" },
-  { id: 5, label: "Warum möchtest du dir ein zweites Standbein aufbauen?" },
-  { id: 7, label: "Ist dir bewusst, dass es sich hier um einen High Income Skill handelt den du lernen kannst und NICHT um ein Job Angebot?" },
-  { id: 8, label: "Wenn du einen Mehrwert erkennen würdest + eine schriftliche Garantie von uns bekommst, könntest du es dir dann vorstellen das System zu nutzen?" },
+// Quiz questions in funnel order (ids skip 6 by design). Labels must match the wording
+// in client/src/components/Quiz.tsx verbatim. `disqualifyAnswers` lists the answer texts
+// that disqualify a lead at that question, so per-question disqualification can be
+// computed retroactively from the stored `quiz_step_<id>` answers.
+const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }[] = [
+  { id: 1, label: "Was ist dein aktueller Beruf?", disqualifyAnswers: ["Schüler/in", "Rentner/in", "aktuell arbeitslos"] },
+  { id: 2, label: "Bist du mit deiner aktuellen Situation zufrieden?", disqualifyAnswers: [] },
+  { id: 3, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18"] },
+  { id: 4, label: "Wie viel Zeit hast du am Tag um sie in dein zweites Standbein zu investieren?", disqualifyAnswers: [] },
+  { id: 5, label: "Warum möchtest du dir ein zweites Standbein aufbauen?", disqualifyAnswers: [] },
+  { id: 7, label: "Ist dir bewusst, dass es sich hier um einen High Income Skill handelt den du lernen kannst und NICHT um ein Job Angebot?", disqualifyAnswers: [] },
+  { id: 8, label: "Wenn du einen Mehrwert erkennen würdest + eine schriftliche Garantie von uns bekommst, könntest du es dir dann vorstellen das System zu nutzen?", disqualifyAnswers: ["Nein"] },
 ];
 
 // Secret that authorizes "test mode" (skips DB + CRM writes for the admin's own runs).
@@ -342,6 +344,19 @@ export async function registerRoutes(
 
       const count = (type: string) => events.filter(e => e.eventType === type).length;
 
+      // Answers recorded for a given quiz question (quiz_step_<id> stores the answer
+      // BEFORE the disqualify check, so disqualifying answers are captured too).
+      const stepAnswers = (id: number): string[] =>
+        events
+          .filter(e => e.eventType === `quiz_step_${id}`)
+          .map(e => {
+            try {
+              return e.eventData ? String(JSON.parse(e.eventData).answer ?? "") : "";
+            } catch {
+              return "";
+            }
+          });
+
       res.json({
         success: true,
         data: {
@@ -368,13 +383,19 @@ export async function registerRoutes(
           funnelQ5: count('funnel_q5'),
           funnelDisqualified: count('funnel_disqualified'),
           funnelQualified: count('funnel_qualified'),
-          // Per-question drop-off + disqualification, labelled with the real question text
-          questionFunnel: QUIZ_QUESTIONS.map((q) => ({
-            id: q.id,
-            label: q.label,
-            reached: count(`funnel_q${q.id}`),
-            disqualified: count(`funnel_dq_q${q.id}`),
-          })),
+          // Per-question drop-off + disqualification, labelled with the real question text.
+          // Computed from stored quiz_step answers so it also works for past data.
+          questionFunnel: QUIZ_QUESTIONS.map((q) => {
+            const answers = stepAnswers(q.id);
+            return {
+              id: q.id,
+              label: q.label,
+              reached: answers.length,
+              disqualified: q.disqualifyAnswers.length
+                ? answers.filter((a) => q.disqualifyAnswers.includes(a)).length
+                : 0,
+            };
+          }),
           // Opt-in / contact form (drop-off analysis)
           contactViewName: count('contact_view_name'),
           contactViewPhone: count('contact_view_phone'),
