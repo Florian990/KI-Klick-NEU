@@ -67,3 +67,17 @@ but read 0 by design for this flow.
 
 **Why:** Architect FAILed the restore for dropping UTM in DB and for CTA-based funnel
 math that no longer matches the immediate-quiz flow.
+
+# Per-question drop-off labels are DUPLICATED and must stay verbatim-in-sync
+
+Quiz question wording lives in `client/src/components/Quiz.tsx` (`questions` +
+`followUpQuestion`). The stats API duplicates it as `QUIZ_QUESTIONS` in
+`server/routes.ts` to label the per-question drop-off (`questionFunnel`). These two
+lists must match WORD-FOR-WORD — the whole point of the feature is the admin seeing the
+real question text, not a paraphrase. Quiz ids are 1,2,3,4,5,7,8 (id 6 was removed).
+
+**Rule:** When quiz wording changes, update BOTH. Per-question tracking uses
+`funnel_q${id}` (now fired for ALL ids, was only 1-5) for "answered/reached" and
+`funnel_dq_q${id}` for "disqualified AT this question". Both are new event strings →
+zero history, collect from deploy forward (tell the user). Architect FAILed v1 because
+Q4/Q5/Q7/Q8 labels were shortened paraphrases.

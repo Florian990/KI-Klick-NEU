@@ -121,11 +121,10 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       answer: answer.text 
     });
 
-    if (currentQuestion.id >= 1 && currentQuestion.id <= 5) {
-      trackEvent(`funnel_q${currentQuestion.id}`);
-    }
+    trackEvent(`funnel_q${currentQuestion.id}`);
 
     if (answer.disqualify) {
+      trackEvent(`funnel_dq_q${currentQuestion.id}`, { answer: answer.text });
       onDisqualify();
       return;
     }

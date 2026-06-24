@@ -29,6 +29,7 @@ interface StatsData {
   funnelQ5: number;
   funnelDisqualified: number;
   funnelQualified: number;
+  questionFunnel: { id: number; label: string; reached: number; disqualified: number }[];
   contactViewName: number;
   contactViewPhone: number;
   contactViewEmail: number;
@@ -99,6 +100,47 @@ function FunnelRow({
       </div>
       <span className="text-sm font-bold tabular-nums text-foreground w-10 text-right flex-shrink-0">{value}</span>
       <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{pct(value, base)}</span>
+    </div>
+  );
+}
+
+function QuestionFunnelRow({
+  step,
+  label,
+  reached,
+  disqualified,
+  base,
+}: {
+  step: number;
+  label: string;
+  reached: number;
+  disqualified: number;
+  base: number;
+}) {
+  const percentage = base > 0 ? Math.round((reached / base) * 100) : 0;
+  return (
+    <div className="py-2 border-b border-border/40 last:border-0">
+      <div className="flex items-start gap-2 mb-1.5">
+        <span className="text-xs font-mono text-muted-foreground mt-0.5 flex-shrink-0">F{step}</span>
+        <span className="text-sm font-medium text-foreground leading-snug">{label}</span>
+      </div>
+      <div className="flex items-center gap-3 pl-6">
+        <div className="flex-1 bg-muted rounded-full h-2.5">
+          <div
+            className="h-2.5 rounded-full transition-all bg-indigo-400"
+            style={{ width: `${Math.min(percentage, 100)}%` }}
+          />
+        </div>
+        <span className="text-sm font-bold tabular-nums text-foreground w-10 text-right flex-shrink-0">{reached}</span>
+        <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{pct(reached, base)}</span>
+        {disqualified > 0 ? (
+          <span className="text-xs font-semibold text-red-500 w-28 text-right flex-shrink-0">
+            ✗ {disqualified} disqualifiziert
+          </span>
+        ) : (
+          <span className="w-28 flex-shrink-0" />
+        )}
+      </div>
     </div>
   );
 }
@@ -605,14 +647,38 @@ export default function AdminStatsPage() {
                 </div>
                 <div className="space-y-1.5">
                   <FunnelRow step="S" label="Funnel gestartet" value={stats.funnelStart} base={stats.uniqueVisitors} color="bg-indigo-400" />
-                  <FunnelRow step="1" label="Frage 1 beantwortet" value={stats.funnelQ1} base={stats.funnelStart} color="bg-indigo-400" />
-                  <FunnelRow step="2" label="Frage 2 beantwortet" value={stats.funnelQ2} base={stats.funnelStart} color="bg-indigo-400" />
-                  <FunnelRow step="3" label="Frage 3 beantwortet" value={stats.funnelQ3} base={stats.funnelStart} color="bg-indigo-400" />
-                  <FunnelRow step="4" label="Frage 4 beantwortet" value={stats.funnelQ4} base={stats.funnelStart} color="bg-indigo-400" />
-                  <FunnelRow step="5" label="Frage 5 beantwortet" value={stats.funnelQ5} base={stats.funnelStart} color="bg-indigo-400" />
-                  <FunnelRow step="✓" label="Qualifiziert" value={stats.funnelQualified} base={stats.funnelStart} color="bg-green-500" />
-                  <FunnelRow step="✗" label="Disqualifiziert" value={stats.funnelDisqualified} base={stats.funnelStart} color="bg-red-400" />
                 </div>
+
+                <div className="mt-4 rounded-xl border border-border bg-muted/20 p-4">
+                  <p className="text-sm font-semibold text-foreground mb-1">Abbrüche pro Frage</p>
+                  <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                    Der Balken zeigt, wie viele Besucher diese Frage <strong>beantwortet</strong> haben (im Verhältnis zum Funnel-Start).
+                    Die rote Zahl zeigt, wie viele genau <strong>bei dieser Frage disqualifiziert</strong> wurden.
+                  </p>
+                  <div>
+                    {(stats.questionFunnel || []).map((q, i) => (
+                      <QuestionFunnelRow
+                        key={q.id}
+                        step={i + 1}
+                        label={q.label}
+                        reached={q.reached}
+                        disqualified={q.disqualified}
+                        base={stats.funnelStart}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 mt-4">
+                  <FunnelRow step="✓" label="Qualifiziert" value={stats.funnelQualified} base={stats.funnelStart} color="bg-green-500" />
+                  <FunnelRow step="✗" label="Disqualifiziert (gesamt)" value={stats.funnelDisqualified} base={stats.funnelStart} color="bg-red-400" />
+                </div>
+
+                <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+                  So erkennst du, ob du zu <strong>wenig Volumen</strong> hast (oben wenige Besucher / Funnel-Starts) oder ob die Besucher
+                  <strong> unqualifiziert</strong> sind (viele rote Disqualifikationen bei einer bestimmten Frage). Hinweis: Die Auswertung
+                  pro Frage sammelt erst ab jetzt Daten – frühere Durchläufe sind nicht rückwirkend erfasst.
+                </p>
               </CardContent>
             </Card>
 

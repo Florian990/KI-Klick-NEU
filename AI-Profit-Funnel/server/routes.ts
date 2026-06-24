@@ -29,6 +29,18 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
 
 const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/";
 
+// Quiz questions in funnel order (ids skip 6 by design). Used to label per-question
+// drop-off stats with the real question wording instead of a generic "Frage N".
+const QUIZ_QUESTIONS: { id: number; label: string }[] = [
+  { id: 1, label: "Was ist dein aktueller Beruf?" },
+  { id: 2, label: "Bist du mit deiner aktuellen Situation zufrieden?" },
+  { id: 3, label: "Wie alt bist du?" },
+  { id: 4, label: "Wie viel Zeit hast du am Tag um sie in dein zweites Standbein zu investieren?" },
+  { id: 5, label: "Warum möchtest du dir ein zweites Standbein aufbauen?" },
+  { id: 7, label: "Ist dir bewusst, dass es sich hier um einen High Income Skill handelt den du lernen kannst und NICHT um ein Job Angebot?" },
+  { id: 8, label: "Wenn du einen Mehrwert erkennen würdest + eine schriftliche Garantie von uns bekommst, könntest du es dir dann vorstellen das System zu nutzen?" },
+];
+
 // Secret that authorizes "test mode" (skips DB + CRM writes for the admin's own runs).
 // Fail-safe: if it is not configured, NO request can ever suppress a real lead.
 const ADMIN_TEST_TOKEN = process.env.ADMIN_TEST_TOKEN || "";
@@ -356,6 +368,13 @@ export async function registerRoutes(
           funnelQ5: count('funnel_q5'),
           funnelDisqualified: count('funnel_disqualified'),
           funnelQualified: count('funnel_qualified'),
+          // Per-question drop-off + disqualification, labelled with the real question text
+          questionFunnel: QUIZ_QUESTIONS.map((q) => ({
+            id: q.id,
+            label: q.label,
+            reached: count(`funnel_q${q.id}`),
+            disqualified: count(`funnel_dq_q${q.id}`),
+          })),
           // Opt-in / contact form (drop-off analysis)
           contactViewName: count('contact_view_name'),
           contactViewPhone: count('contact_view_phone'),
