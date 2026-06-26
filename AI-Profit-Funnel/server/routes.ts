@@ -34,7 +34,7 @@ const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4l
 // that disqualify a lead at that question, so per-question disqualification can be
 // computed retroactively from the stored `quiz_step_<id>` answers.
 const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }[] = [
-  { id: 1, label: "Was ist dein aktueller Beruf?", disqualifyAnswers: ["Schüler/in", "Rentner/in", "aktuell arbeitslos"] },
+  { id: 1, label: "Was ist dein aktueller Beruf?", disqualifyAnswers: ["Schüler/in", "aktuell arbeitslos"] },
   { id: 2, label: "Bist du mit deiner aktuellen Situation zufrieden?", disqualifyAnswers: [] },
   { id: 3, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18"] },
   { id: 4, label: "Wie viel Zeit hast du am Tag um sie in dein zweites Standbein zu investieren?", disqualifyAnswers: [] },

@@ -33,7 +33,7 @@ const questions: QuizQuestion[] = [
       { text: "Azubi/Student/in", icon: <GraduationCap className="h-6 w-6 sm:h-8 sm:w-8" /> },
       { text: "Angestellte/r", icon: <Users className="h-6 w-6 sm:h-8 sm:w-8" /> },
       { text: "Unternehmer/in", icon: <Briefcase className="h-6 w-6 sm:h-8 sm:w-8" /> },
-      { text: "Rentner/in", icon: <Clock className="h-6 w-6 sm:h-8 sm:w-8" />, disqualify: true },
+      { text: "Rentner/in", icon: <Clock className="h-6 w-6 sm:h-8 sm:w-8" /> },
       { text: "aktuell arbeitslos", icon: <XCircle className="h-6 w-6 sm:h-8 sm:w-8" />, disqualify: true },
     ],
   },
