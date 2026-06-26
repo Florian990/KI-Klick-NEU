@@ -29,7 +29,13 @@ interface StatsData {
   funnelQ5: number;
   funnelDisqualified: number;
   funnelQualified: number;
-  questionFunnel: { id: number; label: string; reached: number; disqualified: number }[];
+  questionFunnel: {
+    id: number;
+    label: string;
+    reached: number;
+    disqualified: number;
+    answerBreakdown?: { answer: string; count: number; disqualifying: boolean }[];
+  }[];
   contactViewName: number;
   contactViewPhone: number;
   contactViewEmail: number;
@@ -110,12 +116,14 @@ function QuestionFunnelRow({
   reached,
   disqualified,
   base,
+  answerBreakdown,
 }: {
   step: number;
   label: string;
   reached: number;
   disqualified: number;
   base: number;
+  answerBreakdown?: { answer: string; count: number; disqualifying: boolean }[];
 }) {
   const percentage = base > 0 ? Math.round((reached / base) * 100) : 0;
   return (
@@ -141,6 +149,24 @@ function QuestionFunnelRow({
           <span className="w-28 flex-shrink-0" />
         )}
       </div>
+      {answerBreakdown && answerBreakdown.length > 0 && (
+        <div className="pl-6 mt-2 flex flex-wrap gap-1.5">
+          {answerBreakdown.map((a) => (
+            <span
+              key={a.answer}
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                a.disqualifying
+                  ? "bg-red-500/10 text-red-500 border border-red-500/30"
+                  : "bg-muted text-muted-foreground border border-border/50"
+              }`}
+            >
+              {a.disqualifying && <span aria-hidden>✗</span>}
+              {a.answer}
+              <span className="font-bold tabular-nums">{a.count}</span>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -664,6 +690,7 @@ export default function AdminStatsPage() {
                         reached={q.reached}
                         disqualified={q.disqualified}
                         base={stats.funnelStart}
+                        answerBreakdown={q.answerBreakdown}
                       />
                     ))}
                   </div>

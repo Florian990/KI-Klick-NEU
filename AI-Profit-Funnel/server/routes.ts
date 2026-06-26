@@ -387,6 +387,20 @@ export async function registerRoutes(
           // Computed from stored quiz_step answers so it also works for past data.
           questionFunnel: QUIZ_QUESTIONS.map((q) => {
             const answers = stepAnswers(q.id);
+            // Count how often each answer was given so the dashboard can show
+            // exactly WHICH answers disqualified leads (e.g. Schüler/in vs. arbeitslos).
+            const counts = new Map<string, number>();
+            for (const a of answers) {
+              if (!a) continue;
+              counts.set(a, (counts.get(a) ?? 0) + 1);
+            }
+            const answerBreakdown = Array.from(counts.entries())
+              .map(([answer, n]) => ({
+                answer,
+                count: n,
+                disqualifying: q.disqualifyAnswers.includes(answer),
+              }))
+              .sort((a, b) => b.count - a.count);
             return {
               id: q.id,
               label: q.label,
@@ -394,6 +408,7 @@ export async function registerRoutes(
               disqualified: q.disqualifyAnswers.length
                 ? answers.filter((a) => q.disqualifyAnswers.includes(a)).length
                 : 0,
+              answerBreakdown,
             };
           }),
           // Opt-in / contact form (drop-off analysis)
