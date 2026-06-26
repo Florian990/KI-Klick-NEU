@@ -6,36 +6,9 @@ import DisqualifiedMessage from "@/components/DisqualifiedMessage";
 import { useToast } from "@/hooks/use-toast";
 import { useAnalytics, getTestToken } from "@/hooks/useAnalytics";
 import { apiRequest } from "@/lib/queryClient";
-import { CheckCircle, ChevronRight, Users, Star, TrendingUp, Clock, Target, Coins, GraduationCap, HeadphonesIcon } from "lucide-react";
+import { CheckCircle, ChevronRight, Star, TrendingUp, Clock, Target, Coins, GraduationCap, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-function LiveCounter() {
-  const [count, setCount] = useState(Math.floor(Math.random() * 8) + 18);
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCount(prev => {
-        const change = Math.random() > 0.5 ? 1 : -1;
-        const newCount = prev + change;
-        return Math.max(12, Math.min(35, newCount));
-      });
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-      </span>
-      <Users className="h-3 w-3 text-primary" />
-      <span className="text-xs text-foreground font-medium">{count} Personen machen gerade den Test</span>
-    </div>
-  );
-}
-
 
 const benefits = [
   { icon: Coins, title: "Umsatzgarantie", description: "Du erhältst eine klare Garantie" },
@@ -162,13 +135,9 @@ export default function QuizLandingPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[200px] sm:h-[300px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-4xl mx-auto relative z-10 w-full">
-          <div className="mb-2 sm:mb-3">
-            <LiveCounter />
-          </div>
-          
           <div className="mb-2 sm:mb-3 px-2 text-center">
             <span className="highlight-strong text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground leading-relaxed">
-              Finde in 30 Sekunden heraus, ob du dafür geeignet bist.
+              Finde in 30 Sekunden heraus, ob die KI-Klick Methode für dich geeignet ist
             </span>
           </div>
 
