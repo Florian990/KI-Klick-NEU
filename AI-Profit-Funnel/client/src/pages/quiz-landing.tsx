@@ -140,7 +140,7 @@ export default function QuizLandingPage() {
               Finde in 30 Sekunden heraus, ob du mit der KI-Klick Methode ein zweites Einkommen aufbauen kannst
             </span>
             <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
-              Beantworte ein paar kurze Fragen – ehrlich beantwortet, sofort dein Ergebnis.
+              Beantworte 4 kurze Fragen – ehrlich beantwortet, sofort dein Ergebnis.
             </p>
           </div>
 
