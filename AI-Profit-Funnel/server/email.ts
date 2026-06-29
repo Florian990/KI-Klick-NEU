@@ -11,6 +11,7 @@ interface LeadData {
 }
 
 const questionTexts: { [key: number]: string } = {
+  // Legacy quiz (kept so historical lead mails stay readable)
   1: "Was ist dein aktueller Beruf?",
   2: "Bist du mit deiner aktuellen Situation zufrieden?",
   3: "Wie alt bist du?",
@@ -19,6 +20,12 @@ const questionTexts: { [key: number]: string } = {
   6: "Wärst du bereit, 200€/Monat für Umsetzungskosten einzuplanen?",
   7: "Ist dir bewusst, dass es ein High Income Skill ist (kein Job-Angebot)?",
   8: "Würdest du das System bei schriftlicher Garantie nutzen?",
+  // Current quiz (4 Fragen + Folgefrage)
+  11: "Wie alt bist du?",
+  12: "In welcher beruflichen Situation bist du?",
+  13: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?",
+  14: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?",
+  15: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie bekommst, könntest du es dir vorstellen, das System zu nutzen?",
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {

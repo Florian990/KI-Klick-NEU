@@ -34,13 +34,11 @@ const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4l
 // that disqualify a lead at that question, so per-question disqualification can be
 // computed retroactively from the stored `quiz_step_<id>` answers.
 const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }[] = [
-  { id: 1, label: "Was ist dein aktueller Beruf?", disqualifyAnswers: ["Schüler/in", "aktuell arbeitslos"] },
-  { id: 2, label: "Bist du mit deiner aktuellen Situation zufrieden?", disqualifyAnswers: [] },
-  { id: 3, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18"] },
-  { id: 4, label: "Wie viel Zeit hast du am Tag um sie in dein zweites Standbein zu investieren?", disqualifyAnswers: [] },
-  { id: 5, label: "Warum möchtest du dir ein zweites Standbein aufbauen?", disqualifyAnswers: [] },
-  { id: 7, label: "Ist dir bewusst, dass es sich hier um einen High Income Skill handelt den du lernen kannst und NICHT um ein Job Angebot?", disqualifyAnswers: [] },
-  { id: 8, label: "Wenn du einen Mehrwert erkennen würdest + eine schriftliche Garantie von uns bekommst, könntest du es dir dann vorstellen das System zu nutzen?", disqualifyAnswers: ["Nein"] },
+  { id: 11, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18"] },
+  { id: 12, label: "In welcher beruflichen Situation bist du?", disqualifyAnswers: ["Schüler/in", "Azubi/Student", "Arbeitssuchend/arbeitslos"] },
+  { id: 13, label: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?", disqualifyAnswers: [] },
+  { id: 14, label: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?", disqualifyAnswers: [] },
+  { id: 15, label: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?", disqualifyAnswers: ["Nein"] },
 ];
 
 // Secret that authorizes "test mode" (skips DB + CRM writes for the admin's own runs).

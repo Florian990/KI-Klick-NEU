@@ -1,0 +1,62 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "jmYIFy4U8EhuRpjiY5oCW"
+uri = "file://client/public/assets/quiz/age-under18.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "m2m6k2taCn1YS7DPVeEED"
+uri = "file://client/public/assets/quiz/age-18-29.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "xUuK6j_LRdovo4yWKiBUG"
+uri = "file://client/public/assets/quiz/age-30-45.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "InmHyBjH0sYj2yWC2ODcJ"
+uri = "file://client/public/assets/quiz/age-45plus.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "uLMl8UnVJz_DsVMwJJWZk"
+uri = "file://client/public/assets/quiz/job-angestellt.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "TPjwOtXpoGzcDJnoqAWYw"
+uri = "file://client/public/assets/quiz/job-selbststaendig.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "n2-aMTjoctyUiBEdeKGEk"
+uri = "file://client/public/assets/quiz/job-rentner.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "F2QPVwY8ZYN1EX3qvp_bo"
+uri = "file://client/public/assets/quiz/job-schueler.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "2oEtS0PrWiGK9U8gVAVCv"
+uri = "file://client/public/assets/quiz/job-azubi.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "UXiHIPeCzXfU025mO_ZTN"
+uri = "file://client/public/assets/quiz/job-arbeitssuchend.png"
+type = "image"
+title = "generated_image"

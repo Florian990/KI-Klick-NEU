@@ -137,8 +137,11 @@ export default function QuizLandingPage() {
         <div className="max-w-4xl mx-auto relative z-10 w-full">
           <div className="mb-2 sm:mb-3 px-2 text-center">
             <span className="highlight-strong text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground leading-relaxed">
-              Finde in 30 Sekunden heraus, ob die KI-Klick Methode für dich geeignet ist
+              Finde in 30 Sekunden heraus, ob du mit der KI-Klick Methode ein zweites Einkommen aufbauen kannst
             </span>
+            <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
+              Beantworte ein paar kurze Fragen – ehrlich beantwortet, sofort dein Ergebnis.
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-muted-foreground text-[10px] sm:text-xs md:text-sm">
