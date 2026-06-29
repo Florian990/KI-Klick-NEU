@@ -15,7 +15,6 @@ interface QuizProps {
 
 interface QuizAnswer {
   text: string;
-  image?: string;
   icon?: React.ReactNode;
   disqualify?: boolean;
   followUp?: boolean;
@@ -33,10 +32,10 @@ const questions: QuizQuestion[] = [
     id: 11,
     question: "Wie alt bist du?",
     answers: [
-      { text: "Unter 18", image: "/assets/quiz/age-under18.jpg", disqualify: true },
-      { text: "18–29", image: "/assets/quiz/age-18-29.jpg" },
-      { text: "30–45", image: "/assets/quiz/age-30-45.jpg" },
-      { text: "Über 45", image: "/assets/quiz/age-45plus.jpg" },
+      { text: "Unter 18", disqualify: true },
+      { text: "18–29" },
+      { text: "30–45" },
+      { text: "Über 45" },
     ],
   },
   {
@@ -44,12 +43,12 @@ const questions: QuizQuestion[] = [
     question: "In welcher beruflichen Situation bist du?",
     hint: "Richtet sich an Menschen mit regelmäßigem Einkommen.",
     answers: [
-      { text: "Angestellt", image: "/assets/quiz/job-angestellt.jpg" },
-      { text: "Selbstständig/Unternehmer", image: "/assets/quiz/job-selbststaendig.jpg" },
-      { text: "Rentner/in", image: "/assets/quiz/job-rentner.jpg" },
-      { text: "Schüler/in", image: "/assets/quiz/job-schueler.jpg", disqualify: true },
-      { text: "Azubi/Student", image: "/assets/quiz/job-azubi.jpg", disqualify: true },
-      { text: "Arbeitssuchend/arbeitslos", image: "/assets/quiz/job-arbeitssuchend.jpg", disqualify: true },
+      { text: "Angestellt" },
+      { text: "Selbstständig/Unternehmer" },
+      { text: "Rentner/in" },
+      { text: "Schüler/in", disqualify: true },
+      { text: "Azubi/Student", disqualify: true },
+      { text: "Arbeitssuchend/arbeitslos", disqualify: true },
     ],
   },
   {
@@ -92,7 +91,6 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const totalSteps = showFollowUp ? questions.length + 1 : questions.length;
   const displayStep = showFollowUp ? questions.length + 1 : currentStep + 1;
   const progress = (displayStep / totalSteps) * 100;
-  const isPhotoQuestion = currentQuestion.answers.some((a) => a.image);
 
   useEffect(() => {
     if (!hasTrackedStart.current) {
@@ -143,15 +141,12 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     }
   };
 
-  const gridCols = isPhotoQuestion
-    ? (currentQuestion.answers.length >= 6
-        ? "grid-cols-2 sm:grid-cols-3"
-        : "grid-cols-2 lg:grid-cols-4")
-    : (currentQuestion.answers.length >= 4
-        ? "grid-cols-1 sm:grid-cols-2"
-        : currentQuestion.answers.length === 3
-          ? "grid-cols-1 sm:grid-cols-3"
-          : "grid-cols-1 sm:grid-cols-2");
+  const gridCols =
+    currentQuestion.answers.length >= 4
+      ? "grid-cols-1 sm:grid-cols-2"
+      : currentQuestion.answers.length === 3
+        ? "grid-cols-1 sm:grid-cols-3"
+        : "grid-cols-1 sm:grid-cols-2";
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
@@ -182,50 +177,23 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
         {currentQuestion.answers.map((answer, index) => {
           const isSelected = selectedAnswers[currentQuestion.id] === answer.text;
 
-          if (answer.image) {
-            return (
-              <button
-                key={index}
-                onClick={() => handleAnswer(answer)}
-                data-testid={`quiz-answer-${currentQuestion.id}-${index}`}
-                className={`group relative overflow-hidden rounded-xl border-2 bg-card transition-all duration-200 active:scale-[0.98] touch-manipulation ${
-                  isSelected
-                    ? "border-primary ring-2 ring-primary"
-                    : "border-primary/30 hover:border-primary"
-                }`}
-              >
-                <div className="aspect-square w-full overflow-hidden">
-                  <img
-                    src={answer.image}
-                    alt={answer.text}
-                    loading="lazy"
-                    className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-2 sm:p-3">
-                  <span className="block text-xs sm:text-sm md:text-base font-semibold text-foreground text-center leading-tight">
-                    {answer.text}
-                  </span>
-                </div>
-              </button>
-            );
-          }
-
           return (
             <button
               key={index}
               onClick={() => handleAnswer(answer)}
               data-testid={`quiz-answer-${currentQuestion.id}-${index}`}
-              className={`group p-3 sm:p-4 md:p-5 rounded-lg border-2 bg-card transition-all duration-200 active:scale-[0.98] flex flex-col items-center justify-center gap-1.5 sm:gap-2 md:gap-3 min-h-[80px] sm:min-h-[100px] md:min-h-[120px] touch-manipulation ${
+              className={`group p-3 sm:p-4 md:p-5 rounded-lg border-2 bg-card transition-all duration-200 active:scale-[0.98] flex flex-col items-center justify-center gap-1.5 sm:gap-2 md:gap-3 min-h-[72px] sm:min-h-[88px] md:min-h-[104px] touch-manipulation ${
                 isSelected
                   ? "border-primary ring-2 ring-primary bg-primary/10"
                   : "border-primary/30 hover:border-primary hover:bg-primary/10"
               }`}
             >
-              <div className="text-primary group-hover:scale-110 group-active:scale-105 transition-transform">
-                {answer.icon}
-              </div>
-              <span className="text-xs sm:text-sm md:text-base font-medium text-foreground text-center leading-tight">
+              {answer.icon && (
+                <div className="text-primary group-hover:scale-110 group-active:scale-105 transition-transform">
+                  {answer.icon}
+                </div>
+              )}
+              <span className="text-sm sm:text-base md:text-lg font-medium text-foreground text-center leading-tight">
                 {answer.text}
               </span>
             </button>
