@@ -43,14 +43,81 @@ function formatQuizAnswers(answers?: QuizAnswers): string {
   return result;
 }
 
-export async function sendLeadNotification(lead: LeadData) {
-  const apiKey = process.env.BREVO_SMTP_KEY;
-  if (!apiKey) {
-    console.warn('⚠️  BREVO_SMTP_KEY nicht gesetzt — E-Mail wird übersprungen');
+const NOTIFY_TO = 'agenturmehler@gmail.com';
+
+// Resend "send-only" key works without a verified domain when sending from
+// onboarding@resend.dev. Override via env if a custom verified domain exists.
+const RESEND_FROM = process.env.RESEND_FROM || 'KI-Klick Methode <onboarding@resend.dev>';
+const BREVO_FROM_EMAIL = process.env.BREVO_FROM_EMAIL || 'noreply@geheime-ki-klickmethode.de';
+
+async function sendViaResend(subject: string, textContent: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: [NOTIFY_TO],
+        subject,
+        text: textContent,
+      }),
+    });
+
+    const data = await response.json() as any;
+    if (!response.ok) {
+      console.error('❌ Resend API Fehler:', JSON.stringify(data));
+      return false;
+    }
+    console.log(`✅ Lead-Mail via Resend gesendet (ID: ${data.id})`);
+    return true;
+  } catch (error) {
+    console.error('❌ Fehler beim Resend-Versand:', error);
     return false;
   }
+}
 
+async function sendViaBrevo(subject: string, textContent: string): Promise<boolean> {
+  const apiKey = process.env.BREVO_SMTP_KEY;
+  if (!apiKey) return false;
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'KI-Klick Methode', email: BREVO_FROM_EMAIL },
+        to: [{ email: NOTIFY_TO }],
+        subject,
+        textContent,
+      }),
+    });
+
+    const data = await response.json() as any;
+    if (!response.ok) {
+      console.error('❌ Brevo API Fehler:', JSON.stringify(data));
+      return false;
+    }
+    console.log(`✅ Lead-Mail via Brevo gesendet (ID: ${data.messageId})`);
+    return true;
+  } catch (error) {
+    console.error('❌ Fehler beim Brevo-Versand:', error);
+    return false;
+  }
+}
+
+export async function sendLeadNotification(lead: LeadData) {
   const quizSection = formatQuizAnswers(lead.quizAnswers);
+  const subject = `🎯 Neuer Lead: ${lead.name}`;
 
   const textContent = `
 🎯 NEUER LEAD EINGEGANGEN!
@@ -65,33 +132,13 @@ ${quizSection}
 Automatisch gesendet von deinem KI-Klick Methode Funnel
   `.trim();
 
-  try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': apiKey,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: { name: 'KI-Klick Methode', email: 'noreply@geheime-ki-klickmethode.de' },
-        to: [{ email: 'agenturmehler@gmail.com' }],
-        subject: `🎯 Neuer Lead: ${lead.name}`,
-        textContent,
-      }),
-    });
+  // Primary: Resend (reliable, sends from onboarding@resend.dev without a
+  // verified domain). Fallback: Brevo (kept for redundancy).
+  if (await sendViaResend(subject, textContent)) return true;
 
-    const data = await response.json() as any;
+  console.warn('⚠️  Resend fehlgeschlagen oder nicht konfiguriert — versuche Brevo als Fallback');
+  if (await sendViaBrevo(subject, textContent)) return true;
 
-    if (!response.ok) {
-      console.error('❌ Brevo API Fehler:', JSON.stringify(data));
-      return false;
-    }
-
-    console.log(`✅ Lead-Mail gesendet für: ${lead.name} (ID: ${data.messageId})`);
-    return true;
-  } catch (error) {
-    console.error('❌ Fehler beim E-Mail-Versand:', error);
-    return false;
-  }
+  console.error(`❌ Lead-Mail KONNTE NICHT gesendet werden für: ${lead.name} (Resend + Brevo fehlgeschlagen)`);
+  return false;
 }

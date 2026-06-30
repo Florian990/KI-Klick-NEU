@@ -4,3 +4,4 @@
 - [Quiz funnel lead counting](quiz-funnel-lead-tracking.md) — leads-table row count over-counts (partial saves insert rows); use `funnel_contact_submitted` event for conversions. Analytics edits must be additive-only.
 - [Quiz question IDs](quiz-question-ids.md) — quiz ids are a permanent analytics key; on redesign use a FRESH id block, never reuse old ids.
 - [App lives in subdir](app-lives-in-subdir.md) — app root is `AI-Profit-Funnel/` but code_execution/generateImage write from repo root; move assets in, restart Vite.
+- [Email delivery](email-delivery.md) — Brevo accepts (201) but doesn't deliver from unverified domain; Resend send-only key from onboarding@resend.dev is reliable. RESEND_API_KEY must be on Render.
