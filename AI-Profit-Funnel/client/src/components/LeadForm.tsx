@@ -107,7 +107,7 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground text-sm sm:text-base">Deine Telefonnummer</FormLabel>
+                  <FormLabel className="text-foreground text-sm sm:text-base">Deine WhatsApp-fähige Telefonnummer</FormLabel>
                   <div className="flex gap-2">
                     <Select
                       defaultValue="+49"
