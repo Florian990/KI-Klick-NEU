@@ -1,4 +1,4 @@
-import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar, Star } from "lucide-react";
+import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar, Star, Maximize, Minimize, Gauge } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -17,6 +17,10 @@ export default function VSLPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
   const [playerReady, setPlayerReady] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const videoContainerRef = useRef<HTMLDivElement | null>(null);
+  const playbackRateRef = useRef(1);
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -127,7 +131,10 @@ export default function VSLPage() {
       if (playerRef.current && playerRef.current.getCurrentTime) {
         const currentTime = playerRef.current.getCurrentTime();
         
-        if (currentTime > expectedTimeRef.current + 2) {
+        // Per 500ms tick the video legitimately advances ~0.5s * rate.
+        // Allow that plus a small jitter margin — anything beyond is a seek.
+        const tolerance = 1.5 + 0.5 * playbackRateRef.current;
+        if (currentTime > expectedTimeRef.current + tolerance) {
           playerRef.current.seekTo(expectedTimeRef.current, true);
         } else {
           expectedTimeRef.current = currentTime;
@@ -172,6 +179,54 @@ export default function VSLPage() {
     }
   };
 
+  // Sync fullscreen state (also when the user exits with ESC)
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const fsElement =
+        document.fullscreenElement || (document as any).webkitFullscreenElement;
+      setIsFullscreen(!!fsElement);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    const container = videoContainerRef.current;
+    if (!container) return;
+
+    const fsElement =
+      document.fullscreenElement || (document as any).webkitFullscreenElement;
+
+    if (fsElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    } else {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if ((container as any).webkitRequestFullscreen) {
+        (container as any).webkitRequestFullscreen();
+      }
+    }
+  };
+
+  const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2];
+
+  const cycleSpeed = () => {
+    if (!playerRef.current || !playerRef.current.setPlaybackRate) return;
+    const currentIndex = SPEED_OPTIONS.indexOf(playbackRate);
+    const next = SPEED_OPTIONS[(currentIndex + 1) % SPEED_OPTIONS.length];
+    playerRef.current.setPlaybackRate(next);
+    playbackRateRef.current = next;
+    setPlaybackRate(next);
+  };
+
   const startVideo = () => {
     setShowVideo(true);
     trackEvent('video_start');
@@ -211,7 +266,7 @@ export default function VSLPage() {
           </div>
 
           {/* Video Player */}
-          <div className="relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6">
+          <div ref={videoContainerRef} className="relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6">
             {!showVideo ? (
               <div 
                 className="absolute inset-0 flex items-center justify-center cursor-pointer group"
@@ -274,6 +329,33 @@ export default function VSLPage() {
                           onChange={handleVolumeChange}
                           className="w-16 sm:w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-primary touch-manipulation"
                         />
+                      </div>
+
+                      {/* Speed + Fullscreen (right side) */}
+                      <div className="flex items-center gap-1 sm:gap-2 ml-auto">
+                        <button
+                          onClick={cycleSpeed}
+                          className="h-7 sm:h-8 px-2 sm:px-2.5 rounded-full bg-white/20 flex items-center justify-center gap-1 hover:bg-white/30 transition-colors touch-manipulation"
+                          aria-label="Wiedergabegeschwindigkeit ändern"
+                          data-testid="button-playback-speed"
+                        >
+                          <Gauge className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                          <span className="text-white text-[11px] sm:text-xs font-semibold tabular-nums">
+                            {playbackRate}x
+                          </span>
+                        </button>
+                        <button
+                          onClick={toggleFullscreen}
+                          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors touch-manipulation"
+                          aria-label={isFullscreen ? "Vollbild verlassen" : "Vollbild"}
+                          data-testid="button-fullscreen"
+                        >
+                          {isFullscreen ? (
+                            <Minimize className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                          ) : (
+                            <Maximize className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>

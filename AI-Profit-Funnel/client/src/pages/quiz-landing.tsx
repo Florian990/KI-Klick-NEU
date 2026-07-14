@@ -228,10 +228,10 @@ export default function QuizLandingPage() {
             <div className="flex flex-col items-center text-center order-first lg:order-last">
               <img 
                 src="/assets/WhatsApp_Image_2025-12-12_at_11.54.15_(1)_1765900281327.jpeg" 
-                alt="Florian Mehler"
+                alt="Florian Benedict"
                 className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-primary/30 mb-3 sm:mb-4"
               />
-              <p className="text-base sm:text-lg text-foreground font-medium">Florian Mehler</p>
+              <p className="text-base sm:text-lg text-foreground font-medium">Florian Benedict</p>
               <p className="text-sm sm:text-base text-muted-foreground">Gründer der KI-Klick Methode</p>
             </div>
 
