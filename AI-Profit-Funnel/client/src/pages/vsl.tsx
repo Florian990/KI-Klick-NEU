@@ -382,7 +382,7 @@ export default function VSLPage() {
               className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold touch-manipulation active:scale-[0.98] transition-transform"
             >
               <Calendar className="mr-2 h-5 w-5" />
-              Jetzt für einen der begrenzten 10 Plätze bewerben
+              Jetzt für einen der begrenzten 5 Plätze bewerben
             </Button>
           </div>
         </div>
