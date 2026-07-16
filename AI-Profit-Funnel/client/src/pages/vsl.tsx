@@ -18,6 +18,7 @@ export default function VSLPage() {
   const [volume, setVolume] = useState(100);
   const [playerReady, setPlayerReady] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCssFullscreen, setIsCssFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
   const playbackRateRef = useRef(1);
@@ -194,9 +195,17 @@ export default function VSLPage() {
     };
   }, []);
 
+  // iOS Safari (iPhone) has no Fullscreen API for containers — fall back to a
+  // CSS overlay that fills the whole screen instead.
   const toggleFullscreen = () => {
     const container = videoContainerRef.current;
     if (!container) return;
+
+    // Currently in CSS fallback fullscreen? Just exit it.
+    if (isCssFullscreen) {
+      setIsCssFullscreen(false);
+      return;
+    }
 
     const fsElement =
       document.fullscreenElement || (document as any).webkitFullscreenElement;
@@ -207,14 +216,38 @@ export default function VSLPage() {
       } else if ((document as any).webkitExitFullscreen) {
         (document as any).webkitExitFullscreen();
       }
-    } else {
-      if (container.requestFullscreen) {
-        container.requestFullscreen();
-      } else if ((container as any).webkitRequestFullscreen) {
-        (container as any).webkitRequestFullscreen();
+      return;
+    }
+
+    const request =
+      container.requestFullscreen || (container as any).webkitRequestFullscreen;
+
+    if (request) {
+      try {
+        const result = request.call(container);
+        // If the browser rejects the request (e.g. iOS quirks), fall back to CSS
+        if (result && typeof result.catch === "function") {
+          result.catch(() => setIsCssFullscreen(true));
+        }
+      } catch {
+        setIsCssFullscreen(true);
       }
+    } else {
+      // No Fullscreen API at all (iPhone Safari) → CSS fallback
+      setIsCssFullscreen(true);
     }
   };
+
+  // Lock page scroll while the CSS fallback fullscreen is active
+  useEffect(() => {
+    if (isCssFullscreen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isCssFullscreen]);
 
   const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2];
 
@@ -266,7 +299,14 @@ export default function VSLPage() {
           </div>
 
           {/* Video Player */}
-          <div ref={videoContainerRef} className="relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6">
+          <div
+            ref={videoContainerRef}
+            className={
+              isCssFullscreen
+                ? "fixed inset-0 z-[100] bg-black"
+                : "relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6"
+            }
+          >
             {!showVideo ? (
               <div 
                 className="absolute inset-0 flex items-center justify-center cursor-pointer group"
@@ -347,10 +387,10 @@ export default function VSLPage() {
                         <button
                           onClick={toggleFullscreen}
                           className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors touch-manipulation"
-                          aria-label={isFullscreen ? "Vollbild verlassen" : "Vollbild"}
+                          aria-label={isFullscreen || isCssFullscreen ? "Vollbild verlassen" : "Vollbild"}
                           data-testid="button-fullscreen"
                         >
-                          {isFullscreen ? (
+                          {isFullscreen || isCssFullscreen ? (
                             <Minimize className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                           ) : (
                             <Maximize className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
