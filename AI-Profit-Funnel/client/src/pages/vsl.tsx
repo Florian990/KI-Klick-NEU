@@ -1,4 +1,4 @@
-import { CheckCircle, Play, Pause, Volume2, VolumeX, Calendar, Star, Maximize, Minimize, Gauge } from "lucide-react";
+import { Play, Calendar, Star } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -13,15 +13,6 @@ declare global {
 
 export default function VSLPage() {
   const [showVideo, setShowVideo] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(100);
-  const [playerReady, setPlayerReady] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isCssFullscreen, setIsCssFullscreen] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const videoContainerRef = useRef<HTMLDivElement | null>(null);
-  const playbackRateRef = useRef(1);
   const playerRef = useRef<any>(null);
   const expectedTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -77,11 +68,13 @@ export default function VSLPage() {
       playerRef.current = new window.YT.Player('youtube-player', {
         videoId: 'ZYc4uDJxE2A',
         playerVars: {
-          controls: 0,
+          // Native YouTube controls: fullscreen + speed work everywhere (incl. iPhone).
+          // Forward-seeking is still blocked by the seek protection below.
+          controls: 1,
           disablekb: 1,
           modestbranding: 1,
           rel: 0,
-          fs: 0,
+          fs: 1,
           iv_load_policy: 3,
           playsinline: 1,
         },
@@ -104,19 +97,13 @@ export default function VSLPage() {
   }, [showVideo]);
 
   const onPlayerReady = (event: any) => {
-    setPlayerReady(true);
     event.target.playVideo();
-    setIsPlaying(true);
   };
 
   const onPlayerStateChange = (event: any) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
-      setIsPlaying(true);
       startSeekProtection();
-    } else if (event.data === window.YT.PlayerState.PAUSED) {
-      setIsPlaying(false);
     } else if (event.data === window.YT.PlayerState.ENDED) {
-      setIsPlaying(false);
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
       }
@@ -134,7 +121,10 @@ export default function VSLPage() {
         
         // Per 500ms tick the video legitimately advances ~0.5s * rate.
         // Allow that plus a small jitter margin — anything beyond is a seek.
-        const tolerance = 1.5 + 0.5 * playbackRateRef.current;
+        const rate = playerRef.current.getPlaybackRate
+          ? playerRef.current.getPlaybackRate()
+          : 1;
+        const tolerance = 1.5 + 0.5 * rate;
         if (currentTime > expectedTimeRef.current + tolerance) {
           playerRef.current.seekTo(expectedTimeRef.current, true);
         } else {
@@ -143,122 +133,6 @@ export default function VSLPage() {
       }
     }, 500);
   }, []);
-
-  const togglePlay = () => {
-    if (!playerRef.current) return;
-    
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
-    } else {
-      playerRef.current.playVideo();
-    }
-  };
-
-  const toggleMute = () => {
-    if (!playerRef.current) return;
-    
-    if (isMuted) {
-      playerRef.current.unMute();
-      playerRef.current.setVolume(volume);
-    } else {
-      playerRef.current.mute();
-    }
-    setIsMuted(!isMuted);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
-    if (playerRef.current) {
-      playerRef.current.setVolume(newVolume);
-      if (newVolume === 0) {
-        setIsMuted(true);
-      } else if (isMuted) {
-        playerRef.current.unMute();
-        setIsMuted(false);
-      }
-    }
-  };
-
-  // Sync fullscreen state (also when the user exits with ESC)
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      const fsElement =
-        document.fullscreenElement || (document as any).webkitFullscreenElement;
-      setIsFullscreen(!!fsElement);
-    };
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
-    };
-  }, []);
-
-  // iOS Safari (iPhone) has no Fullscreen API for containers — fall back to a
-  // CSS overlay that fills the whole screen instead.
-  const toggleFullscreen = () => {
-    const container = videoContainerRef.current;
-    if (!container) return;
-
-    // Currently in CSS fallback fullscreen? Just exit it.
-    if (isCssFullscreen) {
-      setIsCssFullscreen(false);
-      return;
-    }
-
-    const fsElement =
-      document.fullscreenElement || (document as any).webkitFullscreenElement;
-
-    if (fsElement) {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen();
-      }
-      return;
-    }
-
-    const request =
-      container.requestFullscreen || (container as any).webkitRequestFullscreen;
-
-    if (request) {
-      try {
-        const result = request.call(container);
-        // If the browser rejects the request (e.g. iOS quirks), fall back to CSS
-        if (result && typeof result.catch === "function") {
-          result.catch(() => setIsCssFullscreen(true));
-        }
-      } catch {
-        setIsCssFullscreen(true);
-      }
-    } else {
-      // No Fullscreen API at all (iPhone Safari) → CSS fallback
-      setIsCssFullscreen(true);
-    }
-  };
-
-  // Lock page scroll while the CSS fallback fullscreen is active
-  useEffect(() => {
-    if (isCssFullscreen) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
-  }, [isCssFullscreen]);
-
-  const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2];
-
-  const cycleSpeed = () => {
-    if (!playerRef.current || !playerRef.current.setPlaybackRate) return;
-    const currentIndex = SPEED_OPTIONS.indexOf(playbackRate);
-    const next = SPEED_OPTIONS[(currentIndex + 1) % SPEED_OPTIONS.length];
-    playerRef.current.setPlaybackRate(next);
-    playbackRateRef.current = next;
-    setPlaybackRate(next);
-  };
 
   const startVideo = () => {
     setShowVideo(true);
@@ -299,14 +173,7 @@ export default function VSLPage() {
           </div>
 
           {/* Video Player */}
-          <div
-            ref={videoContainerRef}
-            className={
-              isCssFullscreen
-                ? "fixed inset-0 z-[100] bg-black"
-                : "relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6"
-            }
-          >
+          <div className="relative aspect-video bg-card rounded-lg sm:rounded-xl border border-border overflow-hidden mb-4 sm:mb-6">
             {!showVideo ? (
               <div 
                 className="absolute inset-0 flex items-center justify-center cursor-pointer group"
@@ -330,77 +197,7 @@ export default function VSLPage() {
                 </div>
               </div>
             ) : (
-              <>
-                <div id="youtube-player" className="absolute inset-0 w-full h-full" />
-                
-                {/* Custom Controls Overlay */}
-                {playerReady && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 sm:p-3 md:p-4">
-                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                      {/* Play/Pause Button */}
-                      <button
-                        onClick={togglePlay}
-                        className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
-                      >
-                        {isPlaying ? (
-                          <Pause className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
-                        ) : (
-                          <Play className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground ml-0.5" />
-                        )}
-                      </button>
-
-                      {/* Volume Controls */}
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <button
-                          onClick={toggleMute}
-                          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors touch-manipulation"
-                        >
-                          {isMuted || volume === 0 ? (
-                            <VolumeX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-                          ) : (
-                            <Volume2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-                          )}
-                        </button>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={isMuted ? 0 : volume}
-                          onChange={handleVolumeChange}
-                          className="w-16 sm:w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-primary touch-manipulation"
-                        />
-                      </div>
-
-                      {/* Speed + Fullscreen (right side) */}
-                      <div className="flex items-center gap-1 sm:gap-2 ml-auto">
-                        <button
-                          onClick={cycleSpeed}
-                          className="h-7 sm:h-8 px-2 sm:px-2.5 rounded-full bg-white/20 flex items-center justify-center gap-1 hover:bg-white/30 transition-colors touch-manipulation"
-                          aria-label="Wiedergabegeschwindigkeit ändern"
-                          data-testid="button-playback-speed"
-                        >
-                          <Gauge className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-                          <span className="text-white text-[11px] sm:text-xs font-semibold tabular-nums">
-                            {playbackRate}x
-                          </span>
-                        </button>
-                        <button
-                          onClick={toggleFullscreen}
-                          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors touch-manipulation"
-                          aria-label={isFullscreen || isCssFullscreen ? "Vollbild verlassen" : "Vollbild"}
-                          data-testid="button-fullscreen"
-                        >
-                          {isFullscreen || isCssFullscreen ? (
-                            <Minimize className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-                          ) : (
-                            <Maximize className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
+              <div id="youtube-player" className="absolute inset-0 w-full h-full" />
             )}
           </div>
 
