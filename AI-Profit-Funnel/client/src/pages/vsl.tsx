@@ -143,7 +143,7 @@ export default function VSLPage() {
     trackEvent('calendly_open');
     if (window.Calendly) {
       window.Calendly.initPopupWidget({
-        url: 'https://calendly.com/florianbenedict/kostenloses-potenzialgesprach'
+        url: 'https://calendly.com/ki-klick-methode/kennenlernen-30-minuten-clone'
       });
     }
   };
