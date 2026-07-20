@@ -46,6 +46,17 @@ export default function QuizLandingPage() {
     utmTerm: null,
   });
 
+  // Once disqualified, the lock persists across reloads / back navigation
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("quiz_disqualified") === "1") {
+        setFunnelState("disqualified");
+      }
+    } catch {
+      // localStorage unavailable (private mode) — no lock possible
+    }
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setUtmParams({
@@ -75,6 +86,11 @@ export default function QuizLandingPage() {
   };
 
   const handleDisqualify = () => {
+    try {
+      localStorage.setItem("quiz_disqualified", "1");
+    } catch {
+      // ignore
+    }
     setFunnelState("disqualified");
     trackEvent('quiz_disqualified');
     trackEvent('funnel_disqualified');
