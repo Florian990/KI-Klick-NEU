@@ -35,7 +35,8 @@ const questions: QuizQuestion[] = [
       { text: "Unter 18", disqualify: true },
       { text: "18–29" },
       { text: "30–45" },
-      { text: "Über 45" },
+      { text: "45–72" },
+      { text: "Über 72", disqualify: true },
     ],
   },
   {
