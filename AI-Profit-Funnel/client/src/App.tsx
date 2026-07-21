@@ -10,6 +10,8 @@ import AdminStatsPage from "@/pages/admin-stats";
 import ImpressumPage from "@/pages/impressum";
 import DatenschutzPage from "@/pages/datenschutz";
 import GarantiePage from "@/pages/garantie";
+import AgbKiKlickPage from "@/pages/agb-ki-klick";
+import ErfolgsgarantieKiKlickPage from "@/pages/erfolgsgarantie-ki-klick";
 
 function Router() {
   return (
@@ -19,6 +21,8 @@ function Router() {
       <Route path="/impressum" component={ImpressumPage} />
       <Route path="/datenschutz" component={DatenschutzPage} />
       <Route path="/garantie" component={GarantiePage} />
+      <Route path="/agbkiklick" component={AgbKiKlickPage} />
+      <Route path="/erfolgsgarantiekiklick" component={ErfolgsgarantieKiKlickPage} />
       <Route path="/admin/stats" component={AdminStatsPage} />
       <Route component={NotFound} />
     </Switch>
