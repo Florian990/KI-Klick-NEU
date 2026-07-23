@@ -1,34 +1,38 @@
 import { useState, useEffect } from "react";
 import {
-  Users, UserPlus, UserCheck, Play, CheckCircle,
-  RefreshCw, Lock, Download, Eye, MousePointer, TrendingUp,
-  BarChart3, Trash2
+  Users, Play, RefreshCw, Lock, Download,
+  BarChart3, Trash2, Calendar, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { isTestMode, setTestToken } from "@/hooks/useAnalytics";
 
-interface StatsData {
-  totalPageViews: number;
-  uniqueVisitors: number;
-  returningVisitors: number;
-  newVisitors: number;
+interface DailyRow {
+  date: string;
+  visitors: number;
+  quizStart: number;
+  quizDisqualified: number;
+  quizCompleted: number;
+  formSubmitted: number;
+  vslVisitors: number;
   videoStart: number;
-  video25: number;
-  video50: number;
-  video75: number;
-  video100: number;
-  ctaShown: number;
-  ctaClick: number;
-  funnelStart: number;
-  funnelQ1: number;
-  funnelQ2: number;
-  funnelQ3: number;
-  funnelQ4: number;
-  funnelQ5: number;
-  funnelDisqualified: number;
-  funnelQualified: number;
+  calendlyOpen: number;
+  calendlyBooked: number;
+}
+
+interface StatsData {
+  visitors: number;
+  totalPageViews: number;
+  quizStart: number;
+  quizDisqualified: number;
+  quizCompleted: number;
+  formSubmitted: number;
+  vslVisitors: number;
+  videoStart: number;
+  calendlyOpen: number;
+  calendlyBooked: number;
+  daily: DailyRow[];
   questionFunnel: {
     id: number;
     label: string;
@@ -36,12 +40,24 @@ interface StatsData {
     disqualified: number;
     answerBreakdown?: { answer: string; count: number; disqualifying: boolean }[];
   }[];
-  contactViewName: number;
-  contactViewPhone: number;
-  contactViewEmail: number;
-  contactSubmitted: number;
-  leadsGenerated: number;
-  calendlyOpen: number;
+}
+
+// Today's date in German time (Europe/Berlin) as YYYY-MM-DD
+function berlinToday(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+}
+
+function shiftDay(day: string, delta: number): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + delta));
+  return dt.toISOString().slice(0, 10);
+}
+
+function formatGermanDate(day: string): string {
+  const [y, m, d] = day.split("-");
+  return `${d}.${m}.${y}`;
 }
 
 function pct(num: number, denom: number) {
@@ -49,75 +65,34 @@ function pct(num: number, denom: number) {
   return Math.round((num / denom) * 100) + "%";
 }
 
-function StatCard({
-  label,
-  value,
-  sub,
-  icon,
-  color,
-}: {
-  label: string;
-  value: number;
-  sub?: string;
-  icon: React.ReactNode;
-  color: string;
-}) {
+function KpiCard({ label, value, sub, accent }: { label: string; value: number; sub?: string; accent?: string }) {
   return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <div className={`h-11 w-11 rounded-xl ${color} flex items-center justify-center flex-shrink-0`}>
-            {icon}
-          </div>
-          <div className="min-w-0">
-            <p className="text-3xl font-bold text-foreground tabular-nums">{value}</p>
-            <p className="text-sm font-medium text-foreground mt-0.5">{label}</p>
-            {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
+      <p className="text-xs text-muted-foreground mb-1">{label}</p>
+      <p className={`text-3xl sm:text-4xl font-bold tabular-nums ${accent || "text-foreground"}`}>{value}</p>
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+    </div>
   );
 }
 
-function FunnelRow({
-  step,
-  label,
-  value,
-  base,
-  color,
-}: {
-  step: string;
-  label: string;
-  value: number;
-  base: number;
-  color: string;
+function FunnelRow({ step, label, value, base, color }: {
+  step: string; label: string; value: number; base: number; color: string;
 }) {
   const percentage = base > 0 ? Math.round((value / base) * 100) : 0;
   return (
     <div className="flex items-center gap-3 py-2">
       <span className="text-xs font-mono text-muted-foreground w-6 text-right flex-shrink-0">{step}</span>
-      <span className="text-sm font-medium text-foreground w-44 flex-shrink-0">{label}</span>
+      <span className="text-sm font-medium text-foreground w-48 flex-shrink-0">{label}</span>
       <div className="flex-1 bg-muted rounded-full h-2.5">
-        <div
-          className={`h-2.5 rounded-full transition-all ${color}`}
-          style={{ width: `${Math.min(percentage, 100)}%` }}
-        />
+        <div className={`h-2.5 rounded-full transition-all ${color}`} style={{ width: `${Math.min(percentage, 100)}%` }} />
       </div>
-      <span className="text-sm font-bold tabular-nums text-foreground w-10 text-right flex-shrink-0">{value}</span>
+      <span className="text-sm font-bold tabular-nums text-foreground w-12 text-right flex-shrink-0">{value}</span>
       <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{pct(value, base)}</span>
     </div>
   );
 }
 
-function QuestionFunnelRow({
-  step,
-  label,
-  reached,
-  disqualified,
-  base,
-  answerBreakdown,
-}: {
+function QuestionFunnelRow({ step, label, reached, disqualified, base, answerBreakdown }: {
   step: number;
   label: string;
   reached: number;
@@ -134,16 +109,13 @@ function QuestionFunnelRow({
       </div>
       <div className="flex items-center gap-3 pl-6">
         <div className="flex-1 bg-muted rounded-full h-2.5">
-          <div
-            className="h-2.5 rounded-full transition-all bg-indigo-400"
-            style={{ width: `${Math.min(percentage, 100)}%` }}
-          />
+          <div className="h-2.5 rounded-full transition-all bg-indigo-400" style={{ width: `${Math.min(percentage, 100)}%` }} />
         </div>
         <span className="text-sm font-bold tabular-nums text-foreground w-10 text-right flex-shrink-0">{reached}</span>
         <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{pct(reached, base)}</span>
         {disqualified > 0 ? (
           <span className="text-xs font-semibold text-red-500 w-28 text-right flex-shrink-0">
-            ✗ {disqualified} disqualifiziert
+            ✗ {disqualified} raus
           </span>
         ) : (
           <span className="w-28 flex-shrink-0" />
@@ -173,10 +145,8 @@ function QuestionFunnelRow({
 
 function SectionHeader({ icon, title, color }: { icon: React.ReactNode; title: string; color: string }) {
   return (
-    <div className={`flex items-center gap-3 mb-4 pb-3 border-b border-border`}>
-      <div className={`h-8 w-8 rounded-lg ${color} flex items-center justify-center`}>
-        {icon}
-      </div>
+    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border">
+      <div className={`h-8 w-8 rounded-lg ${color} flex items-center justify-center`}>{icon}</div>
       <h2 className="text-lg font-bold text-foreground">{title}</h2>
     </div>
   );
@@ -186,7 +156,7 @@ export default function AdminStatsPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activePreset, setActivePreset] = useState<string>("30");
+  const [activePreset, setActivePreset] = useState<string>("heute");
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
@@ -196,13 +166,8 @@ export default function AdminStatsPage() {
   const [isResetting, setIsResetting] = useState(false);
   const [testMode, setTestModeState] = useState(() => isTestMode());
 
-  const today = new Date();
-  const [startDate, setStartDate] = useState(() => {
-    const date = new Date();
-    date.setDate(date.getDate() - 30);
-    return date.toISOString().split("T")[0];
-  });
-  const [endDate, setEndDate] = useState(() => today.toISOString().split("T")[0]);
+  const [startDate, setStartDate] = useState(() => berlinToday());
+  const [endDate, setEndDate] = useState(() => berlinToday());
 
   const getAuthHeader = () => {
     const credentials = sessionStorage.getItem("adminCredentials");
@@ -350,15 +315,17 @@ export default function AdminStatsPage() {
 
   const applyPreset = (preset: string) => {
     setActivePreset(preset);
-    const end = new Date();
-    const start = new Date();
-    if (preset === "0") {
-      start.setHours(0, 0, 0, 0);
-    } else {
-      start.setDate(start.getDate() - parseInt(preset));
+    const today = berlinToday();
+    let s = today;
+    let e = today;
+    if (preset === "gestern") {
+      s = shiftDay(today, -1);
+      e = shiftDay(today, -1);
+    } else if (preset === "7") {
+      s = shiftDay(today, -6);
+    } else if (preset === "30") {
+      s = shiftDay(today, -29);
     }
-    const s = start.toISOString().split("T")[0];
-    const e = end.toISOString().split("T")[0];
     setStartDate(s);
     setEndDate(e);
     fetchStats(s, e);
@@ -399,7 +366,8 @@ export default function AdminStatsPage() {
   }
 
   const presets = [
-    { label: "Heute", value: "0" },
+    { label: "Heute", value: "heute" },
+    { label: "Gestern", value: "gestern" },
     { label: "7 Tage", value: "7" },
     { label: "30 Tage", value: "30" },
   ];
@@ -415,7 +383,7 @@ export default function AdminStatsPage() {
               <BarChart3 className="h-7 w-7 text-primary" />
               Funnel Dashboard
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">KI-Klick Methode · Live-Tracking</p>
+            <p className="text-muted-foreground text-sm mt-1">KI-Klick Methode · Alle Zeiten in deutscher Zeit (Kalendertage)</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
@@ -461,7 +429,7 @@ export default function AdminStatsPage() {
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-wrap items-end gap-3">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {presets.map((p) => (
                   <button
                     key={p.value}
@@ -500,6 +468,9 @@ export default function AdminStatsPage() {
                 </Button>
               </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              „Heute" = der heutige Kalendertag ab 00:00 Uhr deutscher Zeit (nicht die letzten 24 Stunden).
+            </p>
           </CardContent>
         </Card>
 
@@ -519,229 +490,126 @@ export default function AdminStatsPage() {
         {!isLoading && stats && (
           <div className="space-y-6">
 
-            {/* CONVERSION ÜBERSICHT */}
+            {/* QUIZ-SEITE */}
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="p-5 sm:p-6">
                 <SectionHeader
-                  icon={<CheckCircle className="h-4 w-4 text-primary" />}
-                  title="Conversion-Übersicht"
+                  icon={<Users className="h-4 w-4 text-primary" />}
+                  title="Quiz-Seite"
                   color="bg-primary/10"
                 />
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Eintragungen</p>
-                    <p className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">{stats.contactSubmitted}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Formular abgeschlossen</p>
-                  </div>
-                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Besucher → Eintragung</p>
-                    <p className="text-3xl sm:text-4xl font-bold text-green-600 tabular-nums">{pct(stats.contactSubmitted, stats.uniqueVisitors)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.contactSubmitted} von {stats.uniqueVisitors} Besuchern</p>
-                  </div>
-                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Qualifiziert → Eintragung</p>
-                    <p className="text-3xl sm:text-4xl font-bold text-green-600 tabular-nums">{pct(stats.contactSubmitted, stats.funnelQualified)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.contactSubmitted} von {stats.funnelQualified} Qualifizierten</p>
-                  </div>
-                  <div className="bg-background rounded-xl p-4 sm:p-5 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">CTA-Klickrate</p>
-                    <p className="text-3xl sm:text-4xl font-bold text-amber-600 tabular-nums">{pct(stats.ctaClick, stats.ctaShown)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.ctaClick} von {stats.ctaShown} Aufrufen</p>
-                  </div>
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-5">
+                  <KpiCard label="Seitenbesucher" value={stats.visitors} sub="eindeutige Besucher" />
+                  <KpiCard label="Quiz gestartet" value={stats.quizStart} sub={pct(stats.quizStart, stats.visitors) + " der Besucher"} />
+                  <KpiCard label="Rausgeflogen" value={stats.quizDisqualified} sub={pct(stats.quizDisqualified, stats.quizStart) + " der Starts"} accent="text-red-500" />
+                  <KpiCard label="Quiz beendet" value={stats.quizCompleted} sub={pct(stats.quizCompleted, stats.quizStart) + " der Starts"} accent="text-green-600" />
+                  <KpiCard label="Formular ausgefüllt" value={stats.formSubmitted} sub="→ zur VSL-Seite" accent="text-primary" />
+                </div>
+                <div className="space-y-1.5">
+                  <FunnelRow step="1" label="Seitenbesucher" value={stats.visitors} base={stats.visitors} color="bg-blue-400" />
+                  <FunnelRow step="2" label="Quiz gestartet" value={stats.quizStart} base={stats.visitors} color="bg-indigo-400" />
+                  <FunnelRow step="3" label="Quiz beendet" value={stats.quizCompleted} base={stats.visitors} color="bg-green-500" />
+                  <FunnelRow step="4" label="Formular ausgefüllt" value={stats.formSubmitted} base={stats.visitors} color="bg-primary" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* TRAFFIC */}
+            {/* ABBRÜCHE PRO FRAGE */}
             <Card>
               <CardContent className="p-5 sm:p-6">
                 <SectionHeader
-                  icon={<Users className="h-4 w-4 text-blue-600" />}
-                  title="Traffic"
-                  color="bg-blue-500/10"
+                  icon={<XCircle className="h-4 w-4 text-red-500" />}
+                  title="Abbrüche pro Frage"
+                  color="bg-red-500/10"
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <StatCard
-                    label="Besucher gesamt"
-                    value={stats.uniqueVisitors}
-                    sub={`${stats.totalPageViews} Seitenaufrufe`}
-                    icon={<Users className="h-5 w-5 text-blue-600" />}
-                    color="bg-blue-500/10"
-                  />
-                  <StatCard
-                    label="Neue Besucher"
-                    value={stats.newVisitors}
-                    sub={pct(stats.newVisitors, stats.uniqueVisitors) + " aller Besucher"}
-                    icon={<UserPlus className="h-5 w-5 text-green-600" />}
-                    color="bg-green-500/10"
-                  />
-                  <StatCard
-                    label="Wiederkehrend"
-                    value={stats.returningVisitors}
-                    sub={pct(stats.returningVisitors, stats.uniqueVisitors) + " aller Besucher"}
-                    icon={<UserCheck className="h-5 w-5 text-purple-600" />}
-                    color="bg-purple-500/10"
-                  />
+                <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                  Der Balken zeigt, wie viele Besucher die Frage <strong>beantwortet</strong> haben (im Verhältnis zum Quiz-Start).
+                  Die rote Zahl zeigt, wie viele genau <strong>bei dieser Frage rausgeflogen</strong> sind.
+                </p>
+                <div>
+                  {(stats.questionFunnel || []).map((q, i) => (
+                    <QuestionFunnelRow
+                      key={q.id}
+                      step={i + 1}
+                      label={q.label}
+                      reached={q.reached}
+                      disqualified={q.disqualified}
+                      base={stats.quizStart}
+                      answerBreakdown={q.answerBreakdown}
+                    />
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* VIDEO */}
+            {/* VSL-SEITE */}
             <Card>
               <CardContent className="p-5 sm:p-6">
                 <SectionHeader
                   icon={<Play className="h-4 w-4 text-orange-600" />}
-                  title="Video"
+                  title="VSL-Seite"
                   color="bg-orange-500/10"
                 />
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
-                  {[
-                    { label: "Gestartet", value: stats.videoStart },
-                    { label: "25% gesehen", value: stats.video25 },
-                    { label: "50% gesehen", value: stats.video50 },
-                    { label: "75% gesehen", value: stats.video75 },
-                    { label: "100% gesehen", value: stats.video100 },
-                  ].map((item) => (
-                    <div key={item.label} className="bg-muted/50 rounded-xl p-4 text-center">
-                      <p className="text-3xl font-bold tabular-nums text-foreground">{item.value}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
+                  <KpiCard label="VSL-Besucher" value={stats.vslVisitors} sub="eindeutige Besucher" />
+                  <KpiCard label="Video gestartet" value={stats.videoStart} sub={pct(stats.videoStart, stats.vslVisitors) + " der VSL-Besucher"} />
+                  <KpiCard label="Kalender geöffnet" value={stats.calendlyOpen} sub="Klick auf Termin-Button" />
+                  <KpiCard label="Termin gebucht" value={stats.calendlyBooked} sub="bestätigte Calendly-Buchung" accent="text-green-600" />
                 </div>
                 <div className="space-y-1.5">
-                  <FunnelRow step="▶" label="Video gestartet" value={stats.videoStart} base={stats.uniqueVisitors} color="bg-orange-400" />
-                  <FunnelRow step="25" label="25% gesehen" value={stats.video25} base={stats.videoStart} color="bg-orange-400" />
-                  <FunnelRow step="50" label="50% gesehen" value={stats.video50} base={stats.videoStart} color="bg-orange-400" />
-                  <FunnelRow step="75" label="75% gesehen" value={stats.video75} base={stats.videoStart} color="bg-orange-400" />
-                  <FunnelRow step="✓" label="100% gesehen" value={stats.video100} base={stats.videoStart} color="bg-green-500" />
+                  <FunnelRow step="1" label="VSL-Besucher" value={stats.vslVisitors} base={stats.vslVisitors} color="bg-orange-300" />
+                  <FunnelRow step="2" label="Video gestartet" value={stats.videoStart} base={stats.vslVisitors} color="bg-orange-400" />
+                  <FunnelRow step="3" label="Kalender geöffnet" value={stats.calendlyOpen} base={stats.vslVisitors} color="bg-amber-500" />
+                  <FunnelRow step="4" label="Termin gebucht" value={stats.calendlyBooked} base={stats.vslVisitors} color="bg-green-500" />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* CTA */}
-            <Card>
-              <CardContent className="p-5 sm:p-6">
-                <SectionHeader
-                  icon={<MousePointer className="h-4 w-4 text-amber-600" />}
-                  title="CTA"
-                  color="bg-amber-500/10"
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <StatCard
-                    label="CTA eingeblendet"
-                    value={stats.ctaShown}
-                    sub={pct(stats.ctaShown, stats.uniqueVisitors) + " der Besucher"}
-                    icon={<Eye className="h-5 w-5 text-amber-600" />}
-                    color="bg-amber-500/10"
-                  />
-                  <StatCard
-                    label="CTA geklickt"
-                    value={stats.ctaClick}
-                    sub={pct(stats.ctaClick, stats.ctaShown) + " der Einblendungen"}
-                    icon={<MousePointer className="h-5 w-5 text-amber-600" />}
-                    color="bg-amber-500/10"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <FunnelRow step="👁" label="CTA eingeblendet" value={stats.ctaShown} base={stats.uniqueVisitors} color="bg-amber-400" />
-                  <FunnelRow step="→" label="CTA geklickt" value={stats.ctaClick} base={stats.ctaShown} color="bg-amber-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* FUNNEL */}
-            <Card>
-              <CardContent className="p-5 sm:p-6">
-                <SectionHeader
-                  icon={<TrendingUp className="h-4 w-4 text-indigo-600" />}
-                  title="Mini-Funnel"
-                  color="bg-indigo-500/10"
-                />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                  <div className="bg-muted/50 rounded-xl p-4 text-center">
-                    <p className="text-3xl font-bold tabular-nums text-foreground">{stats.funnelStart}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Funnel gestartet</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-xl p-4 text-center">
-                    <p className="text-3xl font-bold tabular-nums text-green-600">{stats.funnelQualified}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Qualifiziert</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-xl p-4 text-center">
-                    <p className="text-3xl font-bold tabular-nums text-red-500">{stats.funnelDisqualified}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Disqualifiziert</p>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <FunnelRow step="S" label="Funnel gestartet" value={stats.funnelStart} base={stats.uniqueVisitors} color="bg-indigo-400" />
-                </div>
-
-                <div className="mt-4 rounded-xl border border-border bg-muted/20 p-4">
-                  <p className="text-sm font-semibold text-foreground mb-1">Abbrüche pro Frage</p>
-                  <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-                    Der Balken zeigt, wie viele Besucher diese Frage <strong>beantwortet</strong> haben (im Verhältnis zum Funnel-Start).
-                    Die rote Zahl zeigt, wie viele genau <strong>bei dieser Frage disqualifiziert</strong> wurden.
-                  </p>
-                  <div>
-                    {(stats.questionFunnel || []).map((q, i) => (
-                      <QuestionFunnelRow
-                        key={q.id}
-                        step={i + 1}
-                        label={q.label}
-                        reached={q.reached}
-                        disqualified={q.disqualified}
-                        base={stats.funnelStart}
-                        answerBreakdown={q.answerBreakdown}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 mt-4">
-                  <FunnelRow step="✓" label="Qualifiziert" value={stats.funnelQualified} base={stats.funnelStart} color="bg-green-500" />
-                  <FunnelRow step="✗" label="Disqualifiziert (gesamt)" value={stats.funnelDisqualified} base={stats.funnelStart} color="bg-red-400" />
-                </div>
-
                 <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
-                  So erkennst du, ob du zu <strong>wenig Volumen</strong> hast (oben wenige Besucher / Funnel-Starts) oder ob die Besucher
-                  <strong> unqualifiziert</strong> sind (viele rote Disqualifikationen bei einer bestimmten Frage). Die Zahlen pro Frage
-                  werden aus den gespeicherten Antworten berechnet und gelten daher auch <strong>rückwirkend</strong>.
+                  „Termin gebucht" wird nur gezählt, wenn im Calendly-Fenster wirklich ein Termin abgeschlossen wurde – nicht schon beim Öffnen.
                 </p>
               </CardContent>
             </Card>
 
-            {/* OPT-IN / EINTRAGUNG */}
+            {/* TAGESÜBERSICHT */}
             <Card>
               <CardContent className="p-5 sm:p-6">
                 <SectionHeader
-                  icon={<UserPlus className="h-4 w-4 text-green-600" />}
-                  title="Opt-in / Eintragung"
-                  color="bg-green-500/10"
+                  icon={<Calendar className="h-4 w-4 text-blue-600" />}
+                  title="Tagesübersicht"
+                  color="bg-blue-500/10"
                 />
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="bg-muted/50 rounded-xl p-4 text-center">
-                    <p className="text-3xl font-bold tabular-nums text-green-600">{stats.funnelQualified}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Qualifiziert</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-xl p-4 text-center">
-                    <p className="text-3xl font-bold tabular-nums text-primary">{stats.contactSubmitted}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Formular abgeschlossen</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-xl p-4 text-center">
-                    <p className="text-3xl font-bold tabular-nums text-foreground">{stats.leadsGenerated}</p>
-                    <p className="text-xs text-muted-foreground mt-1">DB-Einträge*</p>
-                  </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                        <th className="py-2 pr-3 font-medium whitespace-nowrap">Datum</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Besucher</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Quiz gestartet</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Rausgeflogen</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Quiz beendet</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Formular</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">VSL-Besucher</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Video gestartet</th>
+                        <th className="py-2 pl-3 font-medium text-right whitespace-nowrap">Termin gebucht</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(stats.daily || []).map((d) => (
+                        <tr key={d.date} className="border-b border-border/40 last:border-0">
+                          <td className="py-2 pr-3 font-medium whitespace-nowrap">{formatGermanDate(d.date)}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{d.visitors}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{d.quizStart}</td>
+                          <td className={`py-2 px-3 text-right tabular-nums ${d.quizDisqualified > 0 ? "text-red-500 font-semibold" : ""}`}>{d.quizDisqualified}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{d.quizCompleted}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{d.formSubmitted}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{d.vslVisitors}</td>
+                          <td className="py-2 px-3 text-right tabular-nums">{d.videoStart}</td>
+                          <td className={`py-2 pl-3 text-right tabular-nums ${d.calendlyBooked > 0 ? "text-green-600 font-bold" : ""}`}>{d.calendlyBooked}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="space-y-1.5">
-                  <FunnelRow step="✓" label="Qualifiziert" value={stats.funnelQualified} base={stats.funnelQualified} color="bg-green-500" />
-                  <FunnelRow step="1" label="Name-Schritt gesehen" value={stats.contactViewName} base={stats.funnelQualified} color="bg-teal-400" />
-                  <FunnelRow step="2" label="Telefon-Schritt gesehen" value={stats.contactViewPhone} base={stats.funnelQualified} color="bg-teal-400" />
-                  <FunnelRow step="3" label="E-Mail-Schritt gesehen" value={stats.contactViewEmail} base={stats.funnelQualified} color="bg-teal-400" />
-                  <FunnelRow step="📨" label="Formular abgeschlossen" value={stats.contactSubmitted} base={stats.funnelQualified} color="bg-indigo-500" />
-                </div>
-                <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
-                  Zeigt, wo qualifizierte Nutzer beim Ausfüllen des Kontaktformulars abspringen. „Formular abgeschlossen" ist die verlässliche Eintragungs-Zahl (genau 1 Event pro Abschluss).
-                  <br />
-                  <span className="text-muted-foreground/80">*„DB-Einträge" zählt alle Lead-Zeilen in der Datenbank im Zeitraum. Durch automatische Zwischenspeicherung (ab dem Telefon-Schritt) kann eine Person mehrere Zeilen erzeugen — diese Zahl ist daher meist höher als die abgeschlossenen Eintragungen.</span>
+                <p className="text-xs text-muted-foreground mt-4">
+                  Jede Zeile ist ein Kalendertag in deutscher Zeit (00:00–23:59 Uhr). Neueste Tage oben.
                 </p>
               </CardContent>
             </Card>

@@ -48,9 +48,20 @@ export default function VSLPage() {
       document.head.appendChild(ytApi);
     }
 
+    // Track REAL bookings: Calendly fires a postMessage when an appointment
+    // is actually scheduled inside the popup.
+    const onCalendlyMessage = (e: MessageEvent) => {
+      if (typeof e.origin === 'string' && !e.origin.endsWith('calendly.com')) return;
+      if (e.data && typeof e.data === 'object' && e.data.event === 'calendly.event_scheduled') {
+        trackEvent('calendly_booked');
+      }
+    };
+    window.addEventListener('message', onCalendlyMessage);
+
     return () => {
       document.head.removeChild(link);
       document.body.removeChild(script);
+      window.removeEventListener('message', onCalendlyMessage);
     };
   }, []);
 

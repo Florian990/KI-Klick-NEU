@@ -34,12 +34,42 @@ const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4l
 // that disqualify a lead at that question, so per-question disqualification can be
 // computed retroactively from the stored `quiz_step_<id>` answers.
 const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }[] = [
-  { id: 11, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18"] },
+  { id: 11, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18", "Über 72"] },
   { id: 12, label: "In welcher beruflichen Situation bist du?", disqualifyAnswers: ["Schüler/in", "Azubi/Student", "Arbeitssuchend/arbeitslos"] },
   { id: 13, label: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?", disqualifyAnswers: [] },
   { id: 14, label: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?", disqualifyAnswers: [] },
   { id: 15, label: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?", disqualifyAnswers: ["Nein"] },
 ];
+
+// --- Date helpers: all reporting uses German calendar days (Europe/Berlin) ---
+const BERLIN_TZ = "Europe/Berlin";
+const berlinDayFmt = new Intl.DateTimeFormat("en-CA", {
+  timeZone: BERLIN_TZ, year: "numeric", month: "2-digit", day: "2-digit",
+});
+
+// Formats a timestamp as its German calendar day, e.g. "2026-07-23"
+function berlinDay(date: Date): string {
+  return berlinDayFmt.format(date);
+}
+
+// Returns the day after a YYYY-MM-DD string
+function nextDay(day: string): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d + 1));
+  return next.toISOString().slice(0, 10);
+}
+
+// Returns the UTC instant when the given German calendar day starts (00:00 Berlin time),
+// correctly handling summer/winter time.
+function berlinDayStartUtc(day: string): Date {
+  const guess = new Date(`${day}T00:00:00Z`);
+  const offFmt = new Intl.DateTimeFormat("en-US", { timeZone: BERLIN_TZ, timeZoneName: "longOffset" });
+  const name = offFmt.formatToParts(guess).find(p => p.type === "timeZoneName")?.value || "GMT+00:00";
+  const m = name.match(/GMT([+-])(\d{2}):(\d{2})/);
+  const sign = m && m[1] === "-" ? -1 : 1;
+  const offsetMin = m ? sign * (parseInt(m[2], 10) * 60 + parseInt(m[3], 10)) : 0;
+  return new Date(guess.getTime() - offsetMin * 60000);
+}
 
 // Secret that authorizes "test mode" (skips DB + CRM writes for the admin's own runs).
 // Fail-safe: if it is not configured, NO request can ever suppress a real lead.
@@ -326,21 +356,46 @@ export async function registerRoutes(
         });
       }
 
-      const start = new Date(startDate as string);
-      const end = new Date(endDate as string);
-      end.setHours(23, 59, 59, 999);
+      // Date-exact ranges in German time (Europe/Berlin), NOT "last 24h":
+      // a selected day always means 00:00:00–23:59:59 German local time.
+      const start = berlinDayStartUtc(String(startDate));
+      const end = new Date(berlinDayStartUtc(nextDay(String(endDate))).getTime() - 1);
 
-      const [pageViews, events, uniqueVisitors, returningVisitors, leads] = await Promise.all([
+      const [pageViews, events] = await Promise.all([
         storage.getPageViews(start, end),
         storage.getAnalyticsEvents(start, end),
-        storage.getUniqueVisitors(start, end),
-        storage.getReturningVisitors(start, end),
-        storage.getLeads()
       ]);
 
-      const leadsInRange = leads.filter(l => l.createdAt >= start && l.createdAt <= end);
-
       const count = (type: string) => events.filter(e => e.eventType === type).length;
+
+      // Unique visitor counts, overall and per page
+      const uniq = (ids: string[]) => new Set(ids).size;
+      const landingViews = pageViews.filter(p => p.page === '/');
+      const vslViews = pageViews.filter(p => p.page === '/vsl');
+
+      // Per-day breakdown (German calendar days)
+      const dayKeys: string[] = [];
+      for (let d = String(startDate); d <= String(endDate); d = nextDay(d)) {
+        dayKeys.push(d);
+        if (dayKeys.length > 366) break;
+      }
+      const daily = dayKeys.map((day) => {
+        const pv = pageViews.filter(p => berlinDay(p.createdAt) === day);
+        const ev = events.filter(e => berlinDay(e.createdAt) === day);
+        const c = (type: string) => ev.filter(e => e.eventType === type).length;
+        return {
+          date: day,
+          visitors: uniq(pv.filter(p => p.page === '/').map(p => p.visitorId)),
+          quizStart: c('quiz_start'),
+          quizDisqualified: c('quiz_disqualified'),
+          quizCompleted: c('quiz_complete'),
+          formSubmitted: c('funnel_contact_submitted'),
+          vslVisitors: uniq(pv.filter(p => p.page === '/vsl').map(p => p.visitorId)),
+          videoStart: c('video_start'),
+          calendlyOpen: c('calendly_open'),
+          calendlyBooked: c('calendly_booked'),
+        };
+      }).reverse();
 
       // Answers recorded for a given quiz question (quiz_step_<id> stores the answer
       // BEFORE the disqualify check, so disqualifying answers are captured too).
@@ -358,29 +413,20 @@ export async function registerRoutes(
       res.json({
         success: true,
         data: {
-          // Traffic
+          // Landing page (quiz page)
+          visitors: uniq(landingViews.map(p => p.visitorId)),
           totalPageViews: pageViews.length,
-          uniqueVisitors,
-          returningVisitors,
-          newVisitors: uniqueVisitors - returningVisitors,
-          // Video
+          quizStart: count('quiz_start'),
+          quizDisqualified: count('quiz_disqualified'),
+          quizCompleted: count('quiz_complete'),
+          formSubmitted: count('funnel_contact_submitted'),
+          // VSL page
+          vslVisitors: uniq(vslViews.map(p => p.visitorId)),
           videoStart: count('video_start'),
-          video25: count('video_25'),
-          video50: count('video_50'),
-          video75: count('video_75'),
-          video100: count('video_100'),
-          // CTA
-          ctaShown: count('cta_shown'),
-          ctaClick: count('cta_click'),
-          // Quiz funnel (all 5 questions)
-          funnelStart: count('funnel_start'),
-          funnelQ1: count('funnel_q1'),
-          funnelQ2: count('funnel_q2'),
-          funnelQ3: count('funnel_q3'),
-          funnelQ4: count('funnel_q4'),
-          funnelQ5: count('funnel_q5'),
-          funnelDisqualified: count('funnel_disqualified'),
-          funnelQualified: count('funnel_qualified'),
+          calendlyOpen: count('calendly_open'),
+          calendlyBooked: count('calendly_booked'),
+          // Per-day breakdown (German calendar days, newest first)
+          daily,
           // Per-question drop-off + disqualification, labelled with the real question text.
           // Computed from stored quiz_step answers so it also works for past data.
           questionFunnel: QUIZ_QUESTIONS.map((q) => {
@@ -409,15 +455,6 @@ export async function registerRoutes(
               answerBreakdown,
             };
           }),
-          // Opt-in / contact form (drop-off analysis)
-          contactViewName: count('contact_view_name'),
-          contactViewPhone: count('contact_view_phone'),
-          contactViewEmail: count('contact_view_email'),
-          contactSubmitted: count('funnel_contact_submitted'),
-          // Leads actually saved to the database (source of truth)
-          leadsGenerated: leadsInRange.length,
-          // Legacy (kept for backward compatibility; no longer featured)
-          calendlyOpen: count('calendly_open'),
         }
       });
     } catch (error) {
