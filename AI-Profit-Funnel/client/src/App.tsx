@@ -12,12 +12,14 @@ import DatenschutzPage from "@/pages/datenschutz";
 import GarantiePage from "@/pages/garantie";
 import AgbKiKlickPage from "@/pages/agb-ki-klick";
 import ErfolgsgarantieKiKlickPage from "@/pages/erfolgsgarantie-ki-klick";
+import DankePage from "@/pages/danke";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={QuizLandingPage} />
       <Route path="/vsl" component={VSLPage} />
+      <Route path="/danke" component={DankePage} />
       <Route path="/impressum" component={ImpressumPage} />
       <Route path="/datenschutz" component={DatenschutzPage} />
       <Route path="/garantie" component={GarantiePage} />
