@@ -72,6 +72,28 @@ const questions: QuizQuestion[] = [
   },
 ];
 
+// --- Rentner branch questions (ids 16 & 17) ---
+const rentnerArtQuestion: QuizQuestion = {
+  id: 16,
+  question: "In welcher Rentenart befindest du dich aktuell?",
+  answers: [
+    { text: "Frührente / Erwerbsminderungsrente", disqualify: true },
+    { text: "Altersrente" },
+  ],
+};
+
+const rentnerSpielraumQuestion: QuizQuestion = {
+  id: 17,
+  question: "Wie viel finanziellen Spielraum hast du, wenn alle Fixkosten bezahlt sind?",
+  hint: "Deine Antwort hilft uns einzuschätzen, ob wir dir wirklich weiterhelfen können.",
+  answers: [
+    { text: "Aktuell nichts – es ist eng", disqualify: true },
+    { text: "Ein paar hundert Euro" },
+    { text: "Deutlich mehr, ich habe Rücklagen" },
+  ],
+};
+
+// --- Follow-up question if Q14 answered "Nein" ---
 const followUpQuestion: QuizQuestion = {
   id: 15,
   question: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?",
@@ -81,16 +103,49 @@ const followUpQuestion: QuizQuestion = {
   ],
 };
 
+// Index of Q14 in the questions array
+const Q14_INDEX = 3;
+
 export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [showFollowUp, setShowFollowUp] = useState(false);
+  // null = not in rentner branch, 'art' = asking rentenart, 'spielraum' = asking financial room
+  const [rentnerPhase, setRentnerPhase] = useState<null | 'art' | 'spielraum'>(null);
+  // true once the rentner path has been taken (so we know to skip Q13 and handle back correctly)
+  const [isRentnerPath, setIsRentnerPath] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const { trackEvent } = useAnalytics();
   const hasTrackedStart = useRef(false);
 
-  const currentQuestion = showFollowUp ? followUpQuestion : questions[currentStep];
-  const totalSteps = showFollowUp ? questions.length + 1 : questions.length;
-  const displayStep = showFollowUp ? questions.length + 1 : currentStep + 1;
+  // --- Compute which question to show ---
+  const currentQuestion =
+    rentnerPhase === 'art' ? rentnerArtQuestion :
+    rentnerPhase === 'spielraum' ? rentnerSpielraumQuestion :
+    showFollowUp ? followUpQuestion :
+    questions[currentStep];
+
+  // --- Progress bar ---
+  // Rentner path has 5 visible steps (Q11, Q12, Q16, Q17, Q14), normal has 4.
+  const extraSteps = isRentnerPath ? 1 : 0;
+  const totalSteps = showFollowUp
+    ? questions.length + 1 + extraSteps
+    : questions.length + extraSteps;
+
+  let displayStep: number;
+  if (rentnerPhase === 'art') {
+    displayStep = currentStep + 2; // Q12 was step 2, so Q16 = step 3
+  } else if (rentnerPhase === 'spielraum') {
+    displayStep = currentStep + 3; // Q17 = step 4
+  } else if (showFollowUp) {
+    displayStep = questions.length + 1 + extraSteps;
+  } else if (isRentnerPath) {
+    // After rentner branch, currentStep is set to Q14_INDEX (3)
+    // Q14 is the 5th visible step on the rentner path
+    displayStep = currentStep + 2;
+  } else {
+    displayStep = currentStep + 1;
+  }
+
   const progress = (displayStep / totalSteps) * 100;
 
   useEffect(() => {
@@ -106,13 +161,32 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
 
     trackEvent(`quiz_step_${currentQuestion.id}`, {
       question: currentQuestion.question.substring(0, 50),
-      answer: answer.text
+      answer: answer.text,
     });
-
     trackEvent(`funnel_q${currentQuestion.id}`);
 
     if (answer.disqualify) {
       onDisqualify();
+      return;
+    }
+
+    // "Rentner/in" selected at Q12 → enter the rentner branch
+    if (currentQuestion.id === 12 && answer.text === "Rentner/in") {
+      setRentnerPhase('art');
+      setIsRentnerPath(true);
+      return;
+    }
+
+    // Inside rentner branch: rentnerArt question → only Altersrente reaches here
+    if (rentnerPhase === 'art') {
+      setRentnerPhase('spielraum');
+      return;
+    }
+
+    // Inside rentner branch: spielraum question → passed, skip Q13, jump to Q14
+    if (rentnerPhase === 'spielraum') {
+      setRentnerPhase(null);
+      setCurrentStep(Q14_INDEX);
       return;
     }
 
@@ -121,6 +195,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       return;
     }
 
+    // Last question or followUp answered → complete
     if (showFollowUp || currentStep === questions.length - 1) {
       const finalAnswers = { ...selectedAnswers, [currentQuestion.id]: answer.text };
       onComplete(finalAnswers);
@@ -135,6 +210,21 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const handleBack = () => {
     if (showFollowUp) {
       setShowFollowUp(false);
+      return;
+    }
+    if (rentnerPhase === 'spielraum') {
+      setRentnerPhase('art');
+      return;
+    }
+    if (rentnerPhase === 'art') {
+      setRentnerPhase(null);
+      setIsRentnerPath(false);
+      // currentStep is still 1 (Q12), so the user sees Q12 again
+      return;
+    }
+    // Back from Q14 when arrived via rentner path → return to spielraum question
+    if (isRentnerPath && currentStep === Q14_INDEX) {
+      setRentnerPhase('spielraum');
       return;
     }
     if (currentStep > 0) {
@@ -202,7 +292,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
         })}
       </div>
 
-      {(currentStep > 0 || showFollowUp) && (
+      {(currentStep > 0 || showFollowUp || rentnerPhase !== null) && (
         <div className="mt-3 sm:mt-4 md:mt-6 flex justify-center">
           <Button
             variant="ghost"

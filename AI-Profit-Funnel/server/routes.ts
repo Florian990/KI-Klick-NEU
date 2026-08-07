@@ -39,6 +39,8 @@ const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }
   { id: 13, label: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?", disqualifyAnswers: [] },
   { id: 14, label: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?", disqualifyAnswers: [] },
   { id: 15, label: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?", disqualifyAnswers: ["Nein"] },
+  { id: 16, label: "In welcher Rentenart befindest du dich aktuell? (Rentner-Zweig)", disqualifyAnswers: ["Frührente / Erwerbsminderungsrente"] },
+  { id: 17, label: "Wie viel finanziellen Spielraum hast du, wenn alle Fixkosten bezahlt sind? (Rentner-Zweig)", disqualifyAnswers: ["Aktuell nichts – es ist eng"] },
 ];
 
 // --- Date helpers: all reporting uses German calendar days (Europe/Berlin) ---
