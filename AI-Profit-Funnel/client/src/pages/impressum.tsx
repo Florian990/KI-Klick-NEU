@@ -26,6 +26,11 @@ export default function ImpressumPage() {
           </div>
 
           <div>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Vertretungsberechtigt:</h2>
+            <p>Florian Benedict, CEO</p>
+          </div>
+
+          <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">Kontakt:</h2>
             <p>E-Mail: <a href="mailto:info@geheime-ki-klickmethode.de" className="text-primary hover:underline">info@geheime-ki-klickmethode.de</a></p>
           </div>

@@ -6,6 +6,23 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+// Legal pages must remain directly accessible, but should not be listed in
+// search engines. A response header works for direct requests and SPA routes.
+const noIndexPaths = new Set([
+  "/impressum",
+  "/datenschutz",
+  "/agbkiklick",
+  "/erfolgsgarantiekiklick",
+  "/garantie",
+]);
+
+app.use((req, res, next) => {
+  if (noIndexPaths.has(req.path)) {
+    res.setHeader("X-Robots-Tag", "noindex, follow");
+  }
+  next();
+});
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
