@@ -1,9 +1,10 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertLeadSchema, insertPageViewSchema, insertAnalyticsEventSchema } from "@shared/schema";
+import { insertLeadSchema, insertPageViewSchema, insertAnalyticsEventSchema, insertRecruitmentApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import { sendLeadNotification } from "./email";
+import { sendRecruitmentApplicationNotification } from "./recruitment-email";
 
 // Basic Auth middleware for admin routes (without WWW-Authenticate header to prevent browser popup)
 const basicAuth = (req: Request, res: Response, next: NextFunction) => {
@@ -28,6 +29,118 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/";
+
+const recruitmentRawBody = express.raw({ type: "multipart/form-data", limit: "21mb" });
+const recruitmentBodyMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  recruitmentRawBody(req, res, (error) => {
+    if (error) {
+      return res.status(413).json({
+        success: false,
+        message: "Die hochgeladenen Nachweise sind zu groß. Insgesamt sind maximal 20 MB erlaubt.",
+      });
+    }
+    next();
+  });
+};
+
+interface RecruitmentUploadFile {
+  fieldname: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
+function parseMultipartRequest(req: Request): { fields: Record<string, string>; files: RecruitmentUploadFile[] } {
+  const contentType = req.headers["content-type"] || "";
+  const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+  const boundary = boundaryMatch?.[1] || boundaryMatch?.[2]?.trim();
+
+  if (!boundary || !Buffer.isBuffer(req.body)) {
+    throw new Error("Ungültige Formulardaten.");
+  }
+
+  const fields: Record<string, string> = {};
+  const files: RecruitmentUploadFile[] = [];
+  const delimiter = Buffer.from(`--${boundary}`);
+  const headerDelimiter = Buffer.from("\r\n\r\n");
+  let cursor = req.body.indexOf(delimiter);
+
+  while (cursor !== -1) {
+    const nextBoundary = req.body.indexOf(delimiter, cursor + delimiter.length);
+    if (nextBoundary === -1) break;
+
+    let part = req.body.subarray(cursor + delimiter.length, nextBoundary);
+    if (part.subarray(0, 2).toString() === "\r\n") part = part.subarray(2);
+    if (part.subarray(-2).toString() === "\r\n") part = part.subarray(0, -2);
+    cursor = nextBoundary;
+
+    if (part.length === 0 || part.subarray(0, 2).toString() === "--") continue;
+
+    const headerEnd = part.indexOf(headerDelimiter);
+    if (headerEnd === -1) continue;
+
+    const headers = part.subarray(0, headerEnd).toString("utf8");
+    const content = part.subarray(headerEnd + headerDelimiter.length);
+    const disposition = headers.split("\r\n").find((line) => line.toLowerCase().startsWith("content-disposition:"));
+    const fieldName = disposition?.match(/(?:^|;\s*)name="([^"]+)"/i)?.[1];
+    if (!fieldName) continue;
+
+    const filename = disposition?.match(/(?:^|;\s*)filename="([^"]*)"/i)?.[1];
+    if (filename !== undefined) {
+      const mimetype = headers.match(/content-type:\s*([^\r\n]+)/i)?.[1]?.trim().toLowerCase() || "application/octet-stream";
+      files.push({
+        fieldname: fieldName,
+        originalname: filename,
+        mimetype,
+        size: content.length,
+        buffer: Buffer.from(content),
+      });
+    } else {
+      fields[fieldName] = content.toString("utf8");
+    }
+  }
+
+  return { fields, files };
+}
+
+const yesNo = z.enum(["ja", "nein"]);
+const recruitmentApplicationInputSchema = insertRecruitmentApplicationSchema.extend({
+  firstName: z.string().trim().min(2).max(80).regex(/^[^\r\n]+$/),
+  lastName: z.string().trim().min(2).max(80).regex(/^[^\r\n]+$/),
+  email: z.string().trim().email().max(254),
+  phone: z.string().trim().min(6).max(40).regex(/^[^\r\n]+$/),
+  salesExperience: z.string().trim().min(1).max(100),
+  industriesProducts: z.string().trim().min(5).max(2000),
+  coachingMarketExperience: yesNo,
+  makeMoneyMarketExperience: yesNo,
+  fullTimeAvailable: yesNo,
+  lastYearRevenue: z.string().trim().min(1).max(500),
+  softSkills: z.string().trim().min(10).max(4000),
+  careerGoals: z.string().trim().min(10).max(4000),
+  salesTools: z.string().trim().min(3).max(2000),
+  fullFocusCommitment: yesNo,
+  expectations: z.string().trim().min(10).max(4000),
+  evidenceFileNames: z.string().max(600),
+  privacyConsent: z.literal("true"),
+});
+
+function safeEvidenceFilename(filename: string): string {
+  return filename
+    .split(/[\\/]/)
+    .pop()
+    ?.replace(/[^\w.\- ()äöüÄÖÜß]/g, "_")
+    .slice(0, 100) || "nachweis";
+}
+
+function hasValidEvidenceSignature(file: RecruitmentUploadFile): boolean {
+  const header = file.buffer.subarray(0, 12);
+  if (file.mimetype === "application/pdf") return header.toString("ascii", 0, 4) === "%PDF";
+  if (file.mimetype === "image/jpeg") return header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+  if (file.mimetype === "image/png") return header.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  if (file.mimetype === "image/webp") return header.toString("ascii", 0, 4) === "RIFF" && header.toString("ascii", 8, 12) === "WEBP";
+  return false;
+}
 
 // Quiz questions in funnel order (ids skip 6 by design). Labels must match the wording
 // in client/src/components/Quiz.tsx verbatim. `disqualifyAnswers` lists the answer texts
@@ -255,6 +368,78 @@ export async function registerRoutes(
         success: false, 
         message: "Internal server error" 
       });
+    }
+  });
+
+  // Separate recruitment application endpoint. It intentionally does not call
+  // the normal lead table, quiz completion handler, Zapier webhook, or lead mail.
+  app.post("/api/vertriebsbewerbungen", recruitmentBodyMiddleware, async (req, res) => {
+    try {
+      const multipart = parseMultipartRequest(req);
+      const files = multipart.files.filter((file) => file.fieldname === "evidenceFiles");
+
+      if (files.length === 0) {
+        return res.status(400).json({ success: false, message: "Bitte lade mindestens einen Track-Record-Nachweis hoch." });
+      }
+
+      if (files.length > 5) {
+        return res.status(400).json({ success: false, message: "Du kannst maximal fünf Nachweise hochladen." });
+      }
+
+      if (files.some((file) => file.size > 5 * 1024 * 1024)) {
+        return res.status(400).json({ success: false, message: "Eine Datei darf maximal 5 MB groß sein." });
+      }
+
+      const totalBytes = files.reduce((total, file) => total + file.size, 0);
+      if (totalBytes > 20 * 1024 * 1024) {
+        return res.status(400).json({ success: false, message: "Die Nachweise dürfen zusammen maximal 20 MB groß sein." });
+      }
+
+      if (files.some((file) => !hasValidEvidenceSignature(file))) {
+        return res.status(400).json({ success: false, message: "Mindestens ein Nachweis hat kein gültiges Dateiformat." });
+      }
+
+      const evidenceFileNames = files.map((file) => safeEvidenceFilename(file.originalname)).join(", ");
+      const parsed = recruitmentApplicationInputSchema.safeParse({
+        ...multipart.fields,
+        evidenceFileNames,
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Bitte fülle alle Pflichtfelder korrekt aus.",
+          errors: parsed.error.flatten().fieldErrors,
+        });
+      }
+
+      const { privacyConsent: _privacyConsent, ...applicationData } = parsed.data;
+      const application = await storage.createRecruitmentApplication({
+        ...applicationData,
+        privacyConsent: true,
+      });
+
+      const emailSent = await sendRecruitmentApplicationNotification(applicationData, files.map((file) => ({
+        filename: safeEvidenceFilename(file.originalname),
+        contentType: file.mimetype,
+        content: file.buffer,
+      })));
+
+      if (!emailSent) {
+        console.error("❌ Vertriebsbewerbung gespeichert, aber Benachrichtigung konnte nicht gesendet werden:", application.id);
+        return res.status(502).json({
+          success: false,
+          message: "Die Bewerbung wurde gespeichert, aber die interne Benachrichtigung konnte nicht gesendet werden. Bitte versuche es erneut.",
+        });
+      }
+
+      return res.status(201).json({ success: true, applicationId: application.id });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Ungültige Formulardaten.") {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      console.error("Error creating recruitment application:", error);
+      return res.status(500).json({ success: false, message: "Die Bewerbung konnte nicht verarbeitet werden." });
     }
   });
 

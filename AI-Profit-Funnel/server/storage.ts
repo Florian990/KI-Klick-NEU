@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Lead, type InsertLead, type PageView, type InsertPageView, type AnalyticsEvent, type InsertAnalyticsEvent, users, leads, pageViews, analyticsEvents } from "@shared/schema";
+import { type User, type InsertUser, type Lead, type InsertLead, type RecruitmentApplication, type InsertRecruitmentApplication, type PageView, type InsertPageView, type AnalyticsEvent, type InsertAnalyticsEvent, users, leads, recruitmentApplications, pageViews, analyticsEvents } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 
@@ -10,6 +10,7 @@ export interface IStorage {
   createLead(lead: InsertLead): Promise<Lead>;
   getLeads(): Promise<Lead[]>;
   getLeadByEmail(email: string): Promise<Lead | undefined>;
+  createRecruitmentApplication(application: InsertRecruitmentApplication): Promise<RecruitmentApplication>;
   
   createPageView(pageView: InsertPageView): Promise<PageView>;
   createAnalyticsEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent>;
@@ -56,6 +57,14 @@ export class DatabaseStorage implements IStorage {
 
   async getLeadByEmail(email: string): Promise<Lead | undefined> {
     const result = await db.select().from(leads).where(eq(leads.email, email));
+    return result[0];
+  }
+
+  async createRecruitmentApplication(insertApplication: InsertRecruitmentApplication): Promise<RecruitmentApplication> {
+    const result = await db.insert(recruitmentApplications).values({
+      ...insertApplication,
+      evidenceFileNames: insertApplication.evidenceFileNames ?? null,
+    }).returning();
     return result[0];
   }
 

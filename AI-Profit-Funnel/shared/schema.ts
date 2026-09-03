@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -38,6 +38,37 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
+
+// Separate recruitment applications — intentionally isolated from quiz leads.
+export const recruitmentApplications = pgTable("recruitment_applications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  salesExperience: text("sales_experience").notNull(),
+  industriesProducts: text("industries_products").notNull(),
+  coachingMarketExperience: text("coaching_market_experience").notNull(),
+  makeMoneyMarketExperience: text("make_money_market_experience").notNull(),
+  fullTimeAvailable: text("full_time_available").notNull(),
+  lastYearRevenue: text("last_year_revenue").notNull(),
+  softSkills: text("soft_skills").notNull(),
+  careerGoals: text("career_goals").notNull(),
+  salesTools: text("sales_tools").notNull(),
+  fullFocusCommitment: text("full_focus_commitment").notNull(),
+  expectations: text("expectations").notNull(),
+  evidenceFileNames: text("evidence_file_names"),
+  privacyConsent: boolean("privacy_consent").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertRecruitmentApplicationSchema = createInsertSchema(recruitmentApplications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRecruitmentApplication = z.infer<typeof insertRecruitmentApplicationSchema>;
+export type RecruitmentApplication = typeof recruitmentApplications.$inferSelect;
 
 // Analytics - Page Views
 export const pageViews = pgTable("page_views", {

@@ -12,6 +12,7 @@ import DatenschutzPage from "@/pages/datenschutz";
 import AgbKiKlickPage from "@/pages/agb-ki-klick";
 import ErfolgsgarantieKiKlickPage from "@/pages/erfolgsgarantie-ki-klick";
 import DankePage from "@/pages/danke";
+import VertriebsbewerbungDguPage from "@/pages/vertriebsbewerbung-dgu";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/garantie" component={ErfolgsgarantieKiKlickPage} />
       <Route path="/agbkiklick" component={AgbKiKlickPage} />
       <Route path="/erfolgsgarantiekiklick" component={ErfolgsgarantieKiKlickPage} />
+      <Route path="/vertriebsbewerbung-dgu" component={VertriebsbewerbungDguPage} />
       <Route path="/admin/stats" component={AdminStatsPage} />
       <Route component={NotFound} />
     </Switch>

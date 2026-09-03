@@ -41,6 +41,7 @@ export default function DatenschutzPage() {
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">4. Kontaktaufnahme</h2>
             <p>Wenn Sie uns per E-Mail oder über ein Kontaktformular kontaktieren, werden die von Ihnen übermittelten Angaben (z. B. E-Mail-Adresse) ausschließlich zur Bearbeitung Ihrer Anfrage verarbeitet und nicht ohne Ihre Einwilligung weitergegeben.</p>
+            <p className="mt-2">Bei einer Vertriebsbewerbung verarbeiten wir zusätzlich die freiwillig übermittelten Angaben zur Berufserfahrung, bisherigen Vertriebsergebnissen und Zusammenarbeit sowie die hochgeladenen Track-Record-Nachweise. Diese Daten werden ausschließlich intern zur Prüfung und Bearbeitung der Bewerbung verwendet, nicht im normalen Lead- oder Marketingprozess verarbeitet und nicht öffentlich zugänglich gemacht.</p>
           </div>
 
           <div>

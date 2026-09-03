@@ -14,6 +14,7 @@ const noIndexPaths = new Set([
   "/agbkiklick",
   "/erfolgsgarantiekiklick",
   "/garantie",
+  "/vertriebsbewerbung-dgu",
 ]);
 
 app.use((req, res, next) => {

@@ -1,6 +1,6 @@
 ---
 name: App lives in AI-Profit-Funnel/ subdir; tool CWDs differ
-description: Path gotcha — code_execution / image generation run from repo root, the app is one level down.
+description: Path gotcha — sandbox tools and package callbacks may target repo root while the app is one level down.
 ---
 
 # The app is in AI-Profit-Funnel/, but some tools run from repo root
@@ -19,3 +19,14 @@ up new files in `public/` after a workflow restart. Heavy generated PNGs (~1.5 M
 too big for the web — downscale + convert to JPEG with ImageMagick (`mogrify -resize
 600x -strip -quality ~82 -format jpg`) before shipping; `sharp` is not installed but
 `convert`/`mogrify` are.
+
+Package-management callbacks can also resolve the repository root instead of the app
+root. An app dependency installed there can pull in duplicate framework typings and
+break TypeScript even though the runtime package exists.
+
+**Why:** A server upload package installed at repository root introduced a second
+Express type tree that was incompatible with the app's Express 4 types.
+
+**How to apply:** After any package operation, verify which `package.json` and lockfile
+changed before importing the dependency. Remove a misplaced package through the same
+package-management callback rather than leaving root and app dependency trees mixed.
