@@ -149,12 +149,15 @@ function hasValidEvidenceSignature(file: RecruitmentUploadFile): boolean {
 const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }[] = [
   { id: 11, label: "Wie alt bist du?", disqualifyAnswers: ["Unter 18", "Über 72"] },
   { id: 12, label: "In welcher beruflichen Situation bist du?", disqualifyAnswers: ["Schüler/in", "Azubi/Student", "Arbeitssuchend/arbeitslos"] },
+  { id: 18, label: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?", disqualifyAnswers: ["Selbstständig unter 5.000 € Monatsumsatz"] },
   { id: 13, label: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?", disqualifyAnswers: [] },
   { id: 14, label: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?", disqualifyAnswers: [] },
   { id: 15, label: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?", disqualifyAnswers: ["Nein"] },
   { id: 16, label: "In welcher Rentenart befindest du dich aktuell? (Rentner-Zweig)", disqualifyAnswers: ["Frührente / Erwerbsminderungsrente"] },
   { id: 17, label: "Wie viel finanziellen Spielraum hast du, wenn alle Fixkosten bezahlt sind? (Rentner-Zweig)", disqualifyAnswers: ["Aktuell nichts – es ist eng"] },
 ];
+
+const RECRUITMENT_APPLICATIONS_PAUSED = true;
 
 // --- Date helpers: all reporting uses German calendar days (Europe/Berlin) ---
 const BERLIN_TZ = "Europe/Berlin";
@@ -373,7 +376,19 @@ export async function registerRoutes(
 
   // Separate recruitment application endpoint. It intentionally does not call
   // the normal lead table, quiz completion handler, Zapier webhook, or lead mail.
-  app.post("/api/vertriebsbewerbungen", recruitmentBodyMiddleware, async (req, res) => {
+  app.post(
+    "/api/vertriebsbewerbungen",
+    (_req, res, next) => {
+      if (RECRUITMENT_APPLICATIONS_PAUSED) {
+        return res.status(503).json({
+          success: false,
+          message: "Die Vertriebsbewerbung ist momentan pausiert. Bitte versuche es zu einem späteren Zeitpunkt erneut.",
+        });
+      }
+      next();
+    },
+    recruitmentBodyMiddleware,
+    async (req, res) => {
     try {
       const multipart = parseMultipartRequest(req);
       const files = multipart.files.filter((file) => file.fieldname === "evidenceFiles");
@@ -441,7 +456,8 @@ export async function registerRoutes(
       console.error("Error creating recruitment application:", error);
       return res.status(500).json({ success: false, message: "Die Bewerbung konnte nicht verarbeitet werden." });
     }
-  });
+    },
+  );
 
   // Get all leads (admin only — returns lead PII, must stay behind Basic Auth)
   app.get("/api/leads", basicAuth, async (req, res) => {

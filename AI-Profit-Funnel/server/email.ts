@@ -26,6 +26,7 @@ const questionTexts: { [key: number]: string } = {
   13: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?",
   14: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?",
   15: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie bekommst, könntest du es dir vorstellen, das System zu nutzen?",
+  18: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {

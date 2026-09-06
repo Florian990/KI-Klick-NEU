@@ -93,6 +93,16 @@ const rentnerSpielraumQuestion: QuizQuestion = {
   ],
 };
 
+// --- Self-employed branch question (fresh analytics id 18) ---
+const selfEmployedRevenueQuestion: QuizQuestion = {
+  id: 18,
+  question: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
+  answers: [
+    { text: "Selbstständig unter 5.000 € Monatsumsatz", disqualify: true },
+    { text: "Selbstständig über 5.000 € Monatsumsatz" },
+  ],
+};
+
 // --- Follow-up question if Q14 answered "Nein" ---
 const followUpQuestion: QuizQuestion = {
   id: 15,
@@ -113,26 +123,31 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const [rentnerPhase, setRentnerPhase] = useState<null | 'art' | 'spielraum'>(null);
   // true once the rentner path has been taken (so we know to skip Q13 and handle back correctly)
   const [isRentnerPath, setIsRentnerPath] = useState(false);
+  const [selfEmployedPhase, setSelfEmployedPhase] = useState(false);
+  const [isSelfEmployedPath, setIsSelfEmployedPath] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const { trackEvent } = useAnalytics();
   const hasTrackedStart = useRef(false);
 
   // --- Compute which question to show ---
   const currentQuestion =
+    selfEmployedPhase ? selfEmployedRevenueQuestion :
     rentnerPhase === 'art' ? rentnerArtQuestion :
     rentnerPhase === 'spielraum' ? rentnerSpielraumQuestion :
     showFollowUp ? followUpQuestion :
     questions[currentStep];
 
   // --- Progress bar ---
-  // Rentner path has 5 visible steps (Q11, Q12, Q16, Q17, Q14), normal has 4.
-  const extraSteps = isRentnerPath ? 1 : 0;
+  // Rentner and self-employed paths each have one additional visible step.
+  const extraSteps = isRentnerPath || isSelfEmployedPath ? 1 : 0;
   const totalSteps = showFollowUp
     ? questions.length + 1 + extraSteps
     : questions.length + extraSteps;
 
   let displayStep: number;
-  if (rentnerPhase === 'art') {
+  if (selfEmployedPhase) {
+    displayStep = currentStep + 2; // Q12 was step 2, so Q18 = step 3
+  } else if (rentnerPhase === 'art') {
     displayStep = currentStep + 2; // Q12 was step 2, so Q16 = step 3
   } else if (rentnerPhase === 'spielraum') {
     displayStep = currentStep + 3; // Q17 = step 4
@@ -141,6 +156,8 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   } else if (isRentnerPath) {
     // After rentner branch, currentStep is set to Q14_INDEX (3)
     // Q14 is the 5th visible step on the rentner path
+    displayStep = currentStep + 2;
+  } else if (isSelfEmployedPath && currentStep >= 2) {
     displayStep = currentStep + 2;
   } else {
     displayStep = currentStep + 1;
@@ -174,6 +191,20 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     if (currentQuestion.id === 12 && answer.text === "Rentner/in") {
       setRentnerPhase('art');
       setIsRentnerPath(true);
+      return;
+    }
+
+    // "Selbstständig/Unternehmer" selected at Q12 → ask monthly revenue.
+    if (currentQuestion.id === 12 && answer.text === "Selbstständig/Unternehmer") {
+      setSelfEmployedPhase(true);
+      setIsSelfEmployedPath(true);
+      return;
+    }
+
+    // Passed the self-employed revenue threshold → continue with the normal Q13.
+    if (selfEmployedPhase) {
+      setSelfEmployedPhase(false);
+      setCurrentStep(2);
       return;
     }
 
@@ -216,6 +247,11 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       setRentnerPhase('art');
       return;
     }
+    if (selfEmployedPhase) {
+      setSelfEmployedPhase(false);
+      setIsSelfEmployedPath(false);
+      return;
+    }
     if (rentnerPhase === 'art') {
       setRentnerPhase(null);
       setIsRentnerPath(false);
@@ -225,6 +261,12 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     // Back from Q14 when arrived via rentner path → return to spielraum question
     if (isRentnerPath && currentStep === Q14_INDEX) {
       setRentnerPhase('spielraum');
+      return;
+    }
+    // Back from Q13 after the self-employed branch → return to the revenue question.
+    if (isSelfEmployedPath && currentStep === 2) {
+      setCurrentStep(1);
+      setSelfEmployedPhase(true);
       return;
     }
     if (currentStep > 0) {

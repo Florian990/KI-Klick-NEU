@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const acceptedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 const acceptedExtensions = ".jpg,.jpeg,.png,.webp,.pdf";
+const RECRUITMENT_APPLICATIONS_PAUSED = true;
 
 const applicationSchema = z.object({
   firstName: z.string().trim().min(2, "Bitte geben Sie Ihren Vornamen an."),
@@ -137,6 +138,21 @@ export default function VertriebsbewerbungDguPage() {
       document.title = previousTitle;
     };
   }, []);
+
+  if (RECRUITMENT_APPLICATIONS_PAUSED) {
+    return (
+      <main className="min-h-[100dvh] bg-[#101317] px-5 py-10 text-[#f4f0e8] sm:px-8">
+        <section className="mx-auto flex min-h-[80dvh] max-w-2xl flex-col items-center justify-center text-center">
+          <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-full border border-[#c6a15b]/50 bg-[#302817] text-[#d9b871]">
+            <LockKeyhole className="h-8 w-8" />
+          </div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#d9b871]">Vertriebsbewerbung</p>
+          <h1 className="max-w-xl font-serif text-4xl leading-tight text-[#f8f3e9] sm:text-5xl">Bewerbungen sind momentan pausiert.</h1>
+          <p className="mt-6 max-w-lg text-base leading-7 text-[#aeb5bf]">Wir überarbeiten diesen Bereich gerade. Sobald Bewerbungen wieder möglich sind, kannst du deine Angaben und Track-Record-Nachweise hier einreichen.</p>
+        </section>
+      </main>
+    );
+  }
 
   const moveNext = async () => {
     const valid = await trigger(steps[step].fields);

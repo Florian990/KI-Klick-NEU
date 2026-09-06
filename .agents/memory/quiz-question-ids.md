@@ -20,8 +20,8 @@ disqualify flags mismatch.
 the only alternative to fresh ids is a full tracking reset (which also wipes traffic /
 video / conversion history the user wants to keep).
 
-**How to apply:** Old ids used historically: 1,2,3,4,5,7,8. The current 4-question
-(+follow-up) set uses ids 11–15. The legacy macro fields `funnelQ1..5`
+**How to apply:** Old ids used historically: 1,2,3,4,5,7,8. The current core set
+uses ids 11–15, with branch questions on 16–18. The legacy macro fields `funnelQ1..5`
 (count of `funnel_q1..5`) are NOT rendered on the dashboard, so the funnel_q event is
 effectively vestigial — `funnel_start` / `funnel_qualified` / `funnel_disqualified`
 (all id-independent) drive the macro funnel. Also update the id→label map in
