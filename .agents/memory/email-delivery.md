@@ -14,10 +14,11 @@ even when the sending domain is NOT SPF/DKIM-verified. The mail is accepted but
 never delivered (dropped/spam). API success ≠ delivery. The API key was valid —
 the key was never the problem.
 
-**Why Resend is reliable here:** A Resend send-only key can send from
-`onboarding@resend.dev` WITHOUT any verified domain, and delivery to the owner's
-inbox was confirmed. A restricted/send-only key cannot list domains (401
-`restricted_api_key`) — that's expected, not a bug.
+**Why Resend is usable here:** A Resend send-only key can send from
+`onboarding@resend.dev` WITHOUT any verified domain, and Gmail delivery was
+confirmed. However, Gmail may place these messages in Spam, so API acceptance
+or mailbox arrival does not guarantee Inbox placement. A restricted/send-only
+key cannot list domains (401 `restricted_api_key`) — that's expected, not a bug.
 
 **How to apply:**
 - Production runs on **Render**, not Replit. Replit secrets do NOT sync to Render.
