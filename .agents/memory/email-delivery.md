@@ -1,32 +1,31 @@
 ---
 name: Lead notification email delivery
-description: Why Brevo silently failed and how Resend was made the reliable sender for lead notifications.
+description: Distinguish Render provider rejections from development acceptance and actual mailbox delivery.
 ---
 
 # Lead notification email delivery
 
-Lead notification emails (to the funnel owner) are sent best-effort AFTER the lead
-is already persisted to the DB, so email failure never loses a lead. Primary sender
-is now Resend; Brevo is a fallback. See `server/email.ts`.
+Do not infer production email health from a successful development send.
 
-**Why Brevo failed silently:** Brevo's REST API returns success (201 + messageId)
-even when the sending domain is NOT SPF/DKIM-verified. The mail is accepted but
-never delivered (dropped/spam). API success ≠ delivery. The API key was valid —
-the key was never the problem.
+**Why:** September 2026 Render logs supplied by the user showed Resend rejecting
+the recipient with HTTP 403 (default test sender limited to the account's own
+address), followed by Brevo rejecting an unauthorized outbound IP. Brevo's security
+screen confirmed an unauthorized IP. A development Resend diagnostic did arrive,
+but in Spam. These observations do not establish that credentials/accounts are
+identical between environments or that a later IP authorization fixed delivery.
 
-**Why Resend is usable here:** A Resend send-only key can send from
-`onboarding@resend.dev` WITHOUT any verified domain, and Gmail delivery was
-confirmed. However, Gmail may place these messages in Spam, so API acceptance
-or mailbox arrival does not guarantee Inbox placement. A restricted/send-only
-key cannot list domains (401 `restricted_api_key`) — that's expected, not a bug.
+**How to apply:** Diagnose a fresh production attempt using Render logs first.
+If accepted by the provider, inspect provider delivery events and then Gmail.
+API acceptance is not proof of delivery; mailbox delivery is not Inbox placement.
+Resend's default test sender is not a general-purpose unverified sender for arbitrary
+recipients. A send-only key's inability to read delivery status is not a send failure.
+Do not attribute Brevo rejections to unverified DNS without provider evidence.
+An unauthorized IP proves a restriction, not why/when Render changed infrastructure.
+Keep IP restrictions unless deliberately choosing a security tradeoff.
 
-**How to apply:**
-- Production runs on **Render**, not Replit. Replit secrets do NOT sync to Render.
-  `RESEND_API_KEY` MUST be added to Render's env for the fix to work in production.
-- Replit Mail / connector-proxy integrations rely on Replit-injected runtime creds
-  and do NOT work on Render — use a plain API key (Resend) instead.
-- To use a custom verified domain later, set `RESEND_FROM` env var; otherwise the
-  default `onboarding@resend.dev` is used.
-- Secrets are masked in the `viewEnvVars`/code_execution sandbox (returned as
-  booleans). To test a real API call with the real key, run `curl` from bash where
-  the secret is a real env var (never echo the value).
+Production is hosted on Render separately from this development environment.
+**Why:** Its configuration and outbound network differ; development-only tests
+cannot establish production behavior.
+**How to apply:** Verify production configuration independently without exposing
+credentials. Never promise that a successful quiz response guarantees database
+storage or email delivery; confirm each destination separately.
