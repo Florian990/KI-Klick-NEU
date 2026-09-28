@@ -126,6 +126,16 @@ const followUpQuestion: QuizQuestion = {
 // Index of Q14 in the questions array
 const Q14_INDEX = 3;
 
+// Separate analytics ID: only self-employed applicants fail this answer.
+const selfEmployedIncomeQuestion: QuizQuestion = {
+  ...questions[2],
+  id: 23,
+  answers: questions[2].answers.map(answer => ({
+    ...answer,
+    disqualify: answer.text === "Überhaupt nicht – es reicht hinten und vorne nicht",
+  })),
+};
+
 export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [showFollowUp, setShowFollowUp] = useState(false);
@@ -148,6 +158,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     rentnerPhase === 'art' ? rentnerArtQuestion :
     rentnerPhase === 'spielraum' ? rentnerSpielraumQuestion :
     showFollowUp ? followUpQuestion :
+    isSelfEmployedPath && currentStep === 2 ? selfEmployedIncomeQuestion :
     questions[currentStep];
 
   // --- Progress bar ---
@@ -191,7 +202,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       const next = { ...prev, [currentQuestion.id]: answer.text };
       // Changing profession must not forward answers from an abandoned branch.
       if (currentQuestion.id === 19) {
-        for (const id of [13, 14, 15, 16, 17, 20, 21, 22]) delete next[id];
+        for (const id of [13, 14, 15, 16, 17, 20, 21, 22, 23]) delete next[id];
       }
       if (currentQuestion.id === 14) delete next[15];
       return next;

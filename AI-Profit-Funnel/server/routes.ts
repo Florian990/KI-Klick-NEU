@@ -154,6 +154,7 @@ const QUIZ_QUESTIONS: { id: number; label: string; disqualifyAnswers: string[] }
   { id: 20, label: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?", disqualifyAnswers: ["Selbstständig unter 2.000 € Monatsumsatz"] },
   { id: 21, label: "Bist du Auszubildender oder Student?", disqualifyAnswers: ["Student"] },
   { id: 22, label: "Wie würdest du deine finanzielle Situation aktuell beschreiben?", disqualifyAnswers: ["Gerade etwas im Umbruch…"] },
+  { id: 23, label: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen? (Selbstständige)", disqualifyAnswers: ["Überhaupt nicht – es reicht hinten und vorne nicht"] },
   { id: 13, label: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?", disqualifyAnswers: [] },
   { id: 14, label: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?", disqualifyAnswers: [] },
   { id: 15, label: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?", disqualifyAnswers: ["Nein"] },

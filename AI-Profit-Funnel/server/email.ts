@@ -31,6 +31,7 @@ const questionTexts: { [key: number]: string } = {
   20: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
   21: "Bist du Auszubildender oder Student?",
   22: "Wie würdest du deine finanzielle Situation aktuell beschreiben?",
+  23: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?",
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {
