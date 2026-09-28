@@ -40,7 +40,7 @@ const questions: QuizQuestion[] = [
     ],
   },
   {
-    id: 12,
+    id: 19,
     question: "In welcher beruflichen Situation bist du?",
     hint: "Richtet sich an Menschen mit regelmäßigem Einkommen.",
     answers: [
@@ -48,7 +48,7 @@ const questions: QuizQuestion[] = [
       { text: "Selbstständig/Unternehmer" },
       { text: "Rentner/in" },
       { text: "Schüler/in", disqualify: true },
-      { text: "Azubi/Student", disqualify: true },
+      { text: "Azubi/Student" },
       { text: "Arbeitssuchend/arbeitslos", disqualify: true },
     ],
   },
@@ -93,13 +93,22 @@ const rentnerSpielraumQuestion: QuizQuestion = {
   ],
 };
 
-// --- Self-employed branch question (fresh analytics id 18) ---
+// New question IDs preserve historical qualification analytics.
 const selfEmployedRevenueQuestion: QuizQuestion = {
-  id: 18,
+  id: 20,
   question: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
   answers: [
-    { text: "Selbstständig unter 5.000 € Monatsumsatz", disqualify: true },
-    { text: "Selbstständig über 5.000 € Monatsumsatz" },
+    { text: "Selbstständig unter 2.000 € Monatsumsatz", disqualify: true },
+    { text: "Selbstständig über 2.000 € Monatsumsatz" },
+  ],
+};
+
+const educationQuestion: QuizQuestion = {
+  id: 21,
+  question: "Bist du Auszubildender oder Student?",
+  answers: [
+    { text: "Auszubildender" },
+    { text: "Student", disqualify: true },
   ],
 };
 
@@ -125,12 +134,15 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const [isRentnerPath, setIsRentnerPath] = useState(false);
   const [selfEmployedPhase, setSelfEmployedPhase] = useState(false);
   const [isSelfEmployedPath, setIsSelfEmployedPath] = useState(false);
+  const [educationPhase, setEducationPhase] = useState(false);
+  const [isEducationPath, setIsEducationPath] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const { trackEvent } = useAnalytics();
   const hasTrackedStart = useRef(false);
 
   // --- Compute which question to show ---
   const currentQuestion =
+    educationPhase ? educationQuestion :
     selfEmployedPhase ? selfEmployedRevenueQuestion :
     rentnerPhase === 'art' ? rentnerArtQuestion :
     rentnerPhase === 'spielraum' ? rentnerSpielraumQuestion :
@@ -139,14 +151,14 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
 
   // --- Progress bar ---
   // Rentner and self-employed paths each have one additional visible step.
-  const extraSteps = isRentnerPath || isSelfEmployedPath ? 1 : 0;
+  const extraSteps = isRentnerPath || isSelfEmployedPath || isEducationPath ? 1 : 0;
   const totalSteps = showFollowUp
     ? questions.length + 1 + extraSteps
     : questions.length + extraSteps;
 
   let displayStep: number;
-  if (selfEmployedPhase) {
-    displayStep = currentStep + 2; // Q12 was step 2, so Q18 = step 3
+  if (selfEmployedPhase || educationPhase) {
+    displayStep = currentStep + 2;
   } else if (rentnerPhase === 'art') {
     displayStep = currentStep + 2; // Q12 was step 2, so Q16 = step 3
   } else if (rentnerPhase === 'spielraum') {
@@ -157,7 +169,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     // After rentner branch, currentStep is set to Q14_INDEX (3)
     // Q14 is the 5th visible step on the rentner path
     displayStep = currentStep + 2;
-  } else if (isSelfEmployedPath && currentStep >= 2) {
+  } else if ((isSelfEmployedPath || isEducationPath) && currentStep >= 2) {
     displayStep = currentStep + 2;
   } else {
     displayStep = currentStep + 1;
@@ -174,7 +186,21 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   }, []);
 
   const handleAnswer = (answer: QuizAnswer) => {
-    setSelectedAnswers(prev => ({ ...prev, [currentQuestion.id]: answer.text }));
+    setSelectedAnswers(prev => {
+      const next = { ...prev, [currentQuestion.id]: answer.text };
+      // Changing profession must not forward answers from an abandoned branch.
+      if (currentQuestion.id === 19) {
+        for (const id of [13, 14, 15, 16, 17, 20, 21]) delete next[id];
+      }
+      if (currentQuestion.id === 14) delete next[15];
+      return next;
+    });
+
+    if (currentQuestion.id === 19) {
+      setIsRentnerPath(false);
+      setIsSelfEmployedPath(false);
+      setIsEducationPath(false);
+    }
 
     trackEvent(`quiz_step_${currentQuestion.id}`, {
       question: currentQuestion.question.substring(0, 50),
@@ -188,16 +214,28 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     }
 
     // "Rentner/in" selected at Q12 → enter the rentner branch
-    if (currentQuestion.id === 12 && answer.text === "Rentner/in") {
+    if (currentQuestion.id === 19 && answer.text === "Rentner/in") {
       setRentnerPhase('art');
       setIsRentnerPath(true);
       return;
     }
 
     // "Selbstständig/Unternehmer" selected at Q12 → ask monthly revenue.
-    if (currentQuestion.id === 12 && answer.text === "Selbstständig/Unternehmer") {
+    if (currentQuestion.id === 19 && answer.text === "Selbstständig/Unternehmer") {
       setSelfEmployedPhase(true);
       setIsSelfEmployedPath(true);
+      return;
+    }
+
+    if (currentQuestion.id === 19 && answer.text === "Azubi/Student") {
+      setEducationPhase(true);
+      setIsEducationPath(true);
+      return;
+    }
+
+    if (educationPhase) {
+      setEducationPhase(false);
+      setCurrentStep(2);
       return;
     }
 
@@ -229,6 +267,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     // Last question or followUp answered → complete
     if (showFollowUp || currentStep === questions.length - 1) {
       const finalAnswers = { ...selectedAnswers, [currentQuestion.id]: answer.text };
+      if (currentQuestion.id === 14) delete finalAnswers[15];
       onComplete(finalAnswers);
       return;
     }
@@ -245,6 +284,11 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     }
     if (rentnerPhase === 'spielraum') {
       setRentnerPhase('art');
+      return;
+    }
+    if (educationPhase) {
+      setEducationPhase(false);
+      setIsEducationPath(false);
       return;
     }
     if (selfEmployedPhase) {
@@ -267,6 +311,11 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
     if (isSelfEmployedPath && currentStep === 2) {
       setCurrentStep(1);
       setSelfEmployedPhase(true);
+      return;
+    }
+    if (isEducationPath && currentStep === 2) {
+      setCurrentStep(1);
+      setEducationPhase(true);
       return;
     }
     if (currentStep > 0) {

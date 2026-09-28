@@ -27,6 +27,9 @@ const questionTexts: { [key: number]: string } = {
   14: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?",
   15: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie bekommst, könntest du es dir vorstellen, das System zu nutzen?",
   18: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
+  19: "In welcher beruflichen Situation bist du?",
+  20: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
+  21: "Bist du Auszubildender oder Student?",
 };
 
 function formatQuizAnswers(answers?: QuizAnswers): string {
