@@ -33,6 +33,15 @@ DNS or broken DKIM. Preserve the policy and unrelated mail records; never add TX
 alongside a CNAME at the same name. Domain authentication still does not prove sender
 authorization or delivery.
 
+Provider acceptance and sender verification are separate checks.
+**Why:** After the IP rejection stopped, Brevo accepted an API call but subsequently
+rejected its sender. On 2026-09-28 the user confirmed live email delivery worked
+again after the DMARC correction and adding the domain sender as verified in Brevo.
+This confirms the recovery, not the historical cause of the original status change.
+**How to apply:** Check both the authenticated domain and the exact sending address
+in Brevo. Do not treat a successful Brevo recovery as proof that the separate Resend
+fallback configuration is repaired, or promise automatic replay of failed messages.
+
 Production is hosted on Render separately from this development environment.
 **Why:** Its configuration and outbound network differ; development-only tests
 cannot establish production behavior.
