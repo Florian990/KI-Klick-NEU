@@ -94,12 +94,13 @@ const rentnerSpielraumQuestion: QuizQuestion = {
 };
 
 // New question IDs preserve historical qualification analytics.
-const selfEmployedRevenueQuestion: QuizQuestion = {
-  id: 20,
-  question: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
+const selfEmployedFinancialQuestion: QuizQuestion = {
+  id: 22,
+  question: "Wie würdest du deine finanzielle Situation aktuell beschreiben?",
   answers: [
-    { text: "Selbstständig unter 2.000 € Monatsumsatz", disqualify: true },
-    { text: "Selbstständig über 2.000 € Monatsumsatz" },
+    { text: "Ich komme aktuell gut klar!" },
+    { text: "In Ordnung, aber ich möchte mehr!" },
+    { text: "Gerade etwas im Umbruch…", disqualify: true },
   ],
 };
 
@@ -143,7 +144,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   // --- Compute which question to show ---
   const currentQuestion =
     educationPhase ? educationQuestion :
-    selfEmployedPhase ? selfEmployedRevenueQuestion :
+    selfEmployedPhase ? selfEmployedFinancialQuestion :
     rentnerPhase === 'art' ? rentnerArtQuestion :
     rentnerPhase === 'spielraum' ? rentnerSpielraumQuestion :
     showFollowUp ? followUpQuestion :
@@ -190,7 +191,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       const next = { ...prev, [currentQuestion.id]: answer.text };
       // Changing profession must not forward answers from an abandoned branch.
       if (currentQuestion.id === 19) {
-        for (const id of [13, 14, 15, 16, 17, 20, 21]) delete next[id];
+        for (const id of [13, 14, 15, 16, 17, 20, 21, 22]) delete next[id];
       }
       if (currentQuestion.id === 14) delete next[15];
       return next;
@@ -220,7 +221,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       return;
     }
 
-    // "Selbstständig/Unternehmer" selected at Q12 → ask monthly revenue.
+    // Self-employed applicants get a financial situation follow-up.
     if (currentQuestion.id === 19 && answer.text === "Selbstständig/Unternehmer") {
       setSelfEmployedPhase(true);
       setIsSelfEmployedPath(true);
@@ -239,7 +240,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       return;
     }
 
-    // Passed the self-employed revenue threshold → continue with the normal Q13.
+    // Passed the financial situation question → continue with the normal Q13.
     if (selfEmployedPhase) {
       setSelfEmployedPhase(false);
       setCurrentStep(2);
@@ -307,7 +308,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
       setRentnerPhase('spielraum');
       return;
     }
-    // Back from Q13 after the self-employed branch → return to the revenue question.
+    // Back from Q13 after the self-employed branch → return to the financial question.
     if (isSelfEmployedPath && currentStep === 2) {
       setCurrentStep(1);
       setSelfEmployedPhase(true);
