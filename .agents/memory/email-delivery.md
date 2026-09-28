@@ -23,6 +23,16 @@ Do not attribute Brevo rejections to unverified DNS without provider evidence.
 An unauthorized IP proves a restriction, not why/when Render changed infrastructure.
 Keep IP restrictions unless deliberately choosing a security tradeoff.
 
+Brevo authentication can reject a valid existing DMARC policy for lacking its
+reporting tag.
+**Why:** The IONOS-managed DMARC CNAME resolved to a valid p=none policy, but Brevo's
+validator explicitly required a rua tag. The user confirmed the correction worked
+after replacing that CNAME with an equivalent TXT policy including Brevo reporting.
+**How to apply:** Follow the live per-record validation rather than assuming absent
+DNS or broken DKIM. Preserve the policy and unrelated mail records; never add TXT
+alongside a CNAME at the same name. Domain authentication still does not prove sender
+authorization or delivery.
+
 Production is hosted on Render separately from this development environment.
 **Why:** Its configuration and outbound network differ; development-only tests
 cannot establish production behavior.
