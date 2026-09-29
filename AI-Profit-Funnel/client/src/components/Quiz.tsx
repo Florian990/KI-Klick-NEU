@@ -150,6 +150,7 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const { trackEvent } = useAnalytics();
   const hasTrackedStart = useRef(false);
+  const hasTrackedEngagement = useRef(false);
 
   // --- Compute which question to show ---
   const currentQuestion =
@@ -198,6 +199,11 @@ export default function Quiz({ onComplete, onDisqualify }: QuizProps) {
   }, []);
 
   const handleAnswer = (answer: QuizAnswer) => {
+    // Add a true interaction event; retain legacy mount events for old reports.
+    if (!hasTrackedEngagement.current) {
+      trackEvent("quiz_engaged");
+      hasTrackedEngagement.current = true;
+    }
     setSelectedAnswers(prev => {
       const next = { ...prev, [currentQuestion.id]: answer.text };
       // Changing profession must not forward answers from an abandoned branch.

@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertLeadSchema, insertPageViewSchema, insertAnalyticsEventSchema, insertRecruitmentApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import { sendLeadNotification } from "./email";
+import { aggregateFunnel } from "./funnel-metrics";
 import { sendRecruitmentApplicationNotification } from "./recruitment-email";
 
 // Basic Auth middleware for admin routes (without WWW-Authenticate header to prevent browser popup)
@@ -574,13 +575,6 @@ export async function registerRoutes(
         storage.getAnalyticsEvents(start, end),
       ]);
 
-      const count = (type: string) => events.filter(e => e.eventType === type).length;
-
-      // Unique visitor counts, overall and per page
-      const uniq = (ids: string[]) => new Set(ids).size;
-      const landingViews = pageViews.filter(p => p.page === '/');
-      const vslViews = pageViews.filter(p => p.page === '/vsl');
-
       // Per-day breakdown (German calendar days)
       const dayKeys: string[] = [];
       for (let d = String(startDate); d <= String(endDate); d = nextDay(d)) {
@@ -590,79 +584,18 @@ export async function registerRoutes(
       const daily = dayKeys.map((day) => {
         const pv = pageViews.filter(p => berlinDay(p.createdAt) === day);
         const ev = events.filter(e => berlinDay(e.createdAt) === day);
-        const c = (type: string) => ev.filter(e => e.eventType === type).length;
         return {
           date: day,
-          visitors: uniq(pv.filter(p => p.page === '/').map(p => p.visitorId)),
-          quizStart: c('quiz_start'),
-          quizDisqualified: c('quiz_disqualified'),
-          quizCompleted: c('quiz_complete'),
-          formSubmitted: c('funnel_contact_submitted'),
-          vslVisitors: uniq(pv.filter(p => p.page === '/vsl').map(p => p.visitorId)),
-          videoStart: c('video_start'),
-          calendlyOpen: c('calendly_open'),
-          calendlyBooked: c('calendly_booked'),
+          ...aggregateFunnel(pv, ev),
         };
       }).reverse();
-
-      // Answers recorded for a given quiz question (quiz_step_<id> stores the answer
-      // BEFORE the disqualify check, so disqualifying answers are captured too).
-      const stepAnswers = (id: number): string[] =>
-        events
-          .filter(e => e.eventType === `quiz_step_${id}`)
-          .map(e => {
-            try {
-              return e.eventData ? String(JSON.parse(e.eventData).answer ?? "") : "";
-            } catch {
-              return "";
-            }
-          });
 
       res.json({
         success: true,
         data: {
-          // Landing page (quiz page)
-          visitors: uniq(landingViews.map(p => p.visitorId)),
-          totalPageViews: pageViews.length,
-          quizStart: count('quiz_start'),
-          quizDisqualified: count('quiz_disqualified'),
-          quizCompleted: count('quiz_complete'),
-          formSubmitted: count('funnel_contact_submitted'),
-          // VSL page
-          vslVisitors: uniq(vslViews.map(p => p.visitorId)),
-          videoStart: count('video_start'),
-          calendlyOpen: count('calendly_open'),
-          calendlyBooked: count('calendly_booked'),
+          ...aggregateFunnel(pageViews, events, QUIZ_QUESTIONS),
           // Per-day breakdown (German calendar days, newest first)
           daily,
-          // Per-question drop-off + disqualification, labelled with the real question text.
-          // Computed from stored quiz_step answers so it also works for past data.
-          questionFunnel: QUIZ_QUESTIONS.map((q) => {
-            const answers = stepAnswers(q.id);
-            // Count how often each answer was given so the dashboard can show
-            // exactly WHICH answers disqualified leads (e.g. Schüler/in vs. arbeitslos).
-            const counts = new Map<string, number>();
-            for (const a of answers) {
-              if (!a) continue;
-              counts.set(a, (counts.get(a) ?? 0) + 1);
-            }
-            const answerBreakdown = Array.from(counts.entries())
-              .map(([answer, n]) => ({
-                answer,
-                count: n,
-                disqualifying: q.disqualifyAnswers.includes(answer),
-              }))
-              .sort((a, b) => b.count - a.count);
-            return {
-              id: q.id,
-              label: q.label,
-              reached: answers.length,
-              disqualified: q.disqualifyAnswers.length
-                ? answers.filter((a) => q.disqualifyAnswers.includes(a)).length
-                : 0,
-              answerBreakdown,
-            };
-          }),
         }
       });
     } catch (error) {

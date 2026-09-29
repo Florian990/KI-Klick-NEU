@@ -21,6 +21,23 @@ math built on raw lead rows would also be inflated once leads start arriving.
 
 # Analytics changes must be ADDITIVE only
 
+## Visitor-based reporting decision
+
+Use one browser identity per stage and selected period (and separately per German
+calendar day), not raw event occurrences, for visitor conversion rates.
+**Why:** Comparing repeated mount/start events with unique visitors produced a
+127% start rate. Retain the raw legacy mount events for auditability but derive
+historical starts from saved answers and downstream outcomes. Do not rename the
+old mount event to mean an actual first answer.
+**How to apply:** Later actions may establish missing earlier stages; explicitly
+disclose inferred visits instead of hiding successful conversions when pageview
+requests are missing. This is an activity-based visitor report, not a strict
+ordered-session cohort. Multiple outcomes can overlap across repeat runs.
+Question distributions use the last valid answer per visitor/question in the
+selected period so going back does not multiply respondents. Daily unique counts
+are not additive across a multi-day period. Never cap percentages to mask mixed
+denominators, delete raw events, or use lead-table row counts to fix the display.
+
 Historical numbers live as rows in prod Postgres (`analytics_events`, `page_views`,
 `leads`) that the user must not lose. When adjusting tracking: only ADD new event-type
 strings + new aggregations + new display. Never rename, repurpose, or delete existing

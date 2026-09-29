@@ -23,12 +23,14 @@ interface DailyRow {
 
 interface StatsData {
   visitors: number;
+  inferredLandingVisitors: number;
   totalPageViews: number;
   quizStart: number;
   quizDisqualified: number;
   quizCompleted: number;
   formSubmitted: number;
   vslVisitors: number;
+  inferredVslVisitors: number;
   videoStart: number;
   calendlyOpen: number;
   calendlyBooked: number;
@@ -115,7 +117,7 @@ function QuestionFunnelRow({ step, label, reached, disqualified, base, answerBre
         <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{pct(reached, base)}</span>
         {disqualified > 0 ? (
           <span className="text-xs font-semibold text-red-500 w-28 text-right flex-shrink-0">
-            ✗ {disqualified} raus
+              ✗ {disqualified} disqual.
           </span>
         ) : (
           <span className="w-28 flex-shrink-0" />
@@ -388,7 +390,7 @@ export default function AdminStatsPage() {
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
               <Download className="h-4 w-4 mr-2" />
-              CSV Export
+              Leads als CSV
             </Button>
             <Button variant="outline" size="sm" onClick={() => fetchStats()} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
@@ -489,6 +491,9 @@ export default function AdminStatsPage() {
 
         {!isLoading && stats && (
           <div className="space-y-6">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Alle Zahlen zählen eindeutige Browser-IDs im gewählten Zeitraum, nicht Personen oder Ereignisse. Ein Browser kann über mehrere Durchläufe in verschiedenen Ergebnissen vorkommen; Prozentwerte beziehen sich auf die angegebene Basis.
+            </p>
 
             {/* QUIZ-SEITE */}
             <Card className="border-primary/30 bg-primary/5">
@@ -499,32 +504,36 @@ export default function AdminStatsPage() {
                   color="bg-primary/10"
                 />
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-5">
-                  <KpiCard label="Seitenbesucher" value={stats.visitors} sub="eindeutige Besucher" />
-                  <KpiCard label="Quiz gestartet" value={stats.quizStart} sub={pct(stats.quizStart, stats.visitors) + " der Besucher"} />
-                  <KpiCard label="Rausgeflogen" value={stats.quizDisqualified} sub={pct(stats.quizDisqualified, stats.quizStart) + " der Starts"} accent="text-red-500" />
-                  <KpiCard label="Quiz beendet" value={stats.quizCompleted} sub={pct(stats.quizCompleted, stats.quizStart) + " der Starts"} accent="text-green-600" />
-                  <KpiCard label="Formular ausgefüllt" value={stats.formSubmitted} sub="→ zur VSL-Seite" accent="text-primary" />
+                  <KpiCard label="Landing-Besucher" value={stats.visitors} sub="eindeutige Browser-IDs" />
+                  <KpiCard label="Quiz begonnen" value={stats.quizStart} sub={pct(stats.quizStart, stats.visitors) + " der Landing-Besucher"} />
+                  <KpiCard label="Disqualifiziert" value={stats.quizDisqualified} sub={pct(stats.quizDisqualified, stats.quizStart) + " der Quiz-Beginner"} accent="text-red-500" />
+                  <KpiCard label="Quiz beendet" value={stats.quizCompleted} sub={pct(stats.quizCompleted, stats.quizStart) + " der Quiz-Beginner"} accent="text-green-600" />
+                  <KpiCard label="Kontakt gesendet" value={stats.formSubmitted} sub="eindeutige Browser-IDs" accent="text-primary" />
                 </div>
                 <div className="space-y-1.5">
-                  <FunnelRow step="1" label="Seitenbesucher" value={stats.visitors} base={stats.visitors} color="bg-blue-400" />
-                  <FunnelRow step="2" label="Quiz gestartet" value={stats.quizStart} base={stats.visitors} color="bg-indigo-400" />
+                  <FunnelRow step="1" label="Landing-Besucher" value={stats.visitors} base={stats.visitors} color="bg-blue-400" />
+                  <FunnelRow step="2" label="Quiz begonnen" value={stats.quizStart} base={stats.visitors} color="bg-indigo-400" />
                   <FunnelRow step="3" label="Quiz beendet" value={stats.quizCompleted} base={stats.visitors} color="bg-green-500" />
-                  <FunnelRow step="4" label="Formular ausgefüllt" value={stats.formSubmitted} base={stats.visitors} color="bg-primary" />
+                  <FunnelRow step="4" label="Kontakt gesendet" value={stats.formSubmitted} base={stats.visitors} color="bg-primary" />
                 </div>
+                <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+                  Historische Quiz-Beginne werden aus gespeicherten Antworten, Quiz-Interaktionen und nachgelagerten Signalen (Quiz-Abschluss, Kontaktformular, Disqualifikation) neu berechnet; das alte Startsignal beim Laden der Seite zählt nicht. Dabei werden keine Rohdaten gelöscht.
+                  {stats.inferredLandingVisitors > 0 && <> {stats.inferredLandingVisitors} Landing-Besucher ohne erfassten Seitenaufruf wurden aus Quiz-Start-Signalen erschlossen.</>}
+                </p>
               </CardContent>
             </Card>
 
-            {/* ABBRÜCHE PRO FRAGE */}
+            {/* BEANTWORTETE FRAGEN */}
             <Card>
               <CardContent className="p-5 sm:p-6">
                 <SectionHeader
                   icon={<XCircle className="h-4 w-4 text-red-500" />}
-                  title="Abbrüche pro Frage"
+                  title="Beantwortete Fragen"
                   color="bg-red-500/10"
                 />
                 <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-                  Der Balken zeigt, wie viele Besucher die Frage <strong>beantwortet</strong> haben (im Verhältnis zum Quiz-Start).
-                  Die rote Zahl zeigt, wie viele genau <strong>bei dieser Frage rausgeflogen</strong> sind.
+                  Balken und Zahl zeigen eindeutige Browser-IDs mit Antwort je Frage im Verhältnis zu Quiz-Beginnern – keine tatsächlichen Abbrüche.
+                  Die Antwortverteilung zählt pro Browser und Frage nur die letzte gültige Antwort im Zeitraum; die rote Zahl bezeichnet Browser, deren letzte Antwort auf diese Frage disqualifizierend war.
                 </p>
                 <div>
                   {(stats.questionFunnel || []).map((q, i) => (
@@ -551,10 +560,10 @@ export default function AdminStatsPage() {
                   color="bg-orange-500/10"
                 />
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
-                  <KpiCard label="VSL-Besucher" value={stats.vslVisitors} sub="eindeutige Besucher" />
+                  <KpiCard label="VSL-Besucher" value={stats.vslVisitors} sub="eindeutige Browser-IDs" />
                   <KpiCard label="Video gestartet" value={stats.videoStart} sub={pct(stats.videoStart, stats.vslVisitors) + " der VSL-Besucher"} />
-                  <KpiCard label="Kalender geöffnet" value={stats.calendlyOpen} sub="Klick auf Termin-Button" />
-                  <KpiCard label="Termin gebucht" value={stats.calendlyBooked} sub="bestätigte Calendly-Buchung" accent="text-green-600" />
+                  <KpiCard label="Kalender geöffnet" value={stats.calendlyOpen} sub="eindeutige Browser-IDs" />
+                  <KpiCard label="Termin gebucht" value={stats.calendlyBooked} sub="eindeutige Browser-IDs mit Buchung" accent="text-green-600" />
                 </div>
                 <div className="space-y-1.5">
                   <FunnelRow step="1" label="VSL-Besucher" value={stats.vslVisitors} base={stats.vslVisitors} color="bg-orange-300" />
@@ -563,7 +572,8 @@ export default function AdminStatsPage() {
                   <FunnelRow step="4" label="Termin gebucht" value={stats.calendlyBooked} base={stats.vslVisitors} color="bg-green-500" />
                 </div>
                 <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
-                  „Termin gebucht" wird nur gezählt, wenn im Calendly-Fenster wirklich ein Termin abgeschlossen wurde – nicht schon beim Öffnen.
+                  VSL-Besucher umfassen erfasste Seitenaufrufe sowie Browser mit Video-Start, Kalenderöffnung oder Buchung. Eine Buchung zählt auch als Kalenderöffnung, aber nicht automatisch als Video-Start.
+                  {stats.inferredVslVisitors > 0 && <> {stats.inferredVslVisitors} VSL-Besucher ohne erfassten Seitenaufruf wurden aus diesen Signalen erschlossen.</>}
                 </p>
               </CardContent>
             </Card>
@@ -581,11 +591,11 @@ export default function AdminStatsPage() {
                     <thead>
                       <tr className="border-b border-border text-left text-xs text-muted-foreground">
                         <th className="py-2 pr-3 font-medium whitespace-nowrap">Datum</th>
-                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Besucher</th>
-                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Quiz gestartet</th>
-                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Rausgeflogen</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Landing-Besucher</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Quiz begonnen</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Disqualifiziert</th>
                         <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Quiz beendet</th>
-                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Formular</th>
+                        <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Kontakt gesendet</th>
                         <th className="py-2 px-3 font-medium text-right whitespace-nowrap">VSL-Besucher</th>
                         <th className="py-2 px-3 font-medium text-right whitespace-nowrap">Video gestartet</th>
                         <th className="py-2 pl-3 font-medium text-right whitespace-nowrap">Termin gebucht</th>
@@ -609,7 +619,7 @@ export default function AdminStatsPage() {
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground mt-4">
-                  Jede Zeile ist ein Kalendertag in deutscher Zeit (00:00–23:59 Uhr). Neueste Tage oben.
+                  Jede Zeile zählt eindeutige Browser-IDs je deutschem Kalendertag (00:00–23:59 Uhr), neueste zuerst. Derselbe Browser kann an mehreren Tagen vorkommen; die Summe der Tageswerte kann deshalb über dem eindeutigen Gesamtwert des Zeitraums liegen.
                 </p>
               </CardContent>
             </Card>
