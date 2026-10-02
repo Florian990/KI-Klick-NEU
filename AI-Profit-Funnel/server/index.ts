@@ -18,7 +18,9 @@ const noIndexPaths = new Set([
 ]);
 
 app.use((req, res, next) => {
-  if (noIndexPaths.has(req.path)) {
+  if (req.path.replace(/\/+$/, "").toLowerCase() === "/anlage-agb") {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  } else if (noIndexPaths.has(req.path)) {
     res.setHeader("X-Robots-Tag", "noindex, follow");
   }
   next();

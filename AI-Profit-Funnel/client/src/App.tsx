@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { lazy, Suspense } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +15,8 @@ import ErfolgsgarantieKiKlickPage from "@/pages/erfolgsgarantie-ki-klick";
 import DankePage from "@/pages/danke";
 import VertriebsbewerbungDguPage from "@/pages/vertriebsbewerbung-dgu";
 
+const AnlageAgbPage = lazy(() => import("@/pages/anlage-agb"));
+
 function Router() {
   return (
     <Switch>
@@ -26,6 +29,11 @@ function Router() {
       <Route path="/agbkiklick" component={AgbKiKlickPage} />
       <Route path="/erfolgsgarantiekiklick" component={ErfolgsgarantieKiKlickPage} />
       <Route path="/vertriebsbewerbung-dgu" component={VertriebsbewerbungDguPage} />
+      <Route path="/anlage-agb">
+        <Suspense fallback={<p className="p-8">Dokument wird geladen …</p>}>
+          <AnlageAgbPage />
+        </Suspense>
+      </Route>
       <Route path="/admin/stats" component={AdminStatsPage} />
       <Route component={NotFound} />
     </Switch>
