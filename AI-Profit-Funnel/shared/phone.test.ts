@@ -31,9 +31,25 @@ for (const input of ["", "123", "abcdef", "+49 +43 6641234567", "++4915123456789
     assert.throws(() => normalizePhone(input));
   });
 }
-test("do not silently reinterpret international numbers with wrong dropdown", () => {
-  assert.throws(() => normalizePhone("+436641234567", "+49"), /passende Ländervorwahl/);
+test("explicit international prefix overrides default selection", () => {
+  assert.equal(normalizePhone("+436641234567", "+49"), "+436641234567");
   assert.equal(normalizePhone("+436641234567"), "+436641234567");
+});
+
+for (const number of ["+3725123456", "+393123456789", "+36201234567", "+66812345678", "+352621123456"]) {
+  test(`accept ${number} regardless of default country`, () => {
+    for (const selection of ["+49", "+41", "+43", "international"]) {
+      assert.equal(normalizePhone(number, selection), number);
+      assert.equal(normalizePhone(`00${number.slice(1)}`, selection), number);
+    }
+  });
+}
+test("Other country requires explicit prefix for national numbers", () => {
+  assert.throws(() => normalizePhone("0791234567", "international"), /Ländervorwahl/);
+});
+test("national numbers follow selected country, never guess a different country", () => {
+  assert.equal(normalizePhone("0791234567", "+41"), "+41791234567");
+  assert.equal(normalizePhone("06641234567", "+43"), "+436641234567");
 });
 
 function runMiddleware(phone: unknown) {

@@ -1,6 +1,6 @@
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 
-export const PHONE_ERROR = "Bitte gib eine gültige Telefonnummer ein, z. B. 01512 3456789 oder +49 1512 3456789.";
+export const PHONE_ERROR = "Diese Telefonnummer ist nicht gültig. Bitte prüfe die Vorwahl und alle Ziffern.";
 
 /** Return E.164 without inventing digits or interpreting a different country silently. */
 export function normalizePhone(input: unknown, selectedCode?: string): string {
@@ -21,15 +21,18 @@ export function normalizePhone(input: unknown, selectedCode?: string): string {
     value = inner;
   }
   if (!/^\+?\d+$/.test(value)) throw new Error(PHONE_ERROR);
-  if (selectedCode && !["+49", "+43", "+41"].includes(selectedCode)) {
-    throw new Error("Bitte wähle eine gültige Ländervorwahl.");
-  }
   // A single domestic trunk zero is not part of E.164.
-  if (!value.startsWith("+")) value = `${selectedCode ?? "+49"}${value.replace(/^0/, "")}`;
+  // Explicit international input always wins over a default country selection.
+  if (!value.startsWith("+")) {
+    if (selectedCode === "international") {
+      throw new Error("Bitte gib die Ländervorwahl mit ein, zum Beispiel +39 für Italien.");
+    }
+    if (selectedCode && !["+49", "+43", "+41"].includes(selectedCode)) {
+      throw new Error("Bitte wähle das Land deiner Telefonnummer.");
+    }
+    value = `${selectedCode ?? "+49"}${value.replace(/^0/, "")}`;
+  }
   const number = parsePhoneNumberFromString(value);
   if (!number?.isValid() || number.ext) throw new Error(PHONE_ERROR);
-  if (selectedCode && `+${number.countryCallingCode}` !== selectedCode) {
-    throw new Error(`Deine Nummer beginnt mit +${number.countryCallingCode}. Bitte wähle die passende Ländervorwahl aus.`);
-  }
   return number.number;
 }

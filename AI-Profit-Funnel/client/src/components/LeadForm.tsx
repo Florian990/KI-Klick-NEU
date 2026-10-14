@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Loader2, ArrowRight } from "lucide-react";
 import { normalizePhone } from "@shared/phone";
+import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 
 const formSchema = z.object({
   name: z.string().min(2, "Bitte gib deinen Namen ein"),
   email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
   countryCode: z.string().default("+49"),
-  phone: z.string().min(6, "Bitte gib deine Telefonnummer ein"),
+  phone: z.string().trim().min(1, "Bitte gib deine Telefonnummer ein"),
 }).superRefine((data, ctx) => {
   try {
     normalizePhone(data.phone, data.countryCode);
@@ -45,6 +46,21 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
       phone: "",
     },
   });
+
+  const phoneInput = form.watch("phone");
+  const selectedCode = form.watch("countryCode");
+  const internationalInput = /^\s*(\+|00)/.test(phoneInput);
+  let preview: ReturnType<typeof parsePhoneNumberFromString>;
+  try {
+    preview = parsePhoneNumberFromString(normalizePhone(phoneInput, selectedCode));
+  } catch {
+    // Incomplete input is normal while typing. Show errors on submit, not per key.
+  }
+  const countryName = preview?.country
+    ? new Intl.DisplayNames(["de"], { type: "region" }).of(preview.country)
+    : undefined;
+  const possibleOtherCountry = !internationalInput && selectedCode === "+49" &&
+    /^(079|0664)/.test(phoneInput.replace(/[\s()./-]/g, ""));
 
   const handleSubmit = async (data: FormData) => {
     try {
@@ -120,27 +136,36 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
                 <FormItem>
                   <FormLabel className="text-foreground text-sm sm:text-base">Deine WhatsApp-Nummer</FormLabel>
                   <div className="flex gap-2">
-                    <Select
-                      value={form.watch("countryCode")}
+                    {internationalInput ? (
+                      <div
+                        className="shrink-0 min-w-24 px-3 h-11 sm:h-12 flex items-center justify-center rounded-md border border-input bg-background text-sm"
+                        data-testid="detected-country"
+                        title={countryName ?? "Internationale Telefonnummer"}
+                      >
+                        {preview ? `+${preview.countryCallingCode}` : "International"}
+                      </div>
+                    ) : <Select
+                      value={selectedCode}
                       onValueChange={(value) => {
                         form.setValue("countryCode", value);
                         if (form.getValues("phone")) void form.trigger("phone");
                       }}
                     >
-                      <SelectTrigger className="w-24 h-11 sm:h-12 bg-background border-input" data-testid="select-country-code">
+                      <SelectTrigger aria-label="Land deiner Telefonnummer" className="w-28 shrink-0 h-11 sm:h-12 bg-background border-input" data-testid="select-country-code">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="+49">DE +49</SelectItem>
                         <SelectItem value="+43">AT +43</SelectItem>
                         <SelectItem value="+41">CH +41</SelectItem>
+                        <SelectItem value="international">Andere</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select>}
                     <FormControl>
                       <Input
                         type="tel"
-                        placeholder="1512 3456789"
-                        className="flex-1 h-11 sm:h-12 bg-background border-input text-base touch-manipulation"
+                        placeholder={selectedCode === "international" ? "+39 …" : "01512 3456789"}
+                        className="min-w-0 flex-1 h-11 sm:h-12 bg-background border-input text-base touch-manipulation"
                         data-testid="input-phone"
                         autoComplete="tel"
                         inputMode="tel"
@@ -149,9 +174,20 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
                     </FormControl>
                   </div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5">
-                    Die Vorwahl {form.watch("countryCode")} ist bereits ausgewählt.
-                    Du kannst deine Nummer auch mit + oder 00 eingeben – die Vorwahl wird nur einmal übernommen.
+                    Nummer eingeben oder einfügen. Mit + oder 00 erkennen wir die Ländervorwahl automatisch.
                   </p>
+                  {preview && (
+                    <p className="text-xs sm:text-sm text-foreground" aria-live="polite" data-testid="phone-preview">
+                      Deine Nummer: <strong>{preview.formatInternational()}</strong>
+                      {countryName && <> ({countryName})</>}
+                    </p>
+                  )}
+                  {possibleOtherCountry && (
+                    <p className="text-xs text-amber-400" role="status">
+                      Nummer aus der Schweiz oder Österreich? Bitte wähle oben das passende Land.
+                      Aktuell ist Deutschland (+49) ausgewählt.
+                    </p>
+                  )}
                   <FormMessage className="text-xs sm:text-sm" />
                 </FormItem>
               )}
