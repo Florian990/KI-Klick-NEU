@@ -6,3 +6,4 @@
 - [App lives in subdir](app-lives-in-subdir.md) — app root is `AI-Profit-Funnel/` but code_execution/generateImage write from repo root; move assets in, restart Vite.
 - [Email delivery](email-delivery.md) — production provider rejections differ from development; verify Render logs, provider delivery and mailbox separately.
 - [Unlisted legal documents](unlisted-legal-pages.md) — Anlage AGB is a separate link-only supplement, not a replacement for existing legal pages.
+- [Phone normalization](phone-normalization.md) — pasted country prefixes previously caused failed CRM transfers; normalize before every downstream use, never guess ambiguous corrections.

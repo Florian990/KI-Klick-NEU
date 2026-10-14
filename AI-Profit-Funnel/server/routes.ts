@@ -5,6 +5,7 @@ import { insertLeadSchema, insertPageViewSchema, insertAnalyticsEventSchema, ins
 import { z } from "zod";
 import { sendLeadNotification } from "./email";
 import { aggregateFunnel } from "./funnel-metrics";
+import { normalizeLeadPhone } from "./lead-phone";
 import { sendRecruitmentApplicationNotification } from "./recruitment-email";
 
 // Basic Auth middleware for admin routes (without WWW-Authenticate header to prevent browser popup)
@@ -213,7 +214,7 @@ export async function registerRoutes(
 ): Promise<Server> {
 
   // Zapier proxy — forwards quiz answers + contact data server-side to avoid CORS
-  app.post("/api/quiz-complete", async (req, res) => {
+  app.post("/api/quiz-complete", normalizeLeadPhone, async (req, res) => {
     try {
       const { name, email, phone, answers,
         frage_1_alter, frage_2_situation, frage_3_ziel,
@@ -283,7 +284,7 @@ export async function registerRoutes(
   });
 
   // Partial save — stores contact data even if quiz not fully completed
-  app.post("/api/quiz-partial", async (req, res) => {
+  app.post("/api/quiz-partial", normalizeLeadPhone, async (req, res) => {
     try {
       const { name, email, phone } = req.body;
       if (isAuthorizedTest(req.body)) return res.status(200).json({ success: true, test: true });
@@ -298,7 +299,7 @@ export async function registerRoutes(
   });
 
   // Lead capture endpoint
-  app.post("/api/leads", async (req, res) => {
+  app.post("/api/leads", normalizeLeadPhone, async (req, res) => {
     try {
       // Extract only the fields we need for the database
       const { name, email, phone, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, source, quizAnswers } = req.body;

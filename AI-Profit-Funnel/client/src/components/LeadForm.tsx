@@ -13,12 +13,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2, ArrowRight } from "lucide-react";
+import { normalizePhone } from "@shared/phone";
 
 const formSchema = z.object({
   name: z.string().min(2, "Bitte gib deinen Namen ein"),
   email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein"),
   countryCode: z.string().default("+49"),
   phone: z.string().min(6, "Bitte gib deine Telefonnummer ein"),
+}).superRefine((data, ctx) => {
+  try {
+    normalizePhone(data.phone, data.countryCode);
+  } catch (error) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["phone"], message: (error as Error).message });
+  }
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -40,7 +47,11 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
   });
 
   const handleSubmit = async (data: FormData) => {
-    await onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      form.setError("phone", { message: (error as Error).message });
+    }
   };
 
   return (
@@ -110,8 +121,11 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
                   <FormLabel className="text-foreground text-sm sm:text-base">Deine WhatsApp-Nummer</FormLabel>
                   <div className="flex gap-2">
                     <Select
-                      defaultValue="+49"
-                      onValueChange={(value) => form.setValue("countryCode", value)}
+                      value={form.watch("countryCode")}
+                      onValueChange={(value) => {
+                        form.setValue("countryCode", value);
+                        if (form.getValues("phone")) void form.trigger("phone");
+                      }}
                     >
                       <SelectTrigger className="w-24 h-11 sm:h-12 bg-background border-input" data-testid="select-country-code">
                         <SelectValue />
@@ -135,7 +149,8 @@ export default function LeadForm({ onSubmit, isLoading }: LeadFormProps) {
                     </FormControl>
                   </div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5">
-                    Deine Infos bekommst du bequem über WhatsApp.
+                    Die Vorwahl {form.watch("countryCode")} ist bereits ausgewählt.
+                    Du kannst deine Nummer auch mit + oder 00 eingeben – die Vorwahl wird nur einmal übernommen.
                   </p>
                   <FormMessage className="text-xs sm:text-sm" />
                 </FormItem>

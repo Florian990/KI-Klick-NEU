@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { normalizePhone } from "@shared/phone";
 import { useLocation } from "wouter";
 import Quiz, { QuizAnswers } from "@/components/Quiz";
 import LeadForm from "@/components/LeadForm";
@@ -99,7 +100,7 @@ export default function QuizLandingPage() {
   const handleFormSubmit = async (data: { name: string; email: string; countryCode: string; phone: string }) => {
     setIsLoading(true);
     try {
-      const fullPhone = `${data.countryCode} ${data.phone}`;
+      const fullPhone = normalizePhone(data.phone, data.countryCode);
       const testToken = getTestToken();
       await apiRequest("POST", "/api/quiz-complete", {
         name: data.name,
@@ -133,6 +134,13 @@ export default function QuizLandingPage() {
         setLocation("/vsl");
       }, 1000);
     } catch (error) {
+      if (error instanceof Error && error.message.startsWith("400: ")) {
+        let details;
+        try { details = JSON.parse(error.message.slice(5)); } catch {}
+        if (details?.field === "phone" && typeof details.message === "string") {
+          throw new Error(details.message);
+        }
+      }
       console.error("Error submitting lead:", error);
       toast({
         title: "Fehler",
