@@ -47,3 +47,7 @@ ADMIN_TEST_TOKEN = "4a2e524aba36ca315f8131cc30a3e98acf35"
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd AI-Profit-Funnel && npm run start"]
 build = ["bash", "-c", "cd AI-Profit-Funnel && npm run build"]
+
+[postMerge]
+path = "AI-Profit-Funnel/script/post-merge.sh"
+timeoutMs = 180000
