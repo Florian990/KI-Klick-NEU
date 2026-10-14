@@ -25,7 +25,7 @@ const questionTexts: { [key: number]: string } = {
   12: "In welcher beruflichen Situation bist du?",
   13: "Hand aufs Herz: Wie zufrieden bist du mit deinem aktuellen Einkommen?",
   14: "Ist dir bewusst, dass das ein lernbarer Skill ist und KEIN fertiges Job-Angebot?",
-  15: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie bekommst, könntest du es dir vorstellen, das System zu nutzen?",
+  15: "Wenn du einen Mehrwert erkennst + eine schriftliche Garantie von uns bekommst, könntest du es dir vorstellen, das System zu nutzen?",
   18: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
   19: "In welcher beruflichen Situation bist du?",
   20: "Wie hoch ist dein durchschnittlicher Monatsumsatz aus deiner Selbstständigkeit?",
