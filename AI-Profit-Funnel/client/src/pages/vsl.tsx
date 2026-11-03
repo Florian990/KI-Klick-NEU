@@ -154,7 +154,7 @@ export default function VSLPage() {
     trackEvent('calendly_open');
     if (window.Calendly) {
       window.Calendly.initPopupWidget({
-        url: 'https://calendly.com/d/dvvy-xzg-3xw/kostenloses-potenzialgesprach-mit-tim'
+        url: 'https://calendly.com/d/dws3-y8f-qvp/kostenloses-potenzialgesprach'
       });
     }
   };
