@@ -30,7 +30,7 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/43ic4lx/";
+const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27941795/49j1kn8";
 
 const recruitmentRawBody = express.raw({ type: "multipart/form-data", limit: "21mb" });
 const recruitmentBodyMiddleware = (req: Request, res: Response, next: NextFunction) => {
