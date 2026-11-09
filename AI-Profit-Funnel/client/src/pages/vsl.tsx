@@ -7,7 +7,6 @@ declare global {
   interface Window {
     YT: any;
     onYouTubeIframeAPIReady: () => void;
-    Calendly: any;
   }
 }
 
@@ -21,16 +20,6 @@ export default function VSLPage() {
   useEffect(() => {
     trackPageView('/vsl');
     
-    const link = document.createElement('link');
-    link.href = 'https://assets.calendly.com/assets/external/widget.css';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
-    document.body.appendChild(script);
-
     // Preload YouTube so the player appears fast and the box doesn't stay black.
     // Idempotent: never add duplicates across re-mounts.
     if (!document.querySelector('link[data-yt-preconnect]')) {
@@ -48,21 +37,6 @@ export default function VSLPage() {
       document.head.appendChild(ytApi);
     }
 
-    // Track REAL bookings: Calendly fires a postMessage when an appointment
-    // is actually scheduled inside the popup.
-    const onCalendlyMessage = (e: MessageEvent) => {
-      if (typeof e.origin === 'string' && !e.origin.endsWith('calendly.com')) return;
-      if (e.data && typeof e.data === 'object' && e.data.event === 'calendly.event_scheduled') {
-        trackEvent('calendly_booked');
-      }
-    };
-    window.addEventListener('message', onCalendlyMessage);
-
-    return () => {
-      document.head.removeChild(link);
-      document.body.removeChild(script);
-      window.removeEventListener('message', onCalendlyMessage);
-    };
   }, []);
 
   useEffect(() => {
@@ -150,13 +124,11 @@ export default function VSLPage() {
     trackEvent('video_start');
   };
 
-  const openCalendlyPopup = () => {
+  const openBookingCalendar = () => {
+    // Preserve the existing funnel event for calendar clicks.
+    // Completed bookings require a separate Set2Sell integration.
     trackEvent('calendly_open');
-    if (window.Calendly) {
-      window.Calendly.initPopupWidget({
-        url: 'https://calendly.com/d/dws3-y8f-qvp/kostenloses-potenzialgesprach'
-      });
-    }
+    window.open('https://set2sell.io/b/kostenloses-potenzialgespraech-inbound-kalender-vpwfH8', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -226,7 +198,7 @@ export default function VSLPage() {
           <div className="text-center">
             <Button
               size="lg"
-              onClick={openCalendlyPopup}
+              onClick={openBookingCalendar}
               className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg font-semibold touch-manipulation active:scale-[0.98] transition-transform"
             >
               <Calendar className="mr-2 h-5 w-5" />
